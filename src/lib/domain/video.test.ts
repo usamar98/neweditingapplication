@@ -1,0 +1,45 @@
+import { describe, expect, it } from "vitest";
+import {
+  createProjectSchema,
+  defaultEditSettings,
+  editSettingsSchema,
+  MAX_UPLOAD_BYTES,
+  queueMessageSchema,
+} from "./video";
+
+describe("video domain validation", () => {
+  it("accepts the production editor defaults", () => {
+    expect(editSettingsSchema.parse(defaultEditSettings)).toEqual(defaultEditSettings);
+  });
+
+  it("rejects inverted trim ranges", () => {
+    expect(() =>
+      editSettingsSchema.parse({
+        ...defaultEditSettings,
+        trimStart: 8,
+        trimEnd: 3,
+      }),
+    ).toThrow(/Trim end/);
+  });
+
+  it("rejects oversized and unsupported uploads", () => {
+    expect(
+      createProjectSchema.safeParse({
+        fileName: "clip.avi",
+        mimeType: "video/x-msvideo",
+        name: "Clip",
+        size: MAX_UPLOAD_BYTES + 1,
+      }).success,
+    ).toBe(false);
+  });
+
+  it("requires a fully owned queue envelope", () => {
+    expect(
+      queueMessageSchema.safeParse({
+        jobId: crypto.randomUUID(),
+        kind: "analyze",
+        projectId: crypto.randomUUID(),
+      }).success,
+    ).toBe(false);
+  });
+});
