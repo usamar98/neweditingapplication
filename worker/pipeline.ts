@@ -270,5 +270,7 @@ async function exportVideo(context: PipelineContext) {
 }
 
 export async function runPipeline(context: PipelineContext) {
-  return context.job.kind === "analyze" ? analyzeVideo(context) : exportVideo(context);
+  if (context.job.kind === "analyze") return analyzeVideo(context);
+  if (context.job.kind === "export") return exportVideo(context);
+  throw new Error(`Unsupported project job kind: ${context.job.kind}`);
 }

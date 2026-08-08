@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut, Menu, Plus, Video } from "lucide-react";
+import { Clapperboard, ImageIcon, LayoutDashboard, LogOut, Menu, Plus, Video } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Brand } from "@/components/brand";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -12,17 +13,27 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { cn } from "@/lib/utils";
 
 function Navigation({ pathname }: { pathname: string }) {
+  const links = [
+    { href: "/dashboard" as const, icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/generate/video" as const, icon: Clapperboard, label: "AI video generator" },
+    { href: "/generate/image" as const, icon: ImageIcon, label: "AI image generator" },
+  ];
+
   return (
     <nav className="space-y-1">
-      <Link
-        href="/dashboard"
-        className={cn(
-          "flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-          pathname === "/dashboard" && "bg-sidebar-accent text-sidebar-accent-foreground",
-        )}
-      >
-        <LayoutDashboard className="size-4" /> Dashboard
-      </Link>
+      {links.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href as Route}
+          className={cn(
+            "flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            pathname === item.href && "bg-sidebar-accent text-sidebar-accent-foreground",
+          )}
+        >
+          <item.icon className="size-4" /> {item.label}
+        </Link>
+      ))}
+      <div className="px-3 pb-1 pt-4 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">Video editor</div>
       <Link
         href="/dashboard#new-project"
         className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -57,6 +68,12 @@ function UserFooter({ email }: { email: string }) {
 
 export function AppShell({ children, email }: { children: React.ReactNode; email: string }) {
   const pathname = usePathname();
+  const workspace = pathname === "/generate/video"
+    ? { detail: "Model-routed cinematic creation", icon: Clapperboard, title: "AI video studio" }
+    : pathname === "/generate/image"
+      ? { detail: "Campaign-grade visual creation", icon: ImageIcon, title: "AI image studio" }
+      : { detail: "AI editing pipeline", icon: Video, title: "Video workspace" };
+  const WorkspaceIcon = workspace.icon;
 
   return (
     <div className="min-h-screen lg:grid lg:grid-cols-[240px_1fr]">
@@ -80,10 +97,10 @@ export function AppShell({ children, email }: { children: React.ReactNode; email
                 <div className="mt-auto"><UserFooter email={email} /></div>
               </SheetContent>
             </Sheet>
-            <div className="hidden size-8 place-items-center rounded-lg bg-primary/10 text-primary sm:grid"><Video className="size-4" /></div>
+            <div className="hidden size-8 place-items-center rounded-lg bg-primary/10 text-primary sm:grid"><WorkspaceIcon className="size-4" /></div>
             <div>
-              <p className="text-sm font-medium">Video workspace</p>
-              <p className="hidden text-[11px] text-muted-foreground sm:block">AI editing pipeline</p>
+              <p className="text-sm font-medium">{workspace.title}</p>
+              <p className="hidden text-[11px] text-muted-foreground sm:block">{workspace.detail}</p>
             </div>
           </div>
           <Button size="sm" asChild>

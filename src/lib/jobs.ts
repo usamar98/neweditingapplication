@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import type { GenerationRequest } from "@/lib/domain/generation";
 import { HttpError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -162,4 +163,108 @@ export async function enqueueProjectJob({
   );
 
   return { ...job, queue_message_id: queueMessageId };
+}
+
+export async function enqueueGenerationJob({
+  input,
+  requestId,
+  supabase,
+  user,
+}: {
+  input: GenerationRequest;
+  requestId: string;
+  supabase: SupabaseClient<Database>;
+  user: User;
+}) {
+  await consumeRateLimit(
+    supabase,
+    `generation:${input.kind}`,
+    input.kind === "video" ? 2 : 8,
+    60,
+  );
+
+  const admin = createAdminClient();
+  const { data: generation, error: generationError } = await admin
+    .from("generations")
+    .insert({
+      kind: input.kind,
+      name: input.name,
+      prompt: input.prompt,
+      routing_profile: input.profile,
+      settings: input as unknown as Json,
+      status: "queued",
+      user_id: user.id,
+    })
+    .select("*")
+    .single();
+
+  if (generationError || !generation) {
+    throw new HttpError(500, "Unable to create the generation.", "GENERATION_CREATE_FAILED");
+  }
+
+  const kind = input.kind === "image" ? "generate_image" : "generate_video";
+  const { data: job, error: jobError } = await admin
+    .from("jobs")
+    .insert({
+      generation_id: generation.id,
+      kind,
+      payload: { ...input, requestId } as unknown as Json,
+      stage: "Model Autopilot is preparing",
+      status: "queued",
+      user_id: user.id,
+    })
+    .select("*")
+    .single();
+
+  if (jobError || !job) {
+    await admin.from("generations").delete().eq("id", generation.id);
+    throw new HttpError(500, "Unable to create the generation job.", "JOB_CREATE_FAILED");
+  }
+
+  const queueMessage: Json = {
+    generationId: generation.id,
+    jobId: job.id,
+    kind,
+    userId: user.id,
+  };
+  const { data: queueMessageId, error: queueError } = await admin.rpc("queue_video_job", {
+    message: queueMessage,
+  });
+
+  if (queueError || queueMessageId === null) {
+    const finishedAt = new Date().toISOString();
+    await Promise.all([
+      admin
+        .from("jobs")
+        .update({
+          error_code: "QUEUE_SUBMIT_FAILED",
+          error_message: "The generation could not be added to the durable queue.",
+          finished_at: finishedAt,
+          stage: "Queue submission failed",
+          status: "failed",
+        })
+        .eq("id", job.id),
+      admin
+        .from("generations")
+        .update({ last_error: "The generation could not be queued.", status: "failed" })
+        .eq("id", generation.id),
+    ]);
+    logger.error({ err: queueError, generationId: generation.id, jobId: job.id, requestId }, "Generation queue submission failed");
+    throw new HttpError(503, "Processing queue is unavailable.", "QUEUE_UNAVAILABLE");
+  }
+
+  await admin
+    .from("jobs")
+    .update({ queue_message_id: queueMessageId })
+    .eq("id", job.id);
+
+  logger.info(
+    { generationId: generation.id, jobId: job.id, kind, queueMessageId, requestId, userId: user.id },
+    "Generation queued",
+  );
+
+  return {
+    generation,
+    job: { ...job, queue_message_id: queueMessageId },
+  };
 }

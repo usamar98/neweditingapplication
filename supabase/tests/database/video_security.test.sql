@@ -1,13 +1,14 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(32);
 
 select ok((select relrowsecurity from pg_class where oid = 'public.profiles'::regclass), 'profiles has RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.projects'::regclass), 'projects has RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.jobs'::regclass), 'jobs has RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.usage_events'::regclass), 'usage_events has RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.request_counters'::regclass), 'request_counters has RLS');
+select ok((select relrowsecurity from pg_class where oid = 'public.generations'::regclass), 'generations has RLS');
 
 select is(
   (select count(*)::integer from storage.buckets where id in ('video-sources', 'video-outputs', 'video-assets') and not public),
@@ -31,6 +32,17 @@ select ok(not has_table_privilege('authenticated', 'public.request_counters', 'D
 select ok(has_function_privilege('authenticated', 'public.consume_rate_limit(text,integer,integer)', 'EXECUTE'), 'authenticated can call rate limiter');
 select ok(not has_function_privilege('authenticated', 'public.queue_video_job(jsonb)', 'EXECUTE'), 'authenticated cannot submit arbitrary queue messages');
 select ok(has_function_privilege('service_role', 'public.queue_video_job(jsonb)', 'EXECUTE'), 'service role can submit queue messages');
+select ok(has_table_privilege('authenticated', 'public.generations', 'SELECT'), 'authenticated users can read owned generations');
+select ok(not has_table_privilege('anon', 'public.generations', 'SELECT'), 'anonymous users cannot read generations');
+select ok(not has_table_privilege('authenticated', 'public.generations', 'INSERT'), 'authenticated users cannot forge generation state');
+select ok(has_table_privilege('service_role', 'public.generations', 'INSERT'), 'service role can create generations');
+select ok(has_column('public', 'jobs', 'generation_id'), 'jobs can target a generation');
+select ok(has_table_privilege('service_role', 'pgmq.q_video_processing', 'SELECT'), 'service role can inspect queued messages');
+select ok(has_table_privilege('service_role', 'pgmq.q_video_processing', 'INSERT'), 'service role can enqueue messages');
+select ok(has_table_privilege('service_role', 'pgmq.q_video_processing', 'UPDATE'), 'service role can claim messages');
+select ok(has_table_privilege('service_role', 'pgmq.q_video_processing', 'DELETE'), 'service role can remove archived messages');
+select ok(has_table_privilege('service_role', 'pgmq.a_video_processing', 'SELECT'), 'service role can inspect archived messages');
+select ok(has_table_privilege('service_role', 'pgmq.a_video_processing', 'INSERT'), 'service role can archive messages');
 select ok(
   exists(select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'jobs'),
   'jobs publishes Realtime changes'

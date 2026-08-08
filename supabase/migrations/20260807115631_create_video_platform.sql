@@ -108,6 +108,8 @@ create unique index jobs_one_active_kind_per_project_idx
 on public.jobs(project_id, kind)
 where status in ('queued', 'processing', 'retrying');
 create index usage_events_user_created_idx on public.usage_events(user_id, created_at desc);
+create index usage_events_project_idx on public.usage_events(project_id) where project_id is not null;
+create index usage_events_job_idx on public.usage_events(job_id) where job_id is not null;
 create index request_counters_updated_idx on public.request_counters(updated_at);
 
 create function public.set_updated_at()
@@ -166,7 +168,7 @@ select
 from auth.users
 on conflict (id) do nothing;
 
-create function public.consume_rate_limit(
+create function app_private.consume_rate_limit(
   scope_name text,
   request_limit integer,
   window_seconds integer
@@ -212,6 +214,25 @@ begin
 
   return new_count <= request_limit;
 end;
+$$;
+
+revoke all on function app_private.consume_rate_limit(text, integer, integer)
+from public, anon, authenticated;
+grant usage on schema app_private to authenticated;
+grant execute on function app_private.consume_rate_limit(text, integer, integer)
+to authenticated;
+
+create function public.consume_rate_limit(
+  scope_name text,
+  request_limit integer,
+  window_seconds integer
+)
+returns boolean
+language sql
+security invoker
+set search_path = ''
+as $$
+  select app_private.consume_rate_limit(scope_name, request_limit, window_seconds);
 $$;
 
 alter table public.profiles enable row level security;
@@ -455,7 +476,7 @@ as $$
     queued.enqueued_at,
     queued.vt,
     queued.message
-  from pgmq.read('video_processing', visibility_timeout, batch_size) queued;
+  from pgmq.read('video_processing', visibility_timeout, batch_size, '{}'::jsonb) queued;
 $$;
 
 create function public.archive_video_job(message_id bigint)
@@ -475,7 +496,7 @@ grant execute on function public.dequeue_video_jobs(integer, integer) to service
 grant execute on function public.archive_video_job(bigint) to service_role;
 grant usage on schema pgmq to service_role;
 grant execute on function pgmq.send(text, jsonb, integer) to service_role;
-grant execute on function pgmq.read(text, integer, integer) to service_role;
+grant execute on function pgmq.read(text, integer, integer, jsonb) to service_role;
 grant execute on function pgmq.archive(text, bigint) to service_role;
 
 do $$

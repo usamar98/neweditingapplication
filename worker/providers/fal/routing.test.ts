@@ -18,6 +18,19 @@ describe("fal model routing", () => {
     expect(result.endpointId).toBe("fal-ai/veo3.1/fast/image-to-video");
   });
 
+  it("routes premium generations to the highest-quality compatible models", () => {
+    expect(resolveFalModel({ capability: "text-to-image", profile: "quality" }).endpointId)
+      .toBe("fal-ai/flux-2-max");
+    expect(resolveFalModel({ capability: "text-to-video", profile: "quality" }).endpointId)
+      .toBe("fal-ai/veo3.1");
+  });
+
+  it("explains the selected generation model", () => {
+    const selection = resolveFalModel({ capability: "text-to-video", profile: "balanced" });
+    expect(selection.reason).toMatch(/Selected for the balanced routing profile/);
+    expect(selection.source).toBe("catalog");
+  });
+
   it("allows an operations override without a code change", () => {
     const overrides = falModelOverridesEnvSchema.parse(JSON.stringify({
       "content-analysis": {

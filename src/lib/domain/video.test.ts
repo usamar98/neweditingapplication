@@ -42,4 +42,15 @@ describe("video domain validation", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("accepts a fully owned AI generation queue envelope", () => {
+    expect(
+      queueMessageSchema.safeParse({
+        generationId: crypto.randomUUID(),
+        jobId: crypto.randomUUID(),
+        kind: "generate_video",
+        userId: crypto.randomUUID(),
+      }).success,
+    ).toBe(true);
+  });
 });

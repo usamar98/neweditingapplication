@@ -3,9 +3,11 @@ import {
   ArrowRight,
   Captions,
   Check,
+  Clapperboard,
   Clock3,
   Download,
   Film,
+  ImageIcon,
   Ratio,
   Scissors,
   ShieldCheck,
@@ -19,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 const workflow = [
   { icon: Upload, label: "Resumable upload", detail: "Large files continue where they left off." },
@@ -36,12 +39,38 @@ const capabilities = [
   "Realtime background processing",
 ];
 
+const plans = [
+  {
+    description: "Explore the editor and build your first creative workflow.",
+    features: ["3 video projects", "10 AI images", "720p preview exports", "Private media storage"],
+    name: "Starter",
+    price: "$0",
+  },
+  {
+    description: "For creators shipping polished content every week.",
+    features: ["25 video projects", "150 AI images", "20 AI video generations", "1080p exports", "Quality Model Autopilot"],
+    name: "Creator",
+    popular: true,
+    price: "$19",
+  },
+  {
+    description: "More generation capacity for teams and campaigns.",
+    features: ["Unlimited editor projects", "600 AI images", "80 AI video generations", "Priority processing", "Shared brand presets"],
+    name: "Studio",
+    price: "$49",
+  },
+];
+
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[760px]" />
       <nav className="relative z-10 mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
         <Brand />
+        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.07] bg-black/15 p-1 text-sm text-muted-foreground backdrop-blur md:flex">
+          <Link href="#features" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-foreground">Features</Link>
+          <Link href="#pricing" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-foreground">Pricing</Link>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" asChild className="hidden sm:inline-flex">
             <Link href="/login">Sign in</Link>
@@ -57,24 +86,24 @@ export default function Home() {
       <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
         <div className="max-w-3xl">
           <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
-            <Sparkles className="mr-1 size-3.5" /> AI video editor, now available
+            <Sparkles className="mr-1 size-3.5" /> Three creative tools. One private workspace.
           </Badge>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            Your footage,
-            <span className="block text-primary">cut to the good part.</span>
+            From raw idea
+            <span className="block text-primary">to remarkable media.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl">
-            SceneForge understands long videos, finds the moments worth keeping, and gives you a
-            precise editor to turn them into captioned, platform-ready content.
+            Edit long footage, generate cinematic video, and art-direct campaign-ready images.
+            Model Autopilot picks the best-fit AI for every brief while you stay in control.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild className="h-12 px-6 shadow-xl shadow-primary/10">
               <Link href="/login?mode=signup">
-                Edit your first video <ArrowRight className="size-4" />
+                Start creating free <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="h-12 border-white/10 bg-white/[0.02] px-6">
-              <Link href="#workflow">See how it works</Link>
+              <Link href="#features">Explore the studio</Link>
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
@@ -130,6 +159,77 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      <section id="features" className="scroll-mt-20 border-y border-white/[0.06] bg-black/10">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
+          <div className="mb-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="mb-3 text-sm font-medium text-primary">The SceneForge creative suite</p>
+              <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
+                One idea. Three ways to make it real.
+              </h2>
+            </div>
+            <p className="max-w-md text-sm leading-6 text-muted-foreground">
+              Each tool is purpose-built, but projects, private storage, background jobs, and model routing live in one workspace.
+            </p>
+          </div>
+
+          <div className="grid gap-4 lg:grid-cols-3">
+            <Card className="group overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
+              <CardContent className="p-0">
+                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_28%_25%,oklch(0.42_0.09_163),oklch(0.15_0.015_265)_65%)] p-5">
+                  <div className="absolute inset-x-5 bottom-5 rounded-xl border border-white/10 bg-black/35 p-3 backdrop-blur">
+                    <div className="mb-3 flex items-center justify-between text-[10px] text-white/60"><span>campaign-interview.mp4</span><span className="text-primary">6 highlights found</span></div>
+                    <div className="flex h-10 items-end gap-1">
+                      {[48, 76, 40, 82, 54, 90, 34, 68, 44, 84, 58, 72].map((height, index) => <span key={index} className="w-full rounded-full bg-primary/50" style={{ height: `${height}%` }} />)}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Scissors className="size-4.5" /></span><Badge variant="secondary">Available now</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video editor</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Upload long footage and get scenes, transcript, silence cleanup, highlights, captions, reframing, and a precise editable timeline.</p>
+                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Edit footage <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-sky-400/25">
+              <CardContent className="p-0">
+                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_70%_20%,oklch(0.46_0.14_250),oklch(0.145_0.014_265)_67%)]">
+                  <div className="absolute left-5 top-5 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1.5 text-[10px] text-sky-200">MODEL AUTOPILOT</div>
+                  <div className="absolute inset-x-5 bottom-5 grid grid-cols-3 gap-2">
+                    {["Quality", "Speed", "Cost"].map((label, index) => <div key={label} className={cn("rounded-lg border border-white/10 bg-black/30 p-3 text-center text-[10px] text-white/55 backdrop-blur", index === 0 && "border-sky-300/35 bg-sky-300/10 text-sky-100")}>{label}</div>)}
+                  </div>
+                  <Clapperboard className="absolute right-7 top-8 size-14 text-white/15" />
+                </div>
+                <div className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-sky-400/10 text-sky-300"><Film className="size-4.5" /></span><Badge variant="outline" className="border-sky-300/20 bg-sky-300/5 text-sky-200">New</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video generator</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Direct camera motion, mood, format, duration, resolution, and native audio. Autopilot selects the strongest compatible video model for the job.</p>
+                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-300">Direct a shot <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25">
+              <CardContent className="p-0">
+                <div className="grid h-52 grid-cols-2 gap-1 border-b border-white/[0.06] bg-black/20 p-1">
+                  <div className="rounded-l-xl bg-[radial-gradient(circle_at_65%_35%,oklch(0.72_0.17_80),oklch(0.25_0.08_25)_45%,oklch(0.13_0.02_265)_75%)]" />
+                  <div className="grid gap-1"><div className="rounded-tr-xl bg-[linear-gradient(135deg,oklch(0.42_0.14_315),oklch(0.18_0.03_265))]" /><div className="rounded-br-xl bg-[radial-gradient(circle_at_30%_60%,oklch(0.68_0.13_163),oklch(0.15_0.02_265)_60%)]" /></div>
+                  <div className="absolute" />
+                </div>
+                <div className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-300/10 text-fuchsia-200"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-200/20 bg-fuchsia-200/5 text-fuchsia-100">New</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image generator</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Work from a creative brief, not a mystery prompt box. Shape art direction, canvas, seed, and model intent for repeatable campaign-grade visuals.</p>
+                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-200">Art-direct an image <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 
@@ -197,7 +297,39 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="px-5 pb-24 sm:px-8">
+      <section id="pricing" className="scroll-mt-20 border-y border-white/[0.06] bg-black/10">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
+          <div className="mx-auto mb-12 max-w-2xl text-center">
+            <p className="mb-3 text-sm font-medium text-primary">Simple launch pricing</p>
+            <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Choose your creative velocity.</h2>
+            <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Start free. Move up when you need more generations, faster processing, and team-scale capacity.</p>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+            {plans.map((plan) => (
+              <Card key={plan.name} className={cn("relative border-white/[0.08] bg-card/60", plan.popular && "border-primary/35 bg-primary/[0.045] shadow-2xl shadow-primary/5 lg:-translate-y-3")}>
+                {plan.popular && <Badge className="absolute right-5 top-4 shadow-lg">Most popular</Badge>}
+                <CardContent className="flex h-full flex-col p-6 sm:p-7">
+                  <div>
+                    <h3 className="text-lg font-medium">{plan.name}</h3>
+                    <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">{plan.description}</p>
+                    <div className="mt-7 flex items-end gap-2"><span className="text-4xl font-semibold tracking-[-0.05em]">{plan.price}</span><span className="pb-1 text-xs text-muted-foreground">/ month</span></div>
+                  </div>
+                  <Separator className="my-6" />
+                  <ul className="flex-1 space-y-3">
+                    {plan.features.map((feature) => <li key={feature} className="flex items-center gap-2.5 text-sm"><span className="grid size-5 place-items-center rounded-full bg-primary/10 text-primary"><Check className="size-3" /></span>{feature}</li>)}
+                  </ul>
+                  <Button asChild variant={plan.popular ? "default" : "outline"} className="mt-8 h-11 w-full">
+                    <Link href="/login?mode=signup">{plan.price === "$0" ? "Start free" : `Choose ${plan.name}`} <ArrowRight className="size-4" /></Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <p className="mt-7 text-center text-xs text-muted-foreground">Generation allowances are fair-use launch limits and may evolve as models improve.</p>
+        </div>
+      </section>
+
+      <section className="px-5 py-24 sm:px-8">
         <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl border border-primary/15 bg-primary/[0.055] px-6 py-16 text-center sm:px-12 sm:py-20">
           <div className="surface-grid pointer-events-none absolute inset-0 opacity-50" />
           <div className="relative">

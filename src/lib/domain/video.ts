@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { generationQueueMessageSchema } from "@/lib/domain/generation";
 
 export const VIDEO_SOURCE_BUCKET = "video-sources";
 export const VIDEO_OUTPUT_BUCKET = "video-outputs";
@@ -92,7 +93,7 @@ export const enqueueJobSchema = z
   })
   .strict();
 
-export const queueMessageSchema = z
+export const projectQueueMessageSchema = z
   .object({
     jobId: z.string().uuid(),
     kind: z.enum(["analyze", "export"]),
@@ -100,6 +101,11 @@ export const queueMessageSchema = z
     userId: z.string().uuid(),
   })
   .strict();
+
+export const queueMessageSchema = z.union([
+  projectQueueMessageSchema,
+  generationQueueMessageSchema,
+]);
 
 export type EditSettings = z.infer<typeof editSettingsSchema>;
 export type QueueMessage = z.infer<typeof queueMessageSchema>;

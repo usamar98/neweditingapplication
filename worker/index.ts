@@ -4,12 +4,18 @@ import { createClient } from "@supabase/supabase-js";
 import { queueMessageSchema, type QueueMessage } from "../src/lib/domain/video";
 import type { Database, Json, Tables } from "../src/types/database.generated";
 import { getWorkerConfig } from "./config";
+import { runGenerationPipeline } from "./generation-pipeline";
 import { workerLogger } from "./logger";
 import { runPipeline, type ProgressReporter } from "./pipeline";
 import { ProcessError } from "./process";
 
 type QueueRow = Database["public"]["Functions"]["dequeue_video_jobs"]["Returns"][number];
 type Job = Tables<"jobs">;
+type Project = Tables<"projects">;
+type Generation = Tables<"generations">;
+type WorkTarget =
+  | { type: "project"; project: Project }
+  | { type: "generation"; generation: Generation };
 
 const config = getWorkerConfig();
 const supabase = createClient<Database>(
@@ -74,24 +80,37 @@ function createReporter(jobId: string): ProgressReporter {
   };
 }
 
-async function getJobAndProject(message: QueueMessage) {
-  const { data: job, error: jobError } = await supabase
+async function getJobAndTarget(message: QueueMessage): Promise<{ job: Job; target: WorkTarget }> {
+  let jobQuery = supabase
     .from("jobs")
     .select("*")
     .eq("id", message.jobId)
-    .eq("project_id", message.projectId)
-    .eq("user_id", message.userId)
-    .single();
+    .eq("user_id", message.userId);
+  jobQuery = "projectId" in message
+    ? jobQuery.eq("project_id", message.projectId)
+    : jobQuery.eq("generation_id", message.generationId);
+  const { data: job, error: jobError } = await jobQuery.single();
   if (jobError || !job) throw new Error(`Queue job does not match a database record: ${jobError?.message ?? "not found"}`);
 
-  const { data: project, error: projectError } = await supabase
-    .from("projects")
+  if ("projectId" in message) {
+    const { data: project, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", message.projectId)
+      .eq("user_id", message.userId)
+      .single();
+    if (error || !project) throw new Error(`Queue project does not exist: ${error?.message ?? "not found"}`);
+    return { job, target: { type: "project", project } };
+  }
+
+  const { data: generation, error } = await supabase
+    .from("generations")
     .select("*")
-    .eq("id", message.projectId)
+    .eq("id", message.generationId)
     .eq("user_id", message.userId)
     .single();
-  if (projectError || !project) throw new Error(`Queue project does not exist: ${projectError?.message ?? "not found"}`);
-  return { job, project };
+  if (error || !generation) throw new Error(`Queue generation does not exist: ${error?.message ?? "not found"}`);
+  return { job, target: { type: "generation", generation } };
 }
 
 async function markJobStarted(job: Job) {
@@ -110,19 +129,25 @@ async function markJobStarted(job: Job) {
 }
 
 async function markJobComplete(job: Job, result: Json) {
+  const completionStage: Record<Job["kind"], string> = {
+    analyze: "Analysis complete",
+    export: "Export complete",
+    generate_image: "Image ready",
+    generate_video: "Video ready",
+  };
   const { error } = await supabase.from("jobs").update({
     error_code: null,
     error_message: null,
     finished_at: new Date().toISOString(),
     progress: 100,
     result,
-    stage: job.kind === "analyze" ? "Analysis complete" : "Export complete",
+    stage: completionStage[job.kind],
     status: "completed",
   }).eq("id", job.id);
   if (error) throw new Error(`Unable to complete job: ${error.message}`);
 }
 
-async function markJobFailed(job: Job, attempt: number, error: unknown) {
+async function markJobFailed(job: Job, target: WorkTarget, attempt: number, error: unknown) {
   const details = errorDetails(error);
   const exhausted = attempt >= job.max_attempts;
   const { error: jobError } = await supabase.from("jobs").update({
@@ -135,12 +160,37 @@ async function markJobFailed(job: Job, attempt: number, error: unknown) {
   }).eq("id", job.id);
   if (jobError) workerLogger.error({ error: jobError.message, jobId: job.id }, "Unable to persist job failure");
 
-  const { error: projectError } = await supabase.from("projects").update({
-    last_error: details.message,
-    ...(exhausted ? { status: "failed" as const } : {}),
-  }).eq("id", job.project_id);
-  if (projectError) workerLogger.error({ error: projectError.message, projectId: job.project_id }, "Unable to persist project failure");
+  if (target.type === "project") {
+    const { error: projectError } = await supabase.from("projects").update({
+      last_error: details.message,
+      ...(exhausted ? { status: "failed" as const } : {}),
+    }).eq("id", target.project.id);
+    if (projectError) workerLogger.error({ error: projectError.message, projectId: target.project.id }, "Unable to persist project failure");
+  } else {
+    const { error: generationError } = await supabase.from("generations").update({
+      last_error: details.message,
+      status: exhausted ? "failed" : "retrying",
+    }).eq("id", target.generation.id);
+    if (generationError) workerLogger.error({ error: generationError.message, generationId: target.generation.id }, "Unable to persist generation failure");
+  }
   return { details, exhausted };
+}
+
+async function markTargetStarted(job: Job, target: WorkTarget) {
+  if (target.type === "project") {
+    const { error } = await supabase.from("projects").update({
+      last_error: null,
+      status: job.kind === "analyze" ? "analyzing" : "exporting",
+    }).eq("id", target.project.id);
+    if (error) throw new Error(`Unable to update project state: ${error.message}`);
+    return;
+  }
+
+  const { error } = await supabase.from("generations").update({
+    last_error: null,
+    status: "processing",
+  }).eq("id", target.generation.id);
+  if (error) throw new Error(`Unable to update generation state: ${error.message}`);
 }
 
 async function processQueueRow(row: QueueRow) {
@@ -152,19 +202,22 @@ async function processQueueRow(row: QueueRow) {
   }
 
   let job: Job | undefined;
+  let target: WorkTarget | undefined;
   let attempt = 0;
   let tempDir: string | undefined;
   const log = workerLogger.child({
     jobId: parsed.data.jobId,
     messageId: row.msg_id,
-    projectId: parsed.data.projectId,
+    targetId: "projectId" in parsed.data ? parsed.data.projectId : parsed.data.generationId,
+    targetType: "projectId" in parsed.data ? "project" : "generation",
     queueReadCount: row.read_ct,
     userId: parsed.data.userId,
   });
 
   try {
-    const records = await getJobAndProject(parsed.data);
+    const records = await getJobAndTarget(parsed.data);
     job = records.job;
+    target = records.target;
     if (["completed", "cancelled"].includes(job.status)) {
       log.info({ status: job.status }, "Archiving already terminal job");
       await archiveMessage(row.msg_id);
@@ -176,30 +229,36 @@ async function processQueueRow(row: QueueRow) {
     }
 
     attempt = await markJobStarted(job);
-    await supabase.from("projects").update({
-      last_error: null,
-      status: job.kind === "analyze" ? "analyzing" : "exporting",
-    }).eq("id", job.project_id);
+    await markTargetStarted(job, target);
     tempDir = await mkdtemp(resolve(config.WORKER_TEMP_ROOT, `${job.id}-`));
-    log.info({ attempt, kind: job.kind }, "Starting video job");
-    const result = await runPipeline({
-      config,
-      job: { ...job, attempt },
-      project: records.project,
-      report: createReporter(job.id),
-      supabase,
-      tempDir,
-    });
+    log.info({ attempt, kind: job.kind }, "Starting media job");
+    const result = target.type === "project"
+      ? await runPipeline({
+          config,
+          job: { ...job, attempt },
+          project: target.project,
+          report: createReporter(job.id),
+          supabase,
+          tempDir,
+        })
+      : await runGenerationPipeline({
+          config,
+          generation: target.generation,
+          job: { ...job, attempt },
+          report: createReporter(job.id),
+          supabase,
+          tempDir,
+        });
     await markJobComplete(job, result);
     await archiveMessage(row.msg_id);
-    log.info({ attempt, kind: job.kind }, "Video job completed");
+    log.info({ attempt, kind: job.kind }, "Media job completed");
   } catch (error) {
-    if (!job) {
+    if (!job || !target) {
       log.error({ error }, "Queue message could not be matched to a job; archiving poison message");
       await archiveMessage(row.msg_id);
       return;
     }
-    const failure = await markJobFailed(job, attempt || job.attempt + 1, error);
+    const failure = await markJobFailed(job, target, attempt || job.attempt + 1, error);
     log.error({ attempt, error, retrying: !failure.exhausted }, failure.details.message);
     if (failure.exhausted) await archiveMessage(row.msg_id);
   } finally {

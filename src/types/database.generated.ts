@@ -13,6 +13,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      generations: {
+        Row: {
+          created_at: string;
+          duration_seconds: number | null;
+          height: number | null;
+          id: string;
+          kind: Database["public"]["Enums"]["generation_kind"];
+          last_error: string | null;
+          model_endpoint: string | null;
+          name: string;
+          output_bucket: string | null;
+          output_mime: string | null;
+          output_path: string | null;
+          prompt: string;
+          routing_profile: string;
+          routing_reason: string | null;
+          seed: number | null;
+          settings: Json;
+          status: Database["public"]["Enums"]["job_status"];
+          updated_at: string;
+          user_id: string;
+          width: number | null;
+        };
+        Insert: {
+          created_at?: string;
+          duration_seconds?: number | null;
+          height?: number | null;
+          id?: string;
+          kind: Database["public"]["Enums"]["generation_kind"];
+          last_error?: string | null;
+          model_endpoint?: string | null;
+          name: string;
+          output_bucket?: string | null;
+          output_mime?: string | null;
+          output_path?: string | null;
+          prompt: string;
+          routing_profile?: string;
+          routing_reason?: string | null;
+          seed?: number | null;
+          settings?: Json;
+          status?: Database["public"]["Enums"]["job_status"];
+          updated_at?: string;
+          user_id: string;
+          width?: number | null;
+        };
+        Update: {
+          created_at?: string;
+          duration_seconds?: number | null;
+          height?: number | null;
+          id?: string;
+          kind?: Database["public"]["Enums"]["generation_kind"];
+          last_error?: string | null;
+          model_endpoint?: string | null;
+          name?: string;
+          output_bucket?: string | null;
+          output_mime?: string | null;
+          output_path?: string | null;
+          prompt?: string;
+          routing_profile?: string;
+          routing_reason?: string | null;
+          seed?: number | null;
+          settings?: Json;
+          status?: Database["public"]["Enums"]["job_status"];
+          updated_at?: string;
+          user_id?: string;
+          width?: number | null;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -129,7 +198,8 @@ export type Database = {
           max_attempts: number;
           payload: Json;
           progress: number;
-          project_id: string;
+          generation_id: string | null;
+          project_id: string | null;
           queue_message_id: number | null;
           result: Json;
           stage: string;
@@ -149,7 +219,8 @@ export type Database = {
           max_attempts?: number;
           payload?: Json;
           progress?: number;
-          project_id: string;
+          generation_id?: string | null;
+          project_id?: string | null;
           queue_message_id?: number | null;
           result?: Json;
           stage?: string;
@@ -169,7 +240,8 @@ export type Database = {
           max_attempts?: number;
           payload?: Json;
           progress?: number;
-          project_id?: string;
+          generation_id?: string | null;
+          project_id?: string | null;
           queue_message_id?: number | null;
           result?: Json;
           stage?: string;
@@ -179,6 +251,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "jobs_generation_id_fkey";
+            columns: ["generation_id"];
+            isOneToOne: false;
+            referencedRelation: "generations";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "jobs_project_id_fkey";
             columns: ["project_id"];
@@ -216,6 +295,7 @@ export type Database = {
         Row: {
           created_at: string;
           event_type: string;
+          generation_id: string | null;
           id: number;
           job_id: string | null;
           metadata: Json;
@@ -226,6 +306,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           event_type: string;
+          generation_id?: string | null;
           id?: never;
           job_id?: string | null;
           metadata?: Json;
@@ -236,6 +317,7 @@ export type Database = {
         Update: {
           created_at?: string;
           event_type?: string;
+          generation_id?: string | null;
           id?: never;
           job_id?: string | null;
           metadata?: Json;
@@ -244,6 +326,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "usage_events_generation_id_fkey";
+            columns: ["generation_id"];
+            isOneToOne: false;
+            referencedRelation: "generations";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "usage_events_project_id_fkey";
             columns: ["project_id"];
@@ -291,7 +380,8 @@ export type Database = {
       };
     };
     Enums: {
-      job_kind: "analyze" | "export";
+      generation_kind: "image" | "video";
+      job_kind: "analyze" | "export" | "generate_image" | "generate_video";
       job_status:
         | "queued"
         | "processing"
