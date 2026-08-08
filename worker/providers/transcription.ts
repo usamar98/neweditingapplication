@@ -2,9 +2,13 @@ import { readFile } from "node:fs/promises";
 import { z } from "zod";
 import type { Transcript, TranscriptSegment, TranscriptWord } from "../../src/lib/domain/video";
 import type { WorkerConfig } from "../config";
+import { createWorkerFalClient } from "./fal/client";
+import { resolveFalModel, type FalModelSelection } from "./fal/routing";
 
 export interface TranscriptionProvider {
+  readonly model?: string;
   readonly name: string;
+  readonly routing?: FalModelSelection;
   transcribe(audioPath: string): Promise<Transcript>;
 }
 
@@ -60,10 +64,15 @@ class LocalTranscriptionProvider implements TranscriptionProvider {
 }
 
 class OpenAICompatibleTranscriptionProvider implements TranscriptionProvider {
+  readonly model: string;
   readonly name: string;
 
-  constructor(private readonly config: WorkerConfig) {
-    this.name = config.TRANSCRIPTION_PROVIDER;
+  constructor(
+    private readonly config: WorkerConfig,
+    providerName: "openai" | "openai-compatible",
+  ) {
+    this.name = providerName;
+    this.model = config.TRANSCRIPTION_MODEL;
   }
 
   async transcribe(audioPath: string): Promise<Transcript> {
@@ -111,7 +120,107 @@ class OpenAICompatibleTranscriptionProvider implements TranscriptionProvider {
   }
 }
 
+const falTranscriptSchema = z.object({
+  chunks: z
+    .array(
+      z.object({
+        text: z.string(),
+        timestamp: z.array(z.number().nullable()).length(2).optional(),
+      }),
+    )
+    .default([]),
+  inferred_languages: z.array(z.string()).default([]),
+  text: z.string().default(""),
+});
+
+function buildSegments(words: TranscriptWord[]): TranscriptSegment[] {
+  const segments: TranscriptSegment[] = [];
+  let current: TranscriptWord[] = [];
+
+  const flush = () => {
+    if (current.length === 0) return;
+    segments.push({
+      end: current.at(-1)?.end ?? current[0].end,
+      id: segments.length,
+      start: current[0].start,
+      text: current.map((word) => word.text).join(" ").trim(),
+      words: current,
+    });
+    current = [];
+  };
+
+  for (const word of words) {
+    const previous = current.at(-1);
+    const longSegment = current.length >= 18 || (current[0] && word.end - current[0].start >= 8);
+    const longPause = previous ? word.start - previous.end >= 1 : false;
+    if (current.length > 0 && (longSegment || longPause)) flush();
+    current.push(word);
+    if (/[.!?][\]"')]*$/.test(word.text)) flush();
+  }
+  flush();
+  return segments;
+}
+
+export function normalizeFalTranscript(value: unknown): Transcript {
+  const parsed = falTranscriptSchema.parse(value);
+  const words = parsed.chunks.flatMap((chunk) => {
+    const [start, end] = chunk.timestamp ?? [];
+    const text = chunk.text.trim();
+    if (start == null || end == null || start < 0 || end <= start || !text) return [];
+    return [{ end, start, text } satisfies TranscriptWord];
+  });
+
+  return {
+    language: parsed.inferred_languages[0] ?? null,
+    segments: buildSegments(words),
+    text: parsed.text.trim() || words.map((word) => word.text).join(" "),
+  };
+}
+
+class FalTranscriptionProvider implements TranscriptionProvider {
+  readonly model: string;
+  readonly name = "fal";
+  readonly routing: FalModelSelection;
+
+  constructor(private readonly config: WorkerConfig) {
+    this.routing = resolveFalModel({
+      capability: "transcription",
+      overrides: config.FAL_MODEL_OVERRIDES,
+      profile: config.FAL_ROUTING_PROFILE,
+    });
+    this.model = this.routing.endpointId;
+  }
+
+  async transcribe(audioPath: string): Promise<Transcript> {
+    const client = createWorkerFalClient(this.config.FAL_KEY);
+    const audio = await readFile(audioPath);
+    const audioUrl = await client.storage.upload(new File([audio], "speech.mp3", { type: "audio/mpeg" }), {
+      lifecycle: { expiresIn: "1h" },
+    });
+    const result = await client.subscribe(this.routing.endpointId, {
+      input: {
+        audio_url: audioUrl,
+        batch_size: 64,
+        chunk_level: "word",
+        diarize: false,
+        task: "transcribe",
+      },
+      logs: false,
+    });
+    return normalizeFalTranscript(result.data);
+  }
+}
+
+function selectedProvider(config: WorkerConfig) {
+  if (config.TRANSCRIPTION_PROVIDER !== "auto") return config.TRANSCRIPTION_PROVIDER;
+  if (config.FAL_KEY) return "fal";
+  if (config.TRANSCRIPTION_API_KEY) return "openai-compatible";
+  return "local";
+}
+
 export function createTranscriptionProvider(config: WorkerConfig): TranscriptionProvider {
-  if (config.TRANSCRIPTION_PROVIDER === "local") return new LocalTranscriptionProvider();
-  return new OpenAICompatibleTranscriptionProvider(config);
+  const provider = selectedProvider(config);
+  if (provider === "local") return new LocalTranscriptionProvider();
+  if (provider === "fal") return new FalTranscriptionProvider(config);
+  return new OpenAICompatibleTranscriptionProvider(config, provider);
 }

@@ -11,7 +11,7 @@ The application is not a client-side mock. Source videos are uploaded directly t
 - File-size, MIME-type, ownership, and upload-completion validation
 - Project dashboard, history, signed previews, deletion, and export downloads
 - FFprobe media inspection and FFmpeg scene and silence detection
-- Pluggable timestamped transcription and content-analysis providers
+- Automatic fal.ai routing plus pluggable timestamped transcription and content-analysis providers
 - Transcript, automatic captions, filler-word suggestions, and highlight suggestions
 - Trim ranges, optional silence/filler removal, volume, mute, and noise reduction
 - Original, TikTok/Reels 9:16, Instagram square, and YouTube 16:9 output
@@ -40,6 +40,8 @@ flowchart LR
 ```
 
 Heavy media work never runs in a Next.js request or an Edge Function. The web process only validates requests, creates records, and submits small queue messages. The worker downloads to a dedicated temporary root, streams the result back with TUS, and deletes the job directory in `finally`; stale directories are removed on worker startup.
+
+The default Next.js build uses native platform output for Vercel. The web Dockerfile sets `NEXT_OUTPUT=standalone` only inside its builder stage so the container can copy `.next/standalone` without forcing Vercel through the self-hosting artifact path.
 
 ## Prerequisites
 
@@ -78,15 +80,29 @@ Heavy media work never runs in a Next.js request or an Edge Function. The web pr
 
 3. Copy the project URL, publishable key, and server-only secret/service-role key into `.env`. Never prefix a secret or service-role key with `NEXT_PUBLIC_`. Set the Auth site URL and allowed redirect URL to your application origin; confirmation links return through `/auth/confirm`.
 
-4. Select AI adapters. `local` content analysis performs deterministic filler/highlight analysis without a network call. `local` transcription intentionally produces an empty transcript. To enable actual speech transcription and automatic captions, configure an OpenAI or OpenAI-compatible timestamped transcription endpoint:
+4. Select AI adapters. The default `auto` mode uses fal.ai when `FAL_KEY` is present, then an explicitly configured OpenAI-compatible key, and finally the deterministic local fallback. One worker-only Fal key enables timestamped Whisper transcription and LLM-based filler/highlight analysis:
 
    ```dotenv
-   TRANSCRIPTION_PROVIDER=openai
-   TRANSCRIPTION_API_KEY=your_server_only_key
-   CONTENT_ANALYSIS_PROVIDER=local
+   FAL_KEY=your_server_only_fal_key
+   FAL_ROUTING_PROFILE=balanced
+   TRANSCRIPTION_PROVIDER=auto
+   CONTENT_ANALYSIS_PROVIDER=auto
    ```
 
-   Both remote adapters use environment-configured URLs, models, and keys. Provider keys are loaded only by the worker.
+   Fal input audio is uploaded with a one-hour lifecycle, Whisper returns word timestamps for captions, and analysis runs through Fal's current `openrouter/router` endpoint. Provider keys are loaded only by the worker. `local` content analysis remains available without a network call; `local` transcription intentionally produces an empty transcript.
+
+### Automatic fal.ai model routing
+
+`worker/providers/fal/routing.ts` is the central capability registry. A future feature asks for a capability such as `text-to-video`, `image-to-video`, `text-to-image`, `voiceover`, `caption-removal`, or `background-removal`; the router scores only schema-compatible candidates for the selected `quality`, `balanced`, `speed`, or `cost` profile. This keeps routing automatic and auditable without sending an unvalidated payload to an arbitrary model.
+
+Operations can replace a route immediately without a code deployment:
+
+```dotenv
+FAL_ROUTING_PROFILE=quality
+FAL_MODEL_OVERRIDES={"text-to-video":"fal-ai/veo3.1/fast","content-analysis":{"endpointId":"openrouter/router","model":"google/gemini-2.5-flash"}}
+```
+
+Overrides are validated at worker startup. When adding a feature, add its request/response adapter and call `resolveFalModel` with the feature capability; do not call Fal from a browser component or a Next.js request. Long-running media work remains in the durable worker pipeline.
 
 5. Run the web app and worker in separate terminals:
 
@@ -128,6 +144,10 @@ The source bucket accepts MP4, MOV, WebM, and Matroska up to 2 GiB. The output b
 - Set the queue visibility timeout above the longest expected render. Very long productions should increase it from the 30-minute example value.
 - The health endpoint is `/api/health`. Container logs are newline-delimited JSON.
 - Rotate Supabase and AI credentials through your deployment secret manager. Rebuild the web image if browser-safe Supabase values change because they are compiled into the client bundle.
+
+### Vercel and worker environment separation
+
+The Vercel web deployment needs the three `NEXT_PUBLIC_*` values, `SUPABASE_SERVICE_ROLE_KEY`, `MAX_UPLOAD_BYTES`, `SIGNED_URL_TTL_SECONDS`, `NEXT_SERVER_ACTIONS_ENCRYPTION_KEY`, and `DEPLOYMENT_VERSION`. `FAL_KEY`, `FAL_ROUTING_PROFILE`, `FAL_MODEL_OVERRIDES`, the `WORKER_SUPABASE_*` credentials, FFmpeg paths, and worker timing settings belong on the separate worker service. If the worker is deployed through Vercel Services, scope those variables to that service; otherwise do not add `FAL_KEY` to the web project at all.
 
 ## Validation commands
 

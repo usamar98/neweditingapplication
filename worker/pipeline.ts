@@ -169,11 +169,19 @@ async function analyzeVideo(context: PipelineContext) {
   await Promise.all([
     recordUsage(context, "video_seconds_analyzed", probe.duration, asJson({
       contentAnalysisProvider: analysisProvider.name,
+      contentAnalysisModel: analysisProvider.model ?? null,
+      contentAnalysisRouting: analysisProvider.routing ?? null,
     })),
     recordUsage(context, "ai_transcription_seconds", probe.hasAudio ? probe.duration : 0, asJson({
+      model: transcriptionProvider.model ?? null,
       provider: transcriptionProvider.name,
+      routing: transcriptionProvider.routing ?? null,
     })),
-    recordUsage(context, "ai_analysis_request", 1, asJson({ provider: analysisProvider.name })),
+    recordUsage(context, "ai_analysis_request", 1, asJson({
+      model: analysisProvider.model ?? null,
+      provider: analysisProvider.name,
+      routing: analysisProvider.routing ?? null,
+    })),
   ]);
   await context.report("Analysis complete", 100);
   return asJson({
@@ -181,7 +189,11 @@ async function analyzeVideo(context: PipelineContext) {
     durationSeconds: probe.duration,
     providers: {
       contentAnalysis: analysisProvider.name,
+      contentAnalysisModel: analysisProvider.model ?? null,
+      contentAnalysisRouting: analysisProvider.routing ?? null,
       transcription: transcriptionProvider.name,
+      transcriptionModel: transcriptionProvider.model ?? null,
+      transcriptionRouting: transcriptionProvider.routing ?? null,
     },
     transcriptSegments: transcript.segments.length,
   });

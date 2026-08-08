@@ -12,6 +12,7 @@ export const workerLogger = pino({
       "WORKER_SUPABASE_SERVICE_ROLE_KEY",
       "TRANSCRIPTION_API_KEY",
       "CONTENT_ANALYSIS_API_KEY",
+      "FAL_KEY",
     ],
     censor: "[REDACTED]",
   },
