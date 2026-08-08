@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   Captions,
@@ -22,6 +23,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import aiImageVisual from "@/assets/media/ai-image.webp";
+import aiVideoVisual from "@/assets/media/ai-video.webp";
+import videoEditorVisual from "@/assets/media/video-editor.webp";
 
 const workflow = [
   { icon: Upload, label: "Resumable upload", detail: "Large files continue where they left off." },
@@ -123,7 +127,17 @@ export default function Home() {
               <span className="ml-3 text-xs text-muted-foreground">campaign-interview.mp4</span>
             </div>
             <CardContent className="p-4 sm:p-5">
-              <div className="relative aspect-video overflow-hidden rounded-lg bg-[radial-gradient(circle_at_50%_40%,oklch(0.34_0.07_240),oklch(0.13_0.015_265)_68%)]">
+              <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
+                <Image
+                  src={videoEditorVisual}
+                  alt="A professional editor refining an interview in a post-production studio"
+                  fill
+                  priority
+                  placeholder="blur"
+                  sizes="(max-width: 1024px) 92vw, 44vw"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/10" />
                 <div className="absolute inset-0 grid place-items-center">
                   <span className="grid size-14 place-items-center rounded-full border border-white/10 bg-black/30 backdrop-blur">
                     <Film className="size-6 text-white/80" />
@@ -166,7 +180,7 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
           <div className="mb-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
-              <p className="mb-3 text-sm font-medium text-primary">The SceneForge creative suite</p>
+              <p className="mb-3 text-sm font-medium text-primary">The Editing App creative suite</p>
               <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
                 One idea. Three ways to make it real.
               </h2>
@@ -179,7 +193,9 @@ export default function Home() {
           <div className="grid gap-4 lg:grid-cols-3">
             <Card className="group overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
               <CardContent className="p-0">
-                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_28%_25%,oklch(0.42_0.09_163),oklch(0.15_0.015_265)_65%)] p-5">
+                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted p-5">
+                  <Image src={videoEditorVisual} alt="A film editor working in a professional post-production suite" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/10" />
                   <div className="absolute inset-x-5 bottom-5 rounded-xl border border-white/10 bg-black/35 p-3 backdrop-blur">
                     <div className="mb-3 flex items-center justify-between text-[10px] text-white/60"><span>campaign-interview.mp4</span><span className="text-primary">6 highlights found</span></div>
                     <div className="flex h-10 items-end gap-1">
@@ -198,7 +214,9 @@ export default function Home() {
 
             <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-sky-400/25">
               <CardContent className="p-0">
-                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_70%_20%,oklch(0.46_0.14_250),oklch(0.145_0.014_265)_67%)]">
+                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted">
+                  <Image src={aiVideoVisual} alt="A cinematic concept car moving through a rain-lit city" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-black/15" />
                   <div className="absolute left-5 top-5 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1.5 text-[10px] text-sky-200">MODEL AUTOPILOT</div>
                   <div className="absolute inset-x-5 bottom-5 grid grid-cols-3 gap-2">
                     {["Quality", "Speed", "Cost"].map((label, index) => <div key={label} className={cn("rounded-lg border border-white/10 bg-black/30 p-3 text-center text-[10px] text-white/55 backdrop-blur", index === 0 && "border-sky-300/35 bg-sky-300/10 text-sky-100")}>{label}</div>)}
@@ -216,10 +234,9 @@ export default function Home() {
 
             <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25">
               <CardContent className="p-0">
-                <div className="grid h-52 grid-cols-2 gap-1 border-b border-white/[0.06] bg-black/20 p-1">
-                  <div className="rounded-l-xl bg-[radial-gradient(circle_at_65%_35%,oklch(0.72_0.17_80),oklch(0.25_0.08_25)_45%,oklch(0.13_0.02_265)_75%)]" />
-                  <div className="grid gap-1"><div className="rounded-tr-xl bg-[linear-gradient(135deg,oklch(0.42_0.14_315),oklch(0.18_0.03_265))]" /><div className="rounded-br-xl bg-[radial-gradient(circle_at_30%_60%,oklch(0.68_0.13_163),oklch(0.15_0.02_265)_60%)]" /></div>
-                  <div className="absolute" />
+                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted">
+                  <Image src={aiImageVisual} alt="A premium smoky-glass perfume bottle in a cinematic product photograph" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
                 </div>
                 <div className="p-6">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-300/10 text-fuchsia-200"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-200/20 bg-fuchsia-200/5 text-fuchsia-100">New</Badge></div>
@@ -334,7 +351,7 @@ export default function Home() {
           <div className="surface-grid pointer-events-none absolute inset-0 opacity-50" />
           <div className="relative">
             <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Make the first cut in minutes.</h2>
-            <p className="mx-auto mt-4 max-w-xl text-balance leading-7 text-muted-foreground">Upload your footage and let SceneForge prepare an editable, captioned starting point.</p>
+            <p className="mx-auto mt-4 max-w-xl text-balance leading-7 text-muted-foreground">Upload your footage and let Editing App prepare an editable, captioned starting point.</p>
             <Button size="lg" asChild className="mt-8 h-12 px-6">
               <Link href="/login?mode=signup">Start your first project <ArrowRight className="size-4" /></Link>
             </Button>

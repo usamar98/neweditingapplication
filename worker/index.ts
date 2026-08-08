@@ -23,7 +23,7 @@ const supabase = createClient<Database>(
   config.WORKER_SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: { autoRefreshToken: false, persistSession: false },
-    global: { headers: { "x-application-name": "scene-forge-worker" } },
+    global: { headers: { "x-application-name": "editing-app-worker" } },
   },
 );
 let stopping = false;

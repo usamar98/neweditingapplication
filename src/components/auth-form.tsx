@@ -100,7 +100,7 @@ export function AuthForm() {
         </Button>
       </form>
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        {mode === "signup" ? "Already have an account?" : "New to SceneForge?"}{" "}
+        {mode === "signup" ? "Already have an account?" : "New to Editing App?"}{" "}
         <button type="button" className="font-medium text-foreground underline-offset-4 hover:underline" onClick={() => { setMode(mode === "signup" ? "login" : "signup"); setError(null); setNotice(null); }}>
           {mode === "signup" ? "Sign in" : "Create one"}
         </button>

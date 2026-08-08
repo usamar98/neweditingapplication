@@ -11,7 +11,7 @@ export function Brand({ compact = false, className }: { compact?: boolean; class
       </span>
       {!compact && (
         <span className="text-[17px] font-semibold tracking-[-0.03em]">
-          Scene<span className="text-primary">Forge</span>
+          Editing <span className="text-primary">App</span>
         </span>
       )}
     </Link>

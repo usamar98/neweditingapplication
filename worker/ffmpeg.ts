@@ -281,7 +281,7 @@ export function buildExportPlan({
     "-max_muxing_queue_size",
     "2048",
     "-metadata",
-    "comment=Created with SceneForge",
+    "comment=Created with Editing App",
     outputPath,
   );
   return { args, outputDuration };

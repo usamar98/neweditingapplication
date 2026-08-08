@@ -15,11 +15,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "SceneForge — AI video editing",
-    template: "%s · SceneForge",
+    default: "Editing App — AI creative studio",
+    template: "%s · Editing App",
   },
   description:
-    "Turn long footage into polished, captioned, platform-ready videos with an AI-assisted editing workflow.",
+    "Edit footage and create production-ready AI videos and images in one private creative workspace.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
 };
 

@@ -1,6 +1,6 @@
-# SceneForge
+# Editing App
 
-SceneForge is a production-oriented AI video editor built with Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui, Supabase, FFmpeg, and a separate containerized Node.js 22 worker. It implements the first capability of a broader creative platform: upload, analyze, edit, caption, and export videos as MP4.
+Editing App is a production-oriented creative suite built with Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui, Supabase, FFmpeg, and a separate containerized Node.js 22 worker. It combines long-form video editing with model-routed AI image and video generation in one private workspace.
 
 The application is not a client-side mock. Source videos are uploaded directly to private Supabase Storage with resumable TUS uploads, jobs are persisted in Supabase Queues, FFmpeg runs in the worker container, and job progress reaches the editor through Supabase Realtime.
 

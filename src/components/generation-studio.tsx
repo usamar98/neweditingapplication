@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- Generated media uses short-lived private signed URLs. */
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import Image from "next/image";
 import {
   Aperture,
   ArrowDownToLine,
@@ -33,6 +34,8 @@ import type { GenerationView } from "@/lib/data/generations";
 import type { GenerationKind, GenerationRoutingProfile } from "@/lib/domain/generation";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.generated";
+import aiImageVisual from "@/assets/media/ai-image.webp";
+import aiVideoVisual from "@/assets/media/ai-video.webp";
 
 const profiles: Array<{
   detail: string;
@@ -100,7 +103,7 @@ function ModelAutopilot({ generation }: { generation?: GenerationView }) {
           <p className="text-sm font-medium">Model Autopilot</p>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
             {generation?.routing_reason
-              ?? "SceneForge compares the best compatible models for your quality, speed, and cost intent."}
+              ?? "Editing App compares the best compatible models for your quality, speed, and cost intent."}
           </p>
           {generation?.model_endpoint && (
             <p className="mt-2 truncate font-mono text-[10px] text-primary">{generation.model_endpoint}</p>
@@ -393,9 +396,13 @@ export function GenerationStudio({
                 </CardContent>
               </>
             ) : (
-              <CardContent className="grid min-h-80 place-items-center p-8 text-center">
-                <div><Aperture className="mx-auto size-7 text-primary" /><p className="mt-4 text-sm font-medium">Your first {kind} starts here</p><p className="mt-2 text-xs leading-5 text-muted-foreground">Write a creative brief and Model Autopilot will take it from there.</p></div>
-              </CardContent>
+              <div className="relative min-h-80 overflow-hidden">
+                <Image src={isImage ? aiImageVisual : aiVideoVisual} alt="" fill placeholder="blur" sizes="(max-width: 1280px) 100vw, 34vw" className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/10" />
+                <CardContent className="relative grid min-h-80 place-items-end p-6 text-center">
+                  <div className="mx-auto max-w-xs"><Aperture className="mx-auto size-7 text-primary" /><p className="mt-4 text-sm font-medium">Your first {kind} starts here</p><p className="mt-2 text-xs leading-5 text-white/65">Write a creative brief and Model Autopilot will take it from there.</p></div>
+                </CardContent>
+              </div>
             )}
           </Card>
         </div>
