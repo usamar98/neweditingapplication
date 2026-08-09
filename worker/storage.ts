@@ -67,10 +67,13 @@ export async function uploadLargeObjectResumably({
   const projectRef = new URL(config.WORKER_SUPABASE_URL).hostname.split(".")[0];
   const endpoint = `https://${projectRef}.storage.supabase.co/storage/v1/upload/resumable`;
   const nodeStream = createReadStream(filePath);
-  const webReader = Readable.toWeb(nodeStream).getReader();
 
   await new Promise<void>((resolve, reject) => {
-    const upload = new Upload(webReader, {
+    // tus-js-client selects its Node adapter in the worker. That adapter accepts
+    // Buffer or Node Readable sources; a WebStream reader fails after the paid
+    // provider call with "source object may only be an instance of Buffer or
+    // Readable in this environment".
+    const upload = new Upload(nodeStream, {
       chunkSize: TUS_CHUNK_SIZE,
       endpoint,
       headers: {

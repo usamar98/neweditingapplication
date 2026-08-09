@@ -31,6 +31,19 @@ describe("fal model routing", () => {
     expect(selection.source).toBe("catalog");
   });
 
+  it("honors only an approved user-selected endpoint", () => {
+    expect(resolveFalModel({
+      capability: "background-removal",
+      preferredEndpointId: "fal-ai/birefnet/v2",
+      profile: "speed",
+    })).toMatchObject({ endpointId: "fal-ai/birefnet/v2", source: "user-selection" });
+
+    expect(() => resolveFalModel({
+      capability: "background-removal",
+      preferredEndpointId: "untrusted/paid-model",
+    })).toThrow(/not approved/i);
+  });
+
   it("allows an operations override without a code change", () => {
     const overrides = falModelOverridesEnvSchema.parse(JSON.stringify({
       "content-analysis": {

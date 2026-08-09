@@ -27,6 +27,17 @@ export async function consumeRateLimit(
   }
 }
 
+async function requireActiveAccount(supabase: SupabaseClient<Database>, userId: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("account_status")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error || data?.account_status !== "active") {
+    throw new HttpError(403, "Reactivate this account before starting new work.", "ACCOUNT_INACTIVE");
+  }
+}
+
 export async function enqueueProjectJob({
   kind,
   projectId,
@@ -40,6 +51,7 @@ export async function enqueueProjectJob({
   supabase: SupabaseClient<Database>;
   user: User;
 }) {
+  await requireActiveAccount(supabase, user.id);
   await consumeRateLimit(supabase, `job:${kind}`, kind === "export" ? 8 : 12, 60);
 
   const [{ data: project, error: projectError }, { data: activeJob }] = await Promise.all([
@@ -176,12 +188,28 @@ export async function enqueueGenerationJob({
   supabase: SupabaseClient<Database>;
   user: User;
 }) {
+  await requireActiveAccount(supabase, user.id);
   await consumeRateLimit(
     supabase,
     `generation:${input.kind}`,
     input.kind === "video" ? 2 : 8,
     60,
   );
+
+  if (input.kind === "background_removal") {
+    if (!input.sourcePath.startsWith(`${user.id}/`)) {
+      throw new HttpError(403, "The source image does not belong to this account.", "SOURCE_FORBIDDEN");
+    }
+    const sourceParts = input.sourcePath.split("/");
+    const sourceName = sourceParts.pop();
+    const sourceFolder = sourceParts.join("/");
+    const { data: sourceFiles, error: sourceError } = await supabase.storage
+      .from(input.sourceBucket)
+      .list(sourceFolder, { limit: 5, search: sourceName });
+    if (sourceError || !sourceName || !sourceFiles?.some((file) => file.name === sourceName)) {
+      throw new HttpError(409, "Upload the source image before starting removal.", "SOURCE_NOT_READY");
+    }
+  }
 
   const admin = createAdminClient();
   const { data: generation, error: generationError } = await admin
@@ -202,14 +230,18 @@ export async function enqueueGenerationJob({
     throw new HttpError(500, "Unable to create the generation.", "GENERATION_CREATE_FAILED");
   }
 
-  const kind = input.kind === "image" ? "generate_image" : "generate_video";
+  const kind = input.kind === "image"
+    ? "generate_image"
+    : input.kind === "video"
+      ? "generate_video"
+      : "generate_background_removal";
   const { data: job, error: jobError } = await admin
     .from("jobs")
     .insert({
       generation_id: generation.id,
       kind,
       payload: { ...input, requestId } as unknown as Json,
-      stage: "Model Autopilot is preparing",
+      stage: input.kind === "background_removal" ? "Cutout agent is preparing" : "Model Autopilot is preparing",
       status: "queued",
       user_id: user.id,
     })

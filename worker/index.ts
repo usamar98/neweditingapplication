@@ -132,6 +132,7 @@ async function markJobComplete(job: Job, result: Json) {
   const completionStage: Record<Job["kind"], string> = {
     analyze: "Analysis complete",
     export: "Export complete",
+    generate_background_removal: "Background removed",
     generate_image: "Image ready",
     generate_video: "Video ready",
   };
@@ -254,17 +255,17 @@ async function processQueueRow(row: QueueRow) {
     log.info({ attempt, kind: job.kind }, "Media job completed");
   } catch (error) {
     if (!job || !target) {
-      log.error({ error }, "Queue message could not be matched to a job; archiving poison message");
+      log.error({ err: error }, "Queue message could not be matched to a job; archiving poison message");
       await archiveMessage(row.msg_id);
       return;
     }
     const failure = await markJobFailed(job, target, attempt || job.attempt + 1, error);
-    log.error({ attempt, error, retrying: !failure.exhausted }, failure.details.message);
+    log.error({ attempt, err: error, retrying: !failure.exhausted }, failure.details.message);
     if (failure.exhausted) await archiveMessage(row.msg_id);
   } finally {
     if (tempDir) {
       await rm(tempDir, { force: true, recursive: true }).catch((error) => {
-        log.warn({ error, tempDir }, "Unable to clean job temporary directory");
+        log.warn({ err: error, tempDir }, "Unable to clean job temporary directory");
       });
     }
   }
@@ -298,7 +299,7 @@ async function poll() {
       if (row) await processQueueRow(row);
       else await delay(config.WORKER_POLL_INTERVAL_MS);
     } catch (error) {
-      workerLogger.error({ error }, "Worker poll failed");
+      workerLogger.error({ err: error }, "Worker poll failed");
       await delay(Math.min(config.WORKER_POLL_INTERVAL_MS * 2, 30000));
     }
   }
@@ -319,6 +320,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  workerLogger.fatal({ error }, "Video worker failed to start");
+  workerLogger.fatal({ err: error }, "Video worker failed to start");
   process.exitCode = 1;
 });

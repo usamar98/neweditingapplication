@@ -181,7 +181,7 @@ export type FalModelSelection = {
   model?: string;
   profile: FalRoutingProfile;
   reason: string;
-  source: "catalog" | "environment-override";
+  source: "catalog" | "environment-override" | "user-selection";
 };
 
 function weightedScore(candidateValue: FalModelCandidate, profile: FalRoutingProfile) {
@@ -195,10 +195,12 @@ function weightedScore(candidateValue: FalModelCandidate, profile: FalRoutingPro
 export function resolveFalModel({
   capability,
   overrides = {},
+  preferredEndpointId,
   profile = "balanced",
 }: {
   capability: FalCapability;
   overrides?: FalModelOverrides;
+  preferredEndpointId?: string | null;
   profile?: FalRoutingProfile;
 }): FalModelSelection {
   const rankedCandidates = [...falModelCatalog[capability]].sort((left, right) => {
@@ -207,6 +209,23 @@ export function resolveFalModel({
   });
   const [selected] = rankedCandidates;
   if (!selected) throw new Error(`No fal model is registered for ${capability}.`);
+
+  if (preferredEndpointId) {
+    const preferred = rankedCandidates.find(
+      (candidateValue) => candidateValue.endpointId === preferredEndpointId,
+    );
+    if (!preferred) {
+      throw new Error(`The selected model is not approved for ${capability}.`);
+    }
+    return {
+      capability,
+      endpointId: preferred.endpointId,
+      model: preferred.model,
+      profile,
+      reason: `${preferred.summary} Explicitly selected by the user.`,
+      source: "user-selection",
+    };
+  }
 
   const override = overrides[capability];
   if (override) {

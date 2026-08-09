@@ -49,4 +49,19 @@ describe("AI generation domain", () => {
       style: "auto",
     }).success).toBe(false);
   });
+
+  it("accepts a private background-removal source and rejects arbitrary agents", () => {
+    const request = generationRequestSchema.parse({
+      agentId: "birefnet-v2",
+      kind: "background_removal",
+      name: "Product cutout",
+      profile: "quality",
+      prompt: "Remove the image background with clean edges.",
+      sourceBucket: "background-inputs",
+      sourceMime: "image/png",
+      sourcePath: "a4bd6f8b-2330-4e39-b06a-000000000000/source.png",
+    });
+    expect(request.kind).toBe("background_removal");
+    expect(generationRequestSchema.safeParse({ ...request, agentId: "arbitrary-model" }).success).toBe(false);
+  });
 });

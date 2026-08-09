@@ -17,7 +17,9 @@ export function AuthForm() {
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "confirmation_failed" ? "That confirmation link is invalid or expired." : null,
   );
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(
+    searchParams.get("notice") === "deactivated" ? "Your account is inactive. Sign in whenever you want to reactivate it." : null,
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [pending, startTransition] = useTransition();
   const title = mode === "signup" ? "Create your workspace" : "Welcome back";
@@ -28,8 +30,14 @@ export function AuthForm() {
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
     const displayName = String(form.get("displayName") ?? "").trim();
+    const username = String(form.get("username") ?? "").trim().toLowerCase();
     setError(null);
     setNotice(null);
+
+    if (mode === "signup" && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
+      setError("Use at least 8 characters with uppercase, lowercase, and a number.");
+      return;
+    }
 
     startTransition(async () => {
       const supabase = createClient();
@@ -38,7 +46,7 @@ export function AuthForm() {
           email,
           password,
           options: {
-            data: { display_name: displayName },
+            data: { display_name: displayName, username },
             emailRedirectTo: `${window.location.origin}/auth/confirm`,
           },
         });
@@ -73,10 +81,7 @@ export function AuthForm() {
       </div>
       <form onSubmit={onSubmit} className="space-y-4">
         {mode === "signup" && (
-          <div className="space-y-2">
-            <Label htmlFor="displayName">Display name</Label>
-            <Input id="displayName" name="displayName" autoComplete="name" minLength={2} maxLength={80} required placeholder="Ada Lovelace" />
-          </div>
+          <><div className="space-y-2"><Label htmlFor="displayName">Display name</Label><Input id="displayName" name="displayName" autoComplete="name" minLength={2} maxLength={80} required placeholder="Ada Lovelace" /></div><div className="space-y-2"><Label htmlFor="username">Username</Label><Input id="username" name="username" autoComplete="username" minLength={3} maxLength={30} pattern="[a-z0-9_]+" required placeholder="ada_creates" /><p className="text-xs text-muted-foreground">Lowercase letters, numbers, and underscores only.</p></div></>
         )}
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>

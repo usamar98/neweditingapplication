@@ -1,0 +1,15 @@
+services:
+  worker:
+    volumes:
+      - type: bind
+        source: ./worker
+        target: /app/worker
+        read_only: true
+      - type: bind
+        source: ./src/lib/domain
+        target: /app/src/lib/domain
+        read_only: true
+      - type: bind
+        source: ./src/types
+        target: /app/src/types
+        read_only: true

@@ -17,7 +17,6 @@ import {
   WandSparkles,
   Zap,
 } from "lucide-react";
-import { Brand } from "@/components/brand";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +25,8 @@ import { cn } from "@/lib/utils";
 import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
 import videoEditorVisual from "@/assets/media/video-editor.webp";
+import { Brand } from "@/components/brand";
+import { PricingCards } from "@/components/pricing-cards";
 
 const workflow = [
   { icon: Upload, label: "Resumable upload", detail: "Large files continue where they left off." },
@@ -43,54 +44,14 @@ const capabilities = [
   "Realtime background processing",
 ];
 
-const plans = [
-  {
-    description: "Explore the editor and build your first creative workflow.",
-    features: ["3 video projects", "10 AI images", "720p preview exports", "Private media storage"],
-    name: "Starter",
-    price: "$0",
-  },
-  {
-    description: "For creators shipping polished content every week.",
-    features: ["25 video projects", "150 AI images", "20 AI video generations", "1080p exports", "Quality Model Autopilot"],
-    name: "Creator",
-    popular: true,
-    price: "$19",
-  },
-  {
-    description: "More generation capacity for teams and campaigns.",
-    features: ["Unlimited editor projects", "600 AI images", "80 AI video generations", "Priority processing", "Shared brand presets"],
-    name: "Studio",
-    price: "$49",
-  },
-];
-
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden">
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[760px]" />
-      <nav className="relative z-10 mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <Brand />
-        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.07] bg-black/15 p-1 text-sm text-muted-foreground backdrop-blur md:flex">
-          <Link href="#features" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-foreground">Features</Link>
-          <Link href="#pricing" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-foreground">Pricing</Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" asChild className="hidden sm:inline-flex">
-            <Link href="/login">Sign in</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/login?mode=signup">
-              Start creating <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        </div>
-      </nav>
-
       <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
         <div className="max-w-3xl">
           <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
-            <Sparkles className="mr-1 size-3.5" /> Three creative tools. One private workspace.
+            <Sparkles className="mr-1 size-3.5" /> Four creative tools. One private workspace.
           </Badge>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
             From raw idea
@@ -182,7 +143,7 @@ export default function Home() {
             <div className="max-w-2xl">
               <p className="mb-3 text-sm font-medium text-primary">The Editing App creative suite</p>
               <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
-                One idea. Three ways to make it real.
+                One idea. Four ways to make it real.
               </h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-muted-foreground">
@@ -190,7 +151,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-3">
+          <div className="grid gap-4 lg:grid-cols-2">
             <Card className="group overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
               <CardContent className="p-0">
                 <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted p-5">
@@ -243,6 +204,22 @@ export default function Home() {
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Work from a creative brief, not a mystery prompt box. Shape art direction, canvas, seed, and model intent for repeatable campaign-grade visuals.</p>
                   <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-200">Art-direct an image <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-amber-300/25">
+              <CardContent className="p-0">
+                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-[linear-gradient(45deg,oklch(0.25_0.01_265)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.25_0.01_265)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.25_0.01_265)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.25_0.01_265)_75%)] bg-[length:22px_22px]">
+                  <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden border-r border-white/25"><Image src={aiImageVisual} alt="A product photograph ready for background removal" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" /></div>
+                  <div className="absolute inset-y-0 right-0 w-1/2"><Image src={aiImageVisual} alt="" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain mix-blend-lighten" /></div>
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/55 px-3 py-1.5 text-[10px] text-white/80 backdrop-blur">BEFORE / TRANSPARENT</div>
+                </div>
+                <div className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-amber-300/10 text-amber-200"><Scissors className="size-4.5" /></span><Badge variant="outline" className="border-amber-200/20 bg-amber-200/5 text-amber-100">New</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">Background remover</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Protect fine hair, product edges, and soft foreground detail with precision matting, private inputs, and downloadable transparent PNG results.</p>
+                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-200">Create a clean cutout <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
@@ -319,30 +296,9 @@ export default function Home() {
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <p className="mb-3 text-sm font-medium text-primary">Simple launch pricing</p>
             <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Choose your creative velocity.</h2>
-            <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Start free. Move up when you need more generations, faster processing, and team-scale capacity.</p>
+            <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Three monthly plans with secure Stripe checkout. Final plan benefits will be added when you provide them.</p>
           </div>
-          <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
-            {plans.map((plan) => (
-              <Card key={plan.name} className={cn("relative border-white/[0.08] bg-card/60", plan.popular && "border-primary/35 bg-primary/[0.045] shadow-2xl shadow-primary/5 lg:-translate-y-3")}>
-                {plan.popular && <Badge className="absolute right-5 top-4 shadow-lg">Most popular</Badge>}
-                <CardContent className="flex h-full flex-col p-6 sm:p-7">
-                  <div>
-                    <h3 className="text-lg font-medium">{plan.name}</h3>
-                    <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">{plan.description}</p>
-                    <div className="mt-7 flex items-end gap-2"><span className="text-4xl font-semibold tracking-[-0.05em]">{plan.price}</span><span className="pb-1 text-xs text-muted-foreground">/ month</span></div>
-                  </div>
-                  <Separator className="my-6" />
-                  <ul className="flex-1 space-y-3">
-                    {plan.features.map((feature) => <li key={feature} className="flex items-center gap-2.5 text-sm"><span className="grid size-5 place-items-center rounded-full bg-primary/10 text-primary"><Check className="size-3" /></span>{feature}</li>)}
-                  </ul>
-                  <Button asChild variant={plan.popular ? "default" : "outline"} className="mt-8 h-11 w-full">
-                    <Link href="/login?mode=signup">{plan.price === "$0" ? "Start free" : `Choose ${plan.name}`} <ArrowRight className="size-4" /></Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <p className="mt-7 text-center text-xs text-muted-foreground">Generation allowances are fair-use launch limits and may evolve as models improve.</p>
+          <PricingCards />
         </div>
       </section>
 

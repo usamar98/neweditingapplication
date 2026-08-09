@@ -31,7 +31,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { GenerationView } from "@/lib/data/generations";
-import type { GenerationKind, GenerationRoutingProfile } from "@/lib/domain/generation";
+import { agentsForKind } from "@/lib/domain/ai-models";
+import type { GenerationRoutingProfile } from "@/lib/domain/generation";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.generated";
 import aiImageVisual from "@/assets/media/ai-image.webp";
@@ -114,7 +115,7 @@ function ModelAutopilot({ generation }: { generation?: GenerationView }) {
   );
 }
 
-function MediaPreview({ controls = true, generation, kind }: { controls?: boolean; generation: GenerationView; kind: GenerationKind }) {
+function MediaPreview({ controls = true, generation, kind }: { controls?: boolean; generation: GenerationView; kind: "image" | "video" }) {
   if (generation.outputUrl) {
     return kind === "image" ? (
       <img
@@ -147,9 +148,11 @@ export function GenerationStudio({
   kind,
 }: {
   initialGenerations: GenerationView[];
-  kind: GenerationKind;
+  kind: "image" | "video";
 }) {
   const isImage = kind === "image";
+  const agents = agentsForKind(kind);
+  const [agentId, setAgentId] = useState("auto");
   const [generations, setGenerations] = useState(initialGenerations);
   const [name, setName] = useState(isImage ? "Untitled image" : "Untitled video");
   const [prompt, setPrompt] = useState("");
@@ -208,8 +211,8 @@ export function GenerationStudio({
 
     const numericSeed = seed.trim() ? Number(seed) : undefined;
     const payload = isImage
-      ? { aspectRatio, kind: "image", name: name.trim(), profile, prompt: prompt.trim(), seed: numericSeed, style }
-      : { aspectRatio, cameraMotion, duration, generateAudio, kind: "video", mood, name: name.trim(), profile, prompt: prompt.trim(), resolution, seed: numericSeed };
+      ? { agentId, aspectRatio, kind: "image", name: name.trim(), profile, prompt: prompt.trim(), seed: numericSeed, style }
+      : { agentId, aspectRatio, cameraMotion, duration, generateAudio, kind: "video", mood, name: name.trim(), profile, prompt: prompt.trim(), resolution, seed: numericSeed };
 
     try {
       const response = await fetch("/api/generations", {
@@ -281,16 +284,35 @@ export function GenerationStudio({
                   <Label htmlFor={`${kind}-prompt`}>Creative brief</Label>
                   <span className="text-[11px] text-muted-foreground">{prompt.length}/4000</span>
                 </div>
-                <Textarea
-                  id={`${kind}-prompt`}
-                  value={prompt}
-                  onChange={(event) => setPrompt(event.target.value)}
-                  minLength={3}
-                  maxLength={4000}
-                  required
-                  placeholder={examples[0]}
-                  className="min-h-36 resize-y px-4 py-3 leading-6"
-                />
+                <div className="overflow-hidden rounded-xl border border-input bg-input/15 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
+                  <Textarea
+                    id={`${kind}-prompt`}
+                    value={prompt}
+                    onChange={(event) => setPrompt(event.target.value)}
+                    minLength={3}
+                    maxLength={4000}
+                    required
+                    placeholder={examples[0]}
+                    className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0"
+                  />
+                  <div className="flex items-center justify-between border-t border-white/[0.06] p-2">
+                    <Select value={agentId} onValueChange={setAgentId}>
+                      <SelectTrigger aria-label="Select AI model agent" className="h-9 w-[220px] border-white/[0.08] bg-black/15 text-xs">
+                        <Bot className="size-3.5 text-primary" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent align="start" className="w-[300px]">
+                        {agents.map((agent) => (
+                          <SelectItem key={agent.id} value={agent.id}>
+                            <span className="font-medium">{agent.label}</span>
+                            <span className="ml-2 text-[10px] text-muted-foreground">{agent.tag}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <span className="pr-2 text-[10px] text-muted-foreground">Approved model agent</span>
+                  </div>
+                </div>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {examples.slice(1).map((example, index) => (
                     <button key={example} type="button" onClick={() => setPrompt(example)} className="rounded-full border border-white/[0.08] px-3 py-1.5 text-left text-[11px] text-muted-foreground transition hover:border-primary/25 hover:text-foreground">
@@ -367,7 +389,9 @@ export function GenerationStudio({
 
               <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs leading-5 text-muted-foreground">
-                  Autopilot makes a fresh routing decision for every brief and preserves the reason with your result.
+                  {agentId === "auto"
+                    ? "Autopilot makes a fresh routing decision for every brief and preserves the reason with your result."
+                    : "Your selected agent is allowlisted on the server and recorded with the result."}
                 </p>
                 <Button type="submit" size="lg" disabled={submitting || !prompt.trim() || !name.trim()} className="h-11 px-6">
                   {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}

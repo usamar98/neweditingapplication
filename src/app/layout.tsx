@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SiteHeader } from "@/components/site-header";
+import { getCurrentAccount } from "@/lib/auth";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,7 +25,16 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const current = await getCurrentAccount();
+  const account = current
+    ? {
+        avatarUrl: current.profile?.avatar_url ?? null,
+        displayName: current.profile?.display_name || current.user.email?.split("@")[0] || "Creator",
+        email: current.user.email ?? "",
+        username: current.profile?.username ?? `creator_${current.user.id.slice(0, 6)}`,
+      }
+    : null;
   return (
     <html
       lang="en"
@@ -31,7 +42,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body>
-        <TooltipProvider>{children}</TooltipProvider>
+        <TooltipProvider>
+          <SiteHeader account={account} />
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   );

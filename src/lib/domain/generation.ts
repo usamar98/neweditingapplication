@@ -1,6 +1,11 @@
 import { z } from "zod";
+import {
+  backgroundAgentIdSchema,
+  imageAgentIdSchema,
+  videoAgentIdSchema,
+} from "@/lib/domain/ai-models";
 
-export const generationKinds = ["image", "video"] as const;
+export const generationKinds = ["image", "video", "background_removal"] as const;
 export const generationKindSchema = z.enum(generationKinds);
 export type GenerationKind = z.infer<typeof generationKindSchema>;
 
@@ -52,6 +57,7 @@ const sharedRequestShape = {
 export const imageGenerationRequestSchema = z
   .object({
     ...sharedRequestShape,
+    agentId: imageAgentIdSchema.default("auto"),
     aspectRatio: z.enum(imageAspectRatios).default("landscape_16_9"),
     kind: z.literal("image"),
     seed: z.number().int().min(0).max(2147483647).optional(),
@@ -62,6 +68,7 @@ export const imageGenerationRequestSchema = z
 export const videoGenerationRequestSchema = z
   .object({
     ...sharedRequestShape,
+    agentId: videoAgentIdSchema.default("auto"),
     aspectRatio: z.enum(["16:9", "9:16"]).default("16:9"),
     cameraMotion: z.enum(videoCameraMotions).default("auto"),
     duration: z.enum(["4s", "6s", "8s"]).default("8s"),
@@ -73,14 +80,29 @@ export const videoGenerationRequestSchema = z
   })
   .strict();
 
+export const backgroundRemovalRequestSchema = z
+  .object({
+    agentId: backgroundAgentIdSchema.default("auto"),
+    kind: z.literal("background_removal"),
+    name: z.string().trim().min(1).max(120),
+    profile: generationRoutingProfileSchema.default("quality"),
+    prompt: z.string().trim().min(3).max(4000).default("Remove the image background with a clean transparent edge."),
+    sourceBucket: z.literal("background-inputs"),
+    sourceMime: z.enum(["image/jpeg", "image/png", "image/webp"]),
+    sourcePath: z.string().trim().min(1).max(1024),
+  })
+  .strict();
+
 export const generationRequestSchema = z.discriminatedUnion("kind", [
   imageGenerationRequestSchema,
   videoGenerationRequestSchema,
+  backgroundRemovalRequestSchema,
 ]);
 
 export const generationJobPayloadSchema = z.discriminatedUnion("kind", [
   imageGenerationRequestSchema.extend({ requestId: z.string().uuid() }),
   videoGenerationRequestSchema.extend({ requestId: z.string().uuid() }),
+  backgroundRemovalRequestSchema.extend({ requestId: z.string().uuid() }),
 ]);
 
 export const generationQueueMessageSchema = z.union([
@@ -94,6 +116,12 @@ export const generationQueueMessageSchema = z.union([
     generationId: z.string().uuid(),
     jobId: z.string().uuid(),
     kind: z.literal("generate_video"),
+    userId: z.string().uuid(),
+  }).strict(),
+  z.object({
+    generationId: z.string().uuid(),
+    jobId: z.string().uuid(),
+    kind: z.literal("generate_background_removal"),
     userId: z.string().uuid(),
   }).strict(),
 ]);
@@ -130,6 +158,9 @@ const moodDirection: Record<(typeof videoMoods)[number], string> = {
 };
 
 export function buildGenerationPrompt(input: GenerationRequest) {
+  if (input.kind === "background_removal") {
+    return input.prompt;
+  }
   if (input.kind === "image") {
     return [input.prompt, imageStyleDirection[input.style], "No watermark, no UI chrome, no accidental text unless explicitly requested."]
       .filter(Boolean)
