@@ -7,16 +7,18 @@ import { SetupRequired } from "@/components/setup-required";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/config";
+import { getSafeRedirectPath } from "@/lib/safe-redirect";
 
 export const metadata = { title: "Sign in" };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   if (!isSupabaseConfigured()) {
     return <SetupRequired />;
   }
   const user = await getCurrentUser();
   if (user) {
-    redirect("/dashboard");
+    const query = await searchParams;
+    redirect(getSafeRedirectPath(query.next));
   }
 
   return (

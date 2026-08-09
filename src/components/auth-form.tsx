@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
+import { getSafeRedirectPath } from "@/lib/safe-redirect";
 
 export function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialMode = searchParams.get("mode") === "signup" ? "signup" : "login";
+  const redirectPath = getSafeRedirectPath(searchParams.get("next"));
   const [mode, setMode] = useState<"login" | "signup">(initialMode);
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "confirmation_failed" ? "That confirmation link is invalid or expired." : null,
@@ -66,7 +68,7 @@ export function AuthForm() {
         }
       }
 
-      router.replace("/dashboard");
+      router.replace(redirectPath);
       router.refresh();
     });
   }

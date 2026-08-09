@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteHeader } from "@/components/site-header";
+import { AuthActivityTracker } from "@/components/auth-activity-tracker";
+import { isAdminIdentity } from "@/lib/admin";
 import { getCurrentAccount } from "@/lib/auth";
 import { getSiteUrl, siteDescription, siteName } from "@/lib/site";
 import "./globals.css";
@@ -75,6 +77,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         avatarUrl: current.profile?.avatar_url ?? null,
         displayName: current.profile?.display_name || current.user.email?.split("@")[0] || "Creator",
         email: current.user.email ?? "",
+        isAdmin: isAdminIdentity(current.user),
         username: current.profile?.username ?? `creator_${current.user.id.slice(0, 6)}`,
       }
     : null;
@@ -83,6 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <TooltipProvider>
           <SiteHeader account={account} />
+          {account ? <AuthActivityTracker /> : null}
           {children}
         </TooltipProvider>
       </body>

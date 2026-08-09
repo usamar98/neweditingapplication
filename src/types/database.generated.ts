@@ -47,6 +47,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_activity: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          last_seen_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       generations: {
         Row: {
           created_at: string

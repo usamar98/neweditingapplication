@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { CircleUserRound, CreditCard, ImageIcon, LayoutDashboard, LogOut, Menu, Scissors, Video } from "lucide-react";
+import { CircleUserRound, CreditCard, ImageIcon, LayoutDashboard, LogOut, Menu, Scissors, ShieldCheck, Video } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Brand } from "@/components/brand";
@@ -16,6 +16,7 @@ type HeaderAccount = {
   avatarUrl: string | null;
   displayName: string;
   email: string;
+  isAdmin: boolean;
   username: string;
 } | null;
 
@@ -66,6 +67,7 @@ export function SiteHeader({ account }: { account: HeaderAccount }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="py-2"><Link href={"/account" as Route}><CircleUserRound /> Account settings</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild className="py-2"><Link href={"/account#billing" as Route}><CreditCard /> Billing & subscription</Link></DropdownMenuItem>
+                {account.isAdmin ? <DropdownMenuItem asChild className="py-2"><Link href={"/editingappadmin" as Route}><ShieldCheck /> Admin dashboard</Link></DropdownMenuItem> : null}
                 <DropdownMenuSeparator />
                 <form action={signOut}><DropdownMenuItem asChild className="py-2"><button type="submit" className="w-full"><LogOut /> Sign out</button></DropdownMenuItem></form>
               </DropdownMenuContent>
