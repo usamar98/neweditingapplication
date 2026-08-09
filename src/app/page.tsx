@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { Route } from "next";
 import {
   ArrowRight,
   Captions,
@@ -28,6 +29,8 @@ import aiVideoVisual from "@/assets/media/ai-video.webp";
 import videoEditorVisual from "@/assets/media/video-editor.webp";
 import { Brand } from "@/components/brand";
 import { PricingCards } from "@/components/pricing-cards";
+import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
+import { getSiteUrl, siteDescription } from "@/lib/site";
 
 const workflow = [
   { icon: Upload, label: "Resumable upload", detail: "Large files continue where they left off." },
@@ -45,17 +48,26 @@ const capabilities = [
   "Realtime background processing",
 ];
 
+const siteUrl = getSiteUrl().toString();
 const homeJsonLd = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: "Editing App",
-  applicationCategory: "MultimediaApplication",
-  operatingSystem: "Web",
-  description: "A private AI video editor and multi-model creative studio for video, images, product ads, short-form content, and background removal.",
-  offers: [
-    { "@type": "Offer", name: "Creator", price: "29.99", priceCurrency: "USD" },
-    { "@type": "Offer", name: "Studio", price: "49.99", priceCurrency: "USD" },
-    { "@type": "Offer", name: "Business", price: "99.99", priceCurrency: "USD" },
+  "@graph": [
+    { "@type": "Organization", "@id": `${siteUrl}#organization`, name: "Editing App", url: siteUrl, logo: new URL("/icon.svg", siteUrl).toString() },
+    { "@type": "WebSite", "@id": `${siteUrl}#website`, name: "Editing App", url: siteUrl, description: siteDescription, publisher: { "@id": `${siteUrl}#organization` }, inLanguage: "en" },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}#software`,
+      name: "Editing App",
+      url: siteUrl,
+      applicationCategory: "MultimediaApplication",
+      operatingSystem: "Web",
+      description: siteDescription,
+      offers: [
+        { "@type": "Offer", name: "Creator", price: "29.99", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Studio", price: "49.99", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Business", price: "99.99", priceCurrency: "USD" },
+      ],
+    },
   ],
 };
 
@@ -67,7 +79,7 @@ export default function Home() {
       <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
         <div className="max-w-3xl">
           <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
-            <Sparkles className="mr-1 size-3.5" /> One private AI studio. The right model for every job.
+            <Sparkles className="mr-1 size-3.5" /> AI video editor + multi-model creative studio
           </Badge>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
             Edit. Generate.
@@ -331,6 +343,15 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="border-y border-white/[0.06] bg-black/10">
+        <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
+          <div className="max-w-3xl"><p className="text-sm font-medium text-primary">Focused creative workflows</p><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Start with the outcome, then choose the model.</h2><p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Build a product ad from a real page or turn one long recording into channel-ready clips. Every workflow stays connected to the editor and private project storage.</p></div>
+          <div className="mt-10 grid gap-4 lg:grid-cols-2">
+            {searchIntentPages.map((page) => <Card key={page.slug} className="border-white/[0.08] bg-card/60"><CardContent className="p-6 sm:p-8"><p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">{page.eyebrow}</p><h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{page.title}</h3><p className="mt-4 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore the workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
+          </div>
+        </div>
+      </section>
+
       <section id="pricing" className="scroll-mt-20 border-y border-white/[0.06] bg-black/10">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
           <div className="mx-auto mb-12 max-w-2xl text-center">
@@ -359,7 +380,7 @@ export default function Home() {
         <Separator className="mb-8" />
         <div className="flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <Brand />
-          <div className="flex flex-wrap gap-4"><Link href="/features/ai-video-editor" className="hover:text-foreground">Video editor</Link><Link href="/features/ai-video-generator" className="hover:text-foreground">Video generator</Link><Link href="/features/ai-image-generator" className="hover:text-foreground">Image generator</Link><Link href="/features/performance-creative-studio" className="hover:text-foreground">Performance creative</Link></div>
+          <div className="flex max-w-3xl flex-wrap justify-end gap-x-4 gap-y-2"><Link href="/features/ai-video-editor" className="hover:text-foreground">Video editor</Link><Link href="/features/ai-video-generator" className="hover:text-foreground">Video generator</Link><Link href="/features/ai-image-generator" className="hover:text-foreground">Image generator</Link><Link href={"/tools/product-url-to-video" as Route} className="hover:text-foreground">URL to video</Link><Link href={"/tools/long-video-to-shorts" as Route} className="hover:text-foreground">Long video to shorts</Link><Link href="/ai-video-models" className="hover:text-foreground">Model guide</Link><Link href={`/compare/${comparisonPages[0].slug}` as Route} className="hover:text-foreground">Compare VEED</Link></div>
         </div>
       </footer>
     </main>

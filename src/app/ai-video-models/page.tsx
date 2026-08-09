@@ -4,11 +4,14 @@ import { ArrowRight, Check, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getSiteUrl, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "AI video model guide: Seedance, LTX, Veo, and Kling",
   description: "Compare current AI video models by shot length, native audio, resolution, and the job each model handles best in Editing App.",
   alternates: { canonical: "/ai-video-models" },
+  openGraph: { title: "AI video model guide: Seedance, LTX, Veo, and Kling", description: "Compare current AI video models by shot length, native audio, resolution, and best-fit workflow.", type: "article", url: "/ai-video-models" },
+  twitter: { card: "summary_large_image", title: "AI video model guide: Seedance, LTX, Veo, and Kling", description: "Compare current AI video models by shot length, native audio, resolution, and best-fit workflow." },
 };
 
 const models = [
@@ -19,10 +22,25 @@ const models = [
 ] as const;
 
 export default function AiVideoModelsPage() {
+  const pageUrl = new URL("/ai-video-models", getSiteUrl()).toString();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "AI video model guide",
+    description: metadata.description,
+    url: pageUrl,
+    isPartOf: { "@type": "WebSite", name: siteName, url: getSiteUrl().toString() },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: models.map((model, index) => ({ "@type": "ListItem", position: index + 1, name: model.name, url: model.docs })),
+    },
+  };
   return (
     <main className="relative min-h-screen overflow-hidden">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[580px]" />
-      <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-20 text-center sm:px-8 lg:pt-28">
+      <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-16 text-center sm:px-8 lg:pt-24">
+        <nav aria-label="Breadcrumb" className="mb-8 text-left text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><span>AI video model guide</span></nav>
         <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary">Verified model guide · updated August 2026</Badge>
         <h1 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">Choose the AI video model by the shot—not the hype.</h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">Editing App exposes model choice and hides impossible combinations. Longer does not always mean sharper, and 4K is useful only when the model generates it natively.</p>

@@ -16,10 +16,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+
 export const metadata: Metadata = {
   applicationName: siteName,
   title: {
-    default: "Editing App — AI video editor and creative studio",
+    default: "AI Video Editor & Generator | Editing App",
     template: "%s · Editing App",
   },
   description: siteDescription,
@@ -43,16 +45,27 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName,
-    title: "Editing App — AI video editor and creative studio",
+    title: "AI Video Editor & Generator | Editing App",
     description: siteDescription,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Editing App — AI video editor and creative studio",
+    title: "AI Video Editor & Generator | Editing App",
     description: siteDescription,
   },
-  robots: { index: true, follow: true },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  verification: googleSiteVerification ? { google: googleSiteVerification } : undefined,
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

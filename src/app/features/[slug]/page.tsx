@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
@@ -6,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getMarketingFeature, marketingFeatures } from "@/lib/marketing/features";
+import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
 
 export const dynamicParams = false;
@@ -33,20 +35,40 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
   const pageUrl = new URL(`/features/${feature.slug}`, getSiteUrl()).toString();
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: `${siteName} — ${feature.eyebrow}`,
-    applicationCategory: "MultimediaApplication",
-    operatingSystem: "Web",
-    description: feature.description,
-    url: pageUrl,
-    offers: { "@type": "AggregateOffer", lowPrice: "29.99", highPrice: "99.99", priceCurrency: "USD" },
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        name: `${siteName} — ${feature.eyebrow}`,
+        applicationCategory: "MultimediaApplication",
+        operatingSystem: "Web",
+        description: feature.description,
+        url: pageUrl,
+        offers: { "@type": "AggregateOffer", lowPrice: "29.99", highPrice: "99.99", priceCurrency: "USD" },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl().toString() },
+          { "@type": "ListItem", position: 2, name: feature.eyebrow, item: pageUrl },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        mainEntity: feature.faq.map((item) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: { "@type": "Answer", text: item.answer },
+        })),
+      },
+    ],
   };
 
   return (
     <main className="relative min-h-screen overflow-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[620px]" />
-      <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-20 text-center sm:px-8 lg:pb-24 lg:pt-28">
+      <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-16 text-center sm:px-8 lg:pb-24 lg:pt-24">
+        <nav aria-label="Breadcrumb" className="mb-8 text-left text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><span>Features</span><span className="mx-2">/</span><span>{feature.eyebrow}</span></nav>
         <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary"><Sparkles className="size-3.5" /> {feature.eyebrow}</Badge>
         <h1 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">{feature.title}</h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">{feature.description}</p>
@@ -62,6 +84,13 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
       </section>
 
       <section className="border-y border-white/[0.06] bg-black/10"><div className="mx-auto max-w-4xl px-5 py-20 sm:px-8"><h2 className="text-center text-3xl font-semibold tracking-[-0.035em]">Frequently asked questions</h2><div className="mt-10 space-y-3">{feature.faq.map((item) => <Card key={item.question} className="border-white/[0.07] bg-card/50"><CardContent className="p-5 sm:p-6"><h3 className="font-medium">{item.question}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.answer}</p></CardContent></Card>)}</div></div></section>
+
+      <section className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-medium text-primary">Related workflows</p><h2 className="mt-2 text-3xl font-semibold tracking-[-0.035em]">Go deeper on a real search intent.</h2></div><Link href="/ai-video-models" className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">Compare video models <ArrowRight className="size-3.5" /></Link></div>
+        <div className="mt-8 grid gap-4 md:grid-cols-2">
+          {searchIntentPages.map((page) => <Card key={page.slug} className="border-white/[0.07] bg-card/50"><CardContent className="p-6"><h3 className="text-lg font-semibold">{page.title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
+        </div>
+      </section>
     </main>
   );
 }
