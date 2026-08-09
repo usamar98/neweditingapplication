@@ -64,4 +64,45 @@ describe("AI generation domain", () => {
     expect(request.kind).toBe("background_removal");
     expect(generationRequestSchema.safeParse({ ...request, agentId: "arbitrary-model" }).success).toBe(false);
   });
+
+  it("validates product-page performance creatives and adds platform guardrails", () => {
+    const request = generationRequestSchema.parse({
+      agentId: "veo-3-1-performance",
+      audience: "Independent skincare shoppers",
+      callToAction: "Shop now",
+      duration: "8s",
+      kind: "performance_creative",
+      name: "Product launch ad",
+      platform: "instagram",
+      profile: "quality",
+      prompt: "Lead with texture and a credible everyday-use moment.",
+      source: { type: "product_url", url: "https://shop.example.com/products/serum" },
+    });
+
+    expect(buildGenerationPrompt(request)).toMatch(/Instagram Reels \+ Stories/i);
+    expect(buildGenerationPrompt(request)).toMatch(/Do not invent discounts/i);
+    expect(generationRequestSchema.safeParse({
+      ...request,
+      source: { type: "product_url", url: "http://127.0.0.1/product" },
+    }).success).toBe(false);
+  });
+
+  it("accepts an owned-project reference for long-video creative scouting", () => {
+    const request = generationRequestSchema.parse({
+      agentId: "video-understanding-scout",
+      audience: "Marketing leaders",
+      callToAction: "Book a demo",
+      duration: "30s",
+      kind: "performance_creative",
+      name: "Founder clip",
+      platform: "youtube",
+      profile: "quality",
+      prompt: "Find the clearest customer-outcome explanation.",
+      source: { projectId: "d7a9aeb0-726e-4c70-8dbf-81a760cd9562", type: "long_video" },
+    });
+
+    expect(request.kind).toBe("performance_creative");
+    if (request.kind !== "performance_creative") throw new Error("Expected a performance creative request");
+    expect(request.source.type).toBe("long_video");
+  });
 });

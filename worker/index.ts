@@ -134,6 +134,7 @@ async function markJobComplete(job: Job, result: Json) {
     export: "Export complete",
     generate_background_removal: "Background removed",
     generate_image: "Image ready",
+    generate_performance_creative: "Performance creative ready",
     generate_video: "Video ready",
   };
   const { error } = await supabase.from("jobs").update({

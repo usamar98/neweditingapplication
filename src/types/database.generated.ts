@@ -411,13 +411,18 @@ export type Database = {
       queue_video_job: { Args: { message: Json }; Returns: number }
     }
     Enums: {
-      generation_kind: "image" | "video" | "background_removal"
+      generation_kind:
+        | "image"
+        | "video"
+        | "background_removal"
+        | "performance_creative"
       job_kind:
         | "analyze"
         | "export"
         | "generate_image"
         | "generate_video"
         | "generate_background_removal"
+        | "generate_performance_creative"
       job_status:
         | "queued"
         | "processing"
@@ -560,13 +565,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      generation_kind: ["image", "video", "background_removal"],
+      generation_kind: [
+        "image",
+        "video",
+        "background_removal",
+        "performance_creative",
+      ],
       job_kind: [
         "analyze",
         "export",
         "generate_image",
         "generate_video",
         "generate_background_removal",
+        "generate_performance_creative",
       ],
       job_status: [
         "queued",

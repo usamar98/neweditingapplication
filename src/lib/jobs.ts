@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { performanceCreativeAgentSupportsSource } from "@/lib/domain/ai-models";
 import type { GenerationRequest } from "@/lib/domain/generation";
 import { HttpError } from "@/lib/http";
 import { logger } from "@/lib/logger";
@@ -192,7 +193,7 @@ export async function enqueueGenerationJob({
   await consumeRateLimit(
     supabase,
     `generation:${input.kind}`,
-    input.kind === "video" ? 2 : 8,
+    input.kind === "video" || input.kind === "performance_creative" ? 2 : 8,
     60,
   );
 
@@ -208,6 +209,34 @@ export async function enqueueGenerationJob({
       .list(sourceFolder, { limit: 5, search: sourceName });
     if (sourceError || !sourceName || !sourceFiles?.some((file) => file.name === sourceName)) {
       throw new HttpError(409, "Upload the source image before starting removal.", "SOURCE_NOT_READY");
+    }
+  }
+
+  if (input.kind === "performance_creative") {
+    if (!performanceCreativeAgentSupportsSource(input.agentId, input.source.type)) {
+      throw new HttpError(400, "That creative agent does not support the selected source.", "AGENT_SOURCE_MISMATCH");
+    }
+    if (input.source.type === "product_url" && input.duration !== "8s") {
+      throw new HttpError(400, "Product URL ads currently support the 8-second generated format.", "DURATION_UNSUPPORTED");
+    }
+    if (input.source.type === "long_video" && input.duration === "8s") {
+      throw new HttpError(400, "Long-video creatives support 15- or 30-second cuts.", "DURATION_UNSUPPORTED");
+    }
+    if (input.source.type === "long_video") {
+      const { data: sourceProject, error: sourceProjectError } = await supabase
+        .from("projects")
+        .select("id,status,source_path,duration_seconds")
+        .eq("id", input.source.projectId)
+        .maybeSingle();
+      if (sourceProjectError || !sourceProject) {
+        throw new HttpError(404, "The selected source video was not found.", "SOURCE_NOT_FOUND");
+      }
+      if (!["ready", "completed"].includes(sourceProject.status) || !sourceProject.duration_seconds) {
+        throw new HttpError(409, "Finish analyzing the long video before creating ad clips.", "SOURCE_NOT_READY");
+      }
+      if (!sourceProject.source_path.startsWith(`${user.id}/`)) {
+        throw new HttpError(403, "The selected source video does not belong to this account.", "SOURCE_FORBIDDEN");
+      }
     }
   }
 
@@ -234,14 +263,20 @@ export async function enqueueGenerationJob({
     ? "generate_image"
     : input.kind === "video"
       ? "generate_video"
-      : "generate_background_removal";
+      : input.kind === "background_removal"
+        ? "generate_background_removal"
+        : "generate_performance_creative";
   const { data: job, error: jobError } = await admin
     .from("jobs")
     .insert({
       generation_id: generation.id,
       kind,
       payload: { ...input, requestId } as unknown as Json,
-      stage: input.kind === "background_removal" ? "Cutout agent is preparing" : "Model Autopilot is preparing",
+      stage: input.kind === "background_removal"
+        ? "Cutout agent is preparing"
+        : input.kind === "performance_creative"
+          ? "Performance creative agent is preparing"
+          : "Model Autopilot is preparing",
       status: "queued",
       user_id: user.id,
     })

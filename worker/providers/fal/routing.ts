@@ -9,6 +9,7 @@ export const falCapabilities = [
   "voiceover",
   "caption-removal",
   "background-removal",
+  "video-understanding",
 ] as const;
 
 export const falCapabilitySchema = z.enum(falCapabilities);
@@ -164,6 +165,13 @@ export const falModelCatalog: Record<FalCapability, readonly FalModelCandidate[]
       endpointId: "fal-ai/imageutils/rembg",
       scores: { cost: 10, quality: 7, reliability: 9, speed: 10 },
       summary: "Fast and economical background removal.",
+    }),
+  ],
+  "video-understanding": [
+    candidate({
+      endpointId: "fal-ai/video-understanding",
+      scores: { cost: 7, quality: 9, reliability: 9, speed: 8 },
+      summary: "Video-language analysis for finding conversion-ready moments in long footage.",
     }),
   ],
 };

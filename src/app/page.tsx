@@ -9,6 +9,7 @@ import {
   Download,
   Film,
   ImageIcon,
+  Megaphone,
   Ratio,
   Scissors,
   ShieldCheck,
@@ -51,14 +52,14 @@ export default function Home() {
       <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
         <div className="max-w-3xl">
           <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
-            <Sparkles className="mr-1 size-3.5" /> Four creative tools. One private workspace.
+            <Sparkles className="mr-1 size-3.5" /> Five creative tools. One private workspace.
           </Badge>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
             From raw idea
             <span className="block text-primary">to remarkable media.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl">
-            Edit long footage, generate cinematic video, and art-direct campaign-ready images.
+            Edit long footage, generate cinematic media, and turn product pages into performance ads.
             Model Autopilot picks the best-fit AI for every brief while you stay in control.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -143,7 +144,7 @@ export default function Home() {
             <div className="max-w-2xl">
               <p className="mb-3 text-sm font-medium text-primary">The Editing App creative suite</p>
               <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
-                One idea. Four ways to make it real.
+                One idea. Five ways to make it perform.
               </h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-muted-foreground">
@@ -220,6 +221,26 @@ export default function Home() {
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">Background remover</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Protect fine hair, product edges, and soft foreground detail with precision matting, private inputs, and downloadable transparent PNG results.</p>
                   <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-200">Create a clean cutout <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="group overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 lg:col-span-2">
+              <CardContent className="grid p-0 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="relative min-h-64 overflow-hidden border-b border-white/[0.06] bg-muted lg:border-b-0 lg:border-r">
+                  <Image src={aiVideoVisual} alt="A campaign video prepared for performance marketing platforms" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-black/30 to-black/80" />
+                  <div className="absolute inset-x-5 bottom-5 grid grid-cols-4 gap-2">
+                    {["Facebook", "Instagram", "TikTok", "YouTube"].map((platform, index) => <div key={platform} className={cn("rounded-lg border border-white/10 bg-black/40 px-2 py-2 text-center text-[9px] text-white/65 backdrop-blur", index === 1 && "border-primary/35 bg-primary/10 text-primary")}>{platform}</div>)}
+                  </div>
+                  <div className="absolute left-5 top-5 rounded-full border border-primary/25 bg-black/45 px-3 py-1.5 text-[10px] text-primary backdrop-blur">SOURCE-AWARE AI AGENTS</div>
+                </div>
+                <div className="flex flex-col justify-center p-6 sm:p-8">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">New flagship tool</Badge></div>
+                  <h3 className="text-2xl font-semibold tracking-[-0.03em]">AI Performance Creative Studio</h3>
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Turn a product URL into a campaign-ready Veo ad, or let Video Understanding find the strongest hook in long footage and render a captioned short for the platform you choose.</p>
+                  <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Video Understanding Scout</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Private outputs</span></div>
+                  <Link href="/login?mode=signup" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Build a performance creative <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>

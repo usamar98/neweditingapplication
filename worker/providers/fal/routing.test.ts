@@ -18,6 +18,11 @@ describe("fal model routing", () => {
     expect(result.endpointId).toBe("fal-ai/veo3.1/fast/image-to-video");
   });
 
+  it("routes long-form creative scouting through video understanding", () => {
+    expect(resolveFalModel({ capability: "video-understanding", profile: "quality" }))
+      .toMatchObject({ endpointId: "fal-ai/video-understanding", source: "catalog" });
+  });
+
   it("routes premium generations to the highest-quality compatible models", () => {
     expect(resolveFalModel({ capability: "text-to-image", profile: "quality" }).endpointId)
       .toBe("fal-ai/flux-2-max");
