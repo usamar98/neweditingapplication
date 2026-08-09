@@ -3,7 +3,10 @@ import {
   backgroundAgentIdSchema,
   imageAgentIdSchema,
   performanceCreativeAgentIdSchema,
+  videoDurations,
   videoAgentIdSchema,
+  videoAgentSupports,
+  videoResolutions,
 } from "@/lib/domain/ai-models";
 
 export const generationKinds = ["image", "video", "background_removal", "performance_creative"] as const;
@@ -87,14 +90,23 @@ export const videoGenerationRequestSchema = z
     agentId: videoAgentIdSchema.default("auto"),
     aspectRatio: z.enum(["16:9", "9:16"]).default("16:9"),
     cameraMotion: z.enum(videoCameraMotions).default("auto"),
-    duration: z.enum(["4s", "6s", "8s"]).default("8s"),
+    duration: z.enum(videoDurations).default("8s"),
     generateAudio: z.boolean().default(true),
     kind: z.literal("video"),
     mood: z.enum(videoMoods).default("cinematic"),
-    resolution: z.enum(["720p", "1080p"]).default("1080p"),
+    resolution: z.enum(videoResolutions).default("1080p"),
     seed: z.number().int().min(0).max(2147483647).optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((input, context) => {
+    if (input.agentId !== "auto" && !videoAgentSupports(input.agentId, input.duration, input.resolution)) {
+      context.addIssue({
+        code: "custom",
+        message: "The selected model does not support this duration and resolution combination.",
+        path: ["agentId"],
+      });
+    }
+  });
 
 export const backgroundRemovalRequestSchema = z
   .object({

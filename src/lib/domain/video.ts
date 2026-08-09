@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { generationQueueMessageSchema } from "@/lib/domain/generation";
+import { editorAgentIdSchema } from "@/lib/domain/ai-models";
 
 export const VIDEO_SOURCE_BUCKET = "video-sources";
 export const VIDEO_OUTPUT_BUCKET = "video-outputs";
@@ -87,11 +88,13 @@ export const defaultEditSettings = editSettingsSchema.parse({
   trimStart: 0,
 });
 
-export const enqueueJobSchema = z
-  .object({
-    kind: z.enum(["analyze", "export"]),
-  })
-  .strict();
+export const enqueueJobSchema = z.discriminatedUnion("kind", [
+  z.object({
+    agentId: editorAgentIdSchema.default("auto"),
+    kind: z.literal("analyze"),
+  }).strict(),
+  z.object({ kind: z.literal("export") }).strict(),
+]);
 
 export const projectQueueMessageSchema = z
   .object({

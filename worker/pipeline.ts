@@ -1,6 +1,7 @@
 import { stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import {
   editSettingsSchema,
   emptyAnalysis,
@@ -11,6 +12,7 @@ import {
   type Transcript,
   type VideoAnalysis,
 } from "../src/lib/domain/video";
+import { editorAgentIdSchema } from "../src/lib/domain/ai-models";
 import type { Database, Json, Tables } from "../src/types/database.generated";
 import type { WorkerConfig } from "./config";
 import {
@@ -116,7 +118,9 @@ async function analyzeVideo(context: PipelineContext) {
     transcript = await transcriptionProvider.transcribe(audioPath);
   }
 
-  const analysisProvider = createContentAnalysisProvider(context.config);
+  const parsedPayload = z.object({ agentId: editorAgentIdSchema.default("auto") }).passthrough().safeParse(context.job.payload);
+  const editorAgentId = parsedPayload.success ? parsedPayload.data.agentId : "auto";
+  const analysisProvider = createContentAnalysisProvider(context.config, editorAgentId);
   await context.report(`Analyzing content with ${analysisProvider.name}`, 68);
   const content = await analysisProvider.analyze({
     duration: probe.duration,

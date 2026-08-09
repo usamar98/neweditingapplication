@@ -7,6 +7,7 @@ import type {
 import type { WorkerConfig } from "../config";
 import { createWorkerFalClient } from "./fal/client";
 import { resolveFalModel, type FalModelSelection } from "./fal/routing";
+import { endpointForEditorAgent, type EditorAgentId } from "../../src/lib/domain/ai-models";
 
 export type AnalysisInput = {
   duration: number;
@@ -164,10 +165,11 @@ class FalContentAnalysisProvider implements ContentAnalysisProvider {
   readonly name = "fal";
   readonly routing: FalModelSelection;
 
-  constructor(private readonly config: WorkerConfig) {
+  constructor(private readonly config: WorkerConfig, preferredModel?: string | null) {
     this.routing = resolveFalModel({
       capability: "content-analysis",
       overrides: config.FAL_MODEL_OVERRIDES,
+      preferredModel,
       profile: config.FAL_ROUTING_PROFILE,
     });
     if (!this.routing.model) {
@@ -201,7 +203,15 @@ function selectedProvider(config: WorkerConfig) {
   return "local";
 }
 
-export function createContentAnalysisProvider(config: WorkerConfig): ContentAnalysisProvider {
+export function createContentAnalysisProvider(config: WorkerConfig, agentId: EditorAgentId = "auto"): ContentAnalysisProvider {
+  const selected = endpointForEditorAgent(agentId);
+  if (selected === "local") return new LocalContentAnalysisProvider();
+  if (selected) {
+    if (!config.FAL_KEY) {
+      throw new Error("The selected editor model requires FAL_KEY in the worker environment.");
+    }
+    return new FalContentAnalysisProvider(config, selected);
+  }
   const provider = selectedProvider(config);
   if (provider === "local") return new LocalContentAnalysisProvider();
   if (provider === "fal") return new FalContentAnalysisProvider(config);

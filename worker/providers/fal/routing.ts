@@ -102,14 +102,29 @@ export const falModelCatalog: Record<FalCapability, readonly FalModelCandidate[]
   ],
   "text-to-image": [
     candidate({
+      endpointId: "bytedance/seedream/v5/pro/text-to-image",
+      scores: { cost: 5, quality: 10, reliability: 8, speed: 6 },
+      summary: "Premium Seedream 5 image generation with strong prompt and layout understanding.",
+    }),
+    candidate({
+      endpointId: "fal-ai/recraft/v4.1/pro/text-to-image",
+      scores: { cost: 5, quality: 10, reliability: 9, speed: 6 },
+      summary: "High-resolution Recraft generation for brand and commercial design.",
+    }),
+    candidate({
+      endpointId: "fal-ai/nano-banana-2",
+      scores: { cost: 6, quality: 9, reliability: 9, speed: 8 },
+      summary: "High prompt fidelity for directed production visuals.",
+    }),
+    candidate({
       endpointId: "fal-ai/flux-2-max",
       scores: { cost: 4, quality: 10, reliability: 9, speed: 5 },
       summary: "Maximum-quality FLUX.2 image generation.",
     }),
     candidate({
-      endpointId: "fal-ai/flux-2",
-      scores: { cost: 7, quality: 9, reliability: 9, speed: 7 },
-      summary: "Balanced FLUX.2 image generation.",
+      endpointId: "bytedance/seedream/v5/lite/text-to-image",
+      scores: { cost: 9, quality: 8, reliability: 8, speed: 9 },
+      summary: "Fast high-resolution Seedream generation for economical iteration.",
     }),
     candidate({
       endpointId: "fal-ai/flux-2/turbo",
@@ -118,6 +133,11 @@ export const falModelCatalog: Record<FalCapability, readonly FalModelCandidate[]
     }),
   ],
   "text-to-video": [
+    candidate({
+      endpointId: "bytedance/seedance-2.5/text-to-video",
+      scores: { cost: 5, quality: 10, reliability: 8, speed: 5 },
+      summary: "Long-form Seedance generation with native audio and up to 30-second shots.",
+    }),
     candidate({
       endpointId: "fal-ai/veo3.1",
       scores: { cost: 4, quality: 10, reliability: 9, speed: 5 },
@@ -128,8 +148,23 @@ export const falModelCatalog: Record<FalCapability, readonly FalModelCandidate[]
       scores: { cost: 8, quality: 8, reliability: 9, speed: 9 },
       summary: "Faster video generation with native audio.",
     }),
+    candidate({
+      endpointId: "fal-ai/ltx-2.3/text-to-video",
+      scores: { cost: 6, quality: 10, reliability: 9, speed: 7 },
+      summary: "Latest LTX generation with native audio and supported 4K output.",
+    }),
+    candidate({
+      endpointId: "fal-ai/kling-video/v3/pro/text-to-video",
+      scores: { cost: 6, quality: 9, reliability: 8, speed: 6 },
+      summary: "Realistic Kling motion with native audio and flexible shot length.",
+    }),
   ],
   "image-to-video": [
+    candidate({
+      endpointId: "bytedance/seedance-2.5/image-to-video",
+      scores: { cost: 5, quality: 10, reliability: 8, speed: 5 },
+      summary: "Latest Seedance product animation with native audio and strong identity consistency.",
+    }),
     candidate({
       endpointId: "fal-ai/veo3.1/image-to-video",
       scores: { cost: 4, quality: 10, reliability: 9, speed: 5 },
@@ -202,25 +237,33 @@ function weightedScore(candidateValue: FalModelCandidate, profile: FalRoutingPro
 
 export function resolveFalModel({
   capability,
+  compatibleEndpointIds,
   overrides = {},
   preferredEndpointId,
+  preferredModel,
   profile = "balanced",
 }: {
   capability: FalCapability;
+  compatibleEndpointIds?: readonly string[];
   overrides?: FalModelOverrides;
   preferredEndpointId?: string | null;
+  preferredModel?: string | null;
   profile?: FalRoutingProfile;
 }): FalModelSelection {
-  const rankedCandidates = [...falModelCatalog[capability]].sort((left, right) => {
+  const compatibleCandidates = compatibleEndpointIds
+    ? falModelCatalog[capability].filter((candidateValue) => compatibleEndpointIds.includes(candidateValue.endpointId))
+    : falModelCatalog[capability];
+  const rankedCandidates = [...compatibleCandidates].sort((left, right) => {
     const scoreDifference = weightedScore(right, profile) - weightedScore(left, profile);
     return scoreDifference || left.id.localeCompare(right.id);
   });
   const [selected] = rankedCandidates;
   if (!selected) throw new Error(`No fal model is registered for ${capability}.`);
 
-  if (preferredEndpointId) {
+  if (preferredEndpointId || preferredModel) {
     const preferred = rankedCandidates.find(
-      (candidateValue) => candidateValue.endpointId === preferredEndpointId,
+      (candidateValue) => (!preferredEndpointId || candidateValue.endpointId === preferredEndpointId)
+        && (!preferredModel || candidateValue.model === preferredModel),
     );
     if (!preferred) {
       throw new Error(`The selected model is not approved for ${capability}.`);
@@ -238,6 +281,9 @@ export function resolveFalModel({
   const override = overrides[capability];
   if (override) {
     const normalized = typeof override === "string" ? { endpointId: override } : override;
+    if (compatibleEndpointIds && !compatibleEndpointIds.includes(normalized.endpointId)) {
+      throw new Error(`The configured override is not compatible with this ${capability} request.`);
+    }
     const compatibleDefault = rankedCandidates.find(
       (candidateValue) => candidateValue.endpointId === normalized.endpointId,
     );

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import { performanceCreativeAgentSupportsSource } from "@/lib/domain/ai-models";
+import { editorAgentIdSchema, performanceCreativeAgentSupportsSource } from "@/lib/domain/ai-models";
 import type { GenerationRequest } from "@/lib/domain/generation";
 import { HttpError } from "@/lib/http";
 import { logger } from "@/lib/logger";
@@ -40,18 +40,21 @@ async function requireActiveAccount(supabase: SupabaseClient<Database>, userId: 
 }
 
 export async function enqueueProjectJob({
+  agentId,
   kind,
   projectId,
   requestId,
   supabase,
   user,
 }: {
+  agentId?: string;
   kind: "analyze" | "export";
   projectId: string;
   requestId: string;
   supabase: SupabaseClient<Database>;
   user: User;
 }) {
+  const selectedEditorAgent = kind === "analyze" ? editorAgentIdSchema.parse(agentId ?? "auto") : undefined;
   await requireActiveAccount(supabase, user.id);
   await consumeRateLimit(supabase, `job:${kind}`, kind === "export" ? 8 : 12, 60);
 
@@ -111,7 +114,7 @@ export async function enqueueProjectJob({
     });
   }
 
-  const payload: Json = { requestId };
+  const payload: Json = { requestId, ...(selectedEditorAgent ? { agentId: selectedEditorAgent } : {}) };
   const admin = createAdminClient();
   const { data: job, error: insertError } = await admin
     .from("jobs")

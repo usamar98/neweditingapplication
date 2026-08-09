@@ -1,0 +1,68 @@
+export const marketingFeatures = [
+  {
+    slug: "ai-video-editor",
+    eyebrow: "AI-assisted editing",
+    title: "AI video editor for long footage and precise final cuts",
+    description: "Upload long footage, select an AI analysis model, and turn scenes, speech, silences, highlights, captions, crops, and audio cleanup into an editable project.",
+    benefits: ["Selectable AI analysis models", "Scene, silence, filler, and highlight suggestions", "Editable captions and transcript navigation", "9:16, 1:1, and 16:9 exports", "Durable background processing for large uploads"],
+    workflow: ["Upload with resumable transfer", "Choose Editor Autopilot or a specific analysis model", "Review AI suggestions on the timeline", "Export a private MP4 master"],
+    faq: [
+      { question: "Does the AI make permanent cuts?", answer: "No. Analysis creates suggestions; trim, cleanup, captions, framing, and audio controls remain editable before export." },
+      { question: "Can I choose the analysis model?", answer: "Yes. Use Editor Autopilot or select an approved GPT, Gemini, or local analysis option before re-analysis." },
+    ],
+  },
+  {
+    slug: "ai-video-generator",
+    eyebrow: "Multi-model video generation",
+    title: "AI video generation with the right model for every shot",
+    description: "Direct camera movement, mood, aspect ratio, duration, native audio, and resolution, then choose Seedance, LTX, Veo, Kling, or let Model Autopilot route the brief.",
+    benefits: ["Seedance 2.5 shots up to 30 seconds at supported resolution", "Native 4K with supported LTX 2.3 Pro and Veo workflows", "Native audio on compatible models", "Server-side capability validation before paid generation", "Private delivery checkpoints prevent duplicate paid renders on retry"],
+    workflow: ["Write a production brief", "Choose a model or routing intent", "Select only compatible duration and resolution controls", "Download the private master"],
+    faq: [
+      { question: "Does every model support 4K and 30 seconds?", answer: "No. Controls adapt to the selected model. Seedance supports longer shots at its available resolution, while supported LTX and Veo routes provide native 4K for shorter clips." },
+      { question: "What does Model Autopilot do?", answer: "It ranks approved models by quality, reliability, speed, and cost, then selects only from models compatible with the requested duration and resolution." },
+    ],
+  },
+  {
+    slug: "ai-image-generator",
+    eyebrow: "Campaign-ready image generation",
+    title: "AI image generator with art direction and premium model choice",
+    description: "Create product, editorial, photoreal, cinematic, and illustrated visuals with Seedream, Recraft, Nano Banana, and FLUX models in one controlled workflow.",
+    benefits: ["Seedream 5.0 Pro and Lite", "Recraft V4.1 Pro for brand design", "Nano Banana 2 for instruction fidelity", "FLUX.2 Max and Turbo", "Canvas, art direction, seed, and routing controls"],
+    workflow: ["Describe the visual outcome", "Choose an image model or Autopilot", "Set art direction and canvas", "Review the routed private result"],
+    faq: [
+      { question: "Can I choose a specific image model?", answer: "Yes. Every listed model is allowlisted on the server, or you can use Image Autopilot for a fresh routing decision." },
+      { question: "Are generated images public?", answer: "No. Inputs and completed outputs use private storage with time-limited access links." },
+    ],
+  },
+  {
+    slug: "performance-creative-studio",
+    eyebrow: "Performance creative",
+    title: "Turn product URLs and long videos into platform-ready ad creative",
+    description: "Build source-aware ads and short-form content for Facebook, Instagram, TikTok, and YouTube without inventing unsupported product claims.",
+    benefits: ["Product URL metadata and image extraction", "Seedance 2.5 and Veo product-ad directors", "Long-video hook discovery", "Platform-aware aspect ratios and calls to action", "Paid-render checkpoints for safe delivery retries"],
+    workflow: ["Add a product URL or ready video project", "Choose the target platform", "Set audience, message, and CTA", "Generate or render the platform master"],
+    faq: [
+      { question: "Which platforms are supported?", answer: "Facebook, Instagram, TikTok, and YouTube are available with platform-aware placements and aspect ratios." },
+      { question: "Will it invent product claims?", answer: "The planning prompt explicitly treats the source as data and blocks unsupported prices, discounts, reviews, guarantees, ingredients, and performance claims." },
+    ],
+  },
+  {
+    slug: "background-remover",
+    eyebrow: "Precision cutouts",
+    title: "AI background remover for people, products, and fine edges",
+    description: "Remove image backgrounds with precision or speed agents, private uploads, transparent PNG output, and edge-aware model routing.",
+    benefits: ["BiRefNet V2 precision matting", "Fast Rembg option", "Hair and soft-edge preservation", "Transparent PNG delivery", "Private source and output storage"],
+    workflow: ["Upload a JPEG, PNG, or WebP", "Choose precision, speed, or Autopilot", "Run the private cutout job", "Download the transparent PNG"],
+    faq: [
+      { question: "Which model should I choose?", answer: "Use BiRefNet V2 for hair, products, and fine edges; use Rembg Fast for clean, simple subjects; or let Autopilot decide." },
+      { question: "What output format is delivered?", answer: "The completed cutout is stored privately and delivered as a transparent PNG." },
+    ],
+  },
+] as const;
+
+export type MarketingFeature = (typeof marketingFeatures)[number];
+
+export function getMarketingFeature(slug: string) {
+  return marketingFeatures.find((feature) => feature.slug === slug);
+}

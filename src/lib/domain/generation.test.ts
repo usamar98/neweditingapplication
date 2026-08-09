@@ -39,6 +39,23 @@ describe("AI generation domain", () => {
     expect(buildGenerationPrompt(request)).toMatch(/temporal consistency/i);
   });
 
+  it("accepts Seedance long shots only at its supported resolution", () => {
+    const request = {
+      agentId: "seedance-2-5",
+      aspectRatio: "16:9",
+      duration: "30s",
+      generateAudio: true,
+      kind: "video",
+      name: "Product story",
+      profile: "quality",
+      prompt: "A premium product story told as one coherent shot",
+      resolution: "720p",
+    } as const;
+
+    expect(generationRequestSchema.safeParse(request).success).toBe(true);
+    expect(generationRequestSchema.safeParse({ ...request, resolution: "1080p" }).success).toBe(false);
+  });
+
   it("requires a request ID in durable worker payloads", () => {
     expect(generationJobPayloadSchema.safeParse({
       aspectRatio: "square_hd",

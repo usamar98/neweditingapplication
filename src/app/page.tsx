@@ -45,22 +45,37 @@ const capabilities = [
   "Realtime background processing",
 ];
 
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Editing App",
+  applicationCategory: "MultimediaApplication",
+  operatingSystem: "Web",
+  description: "A private AI video editor and multi-model creative studio for video, images, product ads, short-form content, and background removal.",
+  offers: [
+    { "@type": "Offer", name: "Creator", price: "29.99", priceCurrency: "USD" },
+    { "@type": "Offer", name: "Studio", price: "49.99", priceCurrency: "USD" },
+    { "@type": "Offer", name: "Business", price: "99.99", priceCurrency: "USD" },
+  ],
+};
+
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd).replace(/</g, "\\u003c") }} />
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[760px]" />
       <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
         <div className="max-w-3xl">
           <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
-            <Sparkles className="mr-1 size-3.5" /> Five creative tools. One private workspace.
+            <Sparkles className="mr-1 size-3.5" /> One private AI studio. The right model for every job.
           </Badge>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            From raw idea
-            <span className="block text-primary">to remarkable media.</span>
+            Edit. Generate.
+            <span className="block text-primary">Launch creative that performs.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl">
-            Edit long footage, generate cinematic media, and turn product pages into performance ads.
-            Model Autopilot picks the best-fit AI for every brief while you stay in control.
+            Edit long footage, generate premium video and images, and turn product pages into ready-to-run ads.
+            Choose Seedance, LTX, Veo, Kling, Seedream, and more—or let Model Autopilot route the brief.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild className="h-12 px-6 shadow-xl shadow-primary/10">
@@ -69,13 +84,16 @@ export default function Home() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="h-12 border-white/10 bg-white/[0.02] px-6">
-              <Link href="#features">Explore the studio</Link>
+              <Link href="/features/ai-video-generator">Explore the studio</Link>
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-primary" /> Private by default</span>
             <span className="inline-flex items-center gap-1.5"><Zap className="size-3.5 text-primary" /> Durable processing</span>
             <span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-primary" /> Live progress</span>
+          </div>
+          <div className="mt-6 flex flex-wrap items-center gap-2" aria-label="Available premium AI model families">
+            {['Seedance 2.5', 'LTX 2.3', 'Veo 3.1', 'Kling 3', 'Seedream 5'].map((model) => <Link href="/ai-video-models" key={model} className="rounded-full border border-white/[0.08] bg-black/15 px-3 py-1.5 text-[10px] font-medium text-white/60 transition hover:border-primary/25 hover:text-primary">{model}</Link>)}
           </div>
         </div>
 
@@ -86,7 +104,7 @@ export default function Home() {
               <span className="size-2.5 rounded-full bg-red-400/70" />
               <span className="size-2.5 rounded-full bg-amber-400/70" />
               <span className="size-2.5 rounded-full bg-emerald-400/70" />
-              <span className="ml-3 text-xs text-muted-foreground">campaign-interview.mp4</span>
+              <span className="ml-3 text-xs text-muted-foreground">Editing App · creative command center</span>
             </div>
             <CardContent className="p-4 sm:p-5">
               <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
@@ -108,6 +126,7 @@ export default function Home() {
                 <div className="absolute inset-x-8 bottom-5 rounded-md bg-black/65 px-3 py-2 text-center text-sm font-semibold shadow-lg">
                   Turn one recording into a week of content.
                 </div>
+                <div className="absolute left-4 top-4 rounded-lg border border-primary/25 bg-black/60 px-3 py-2 text-[10px] text-primary backdrop-blur">GPT-5 mini Editor · selected</div>
               </div>
               <div className="mt-5 space-y-3">
                 <div className="flex items-center justify-between text-xs">
@@ -169,7 +188,7 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Scissors className="size-4.5" /></span><Badge variant="secondary">Available now</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video editor</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Upload long footage and get scenes, transcript, silence cleanup, highlights, captions, reframing, and a precise editable timeline.</p>
-                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Edit footage <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/ai-video-editor" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore AI video editing <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
@@ -189,7 +208,7 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-sky-400/10 text-sky-300"><Film className="size-4.5" /></span><Badge variant="outline" className="border-sky-300/20 bg-sky-300/5 text-sky-200">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Direct camera motion, mood, format, duration, resolution, and native audio. Autopilot selects the strongest compatible video model for the job.</p>
-                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-300">Direct a shot <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/ai-video-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-300">Explore video generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
@@ -204,7 +223,7 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-300/10 text-fuchsia-200"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-200/20 bg-fuchsia-200/5 text-fuchsia-100">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Work from a creative brief, not a mystery prompt box. Shape art direction, canvas, seed, and model intent for repeatable campaign-grade visuals.</p>
-                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-200">Art-direct an image <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/ai-image-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-200">Explore image generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
@@ -220,7 +239,7 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-amber-300/10 text-amber-200"><Scissors className="size-4.5" /></span><Badge variant="outline" className="border-amber-200/20 bg-amber-200/5 text-amber-100">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">Background remover</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Protect fine hair, product edges, and soft foreground detail with precision matting, private inputs, and downloadable transparent PNG results.</p>
-                  <Link href="/login?mode=signup" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-200">Create a clean cutout <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/background-remover" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-200">Explore background removal <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
@@ -238,9 +257,9 @@ export default function Home() {
                 <div className="flex flex-col justify-center p-6 sm:p-8">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">New flagship tool</Badge></div>
                   <h3 className="text-2xl font-semibold tracking-[-0.03em]">AI Performance Creative Studio</h3>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Turn a product URL into a campaign-ready Veo ad, or let Video Understanding find the strongest hook in long footage and render a captioned short for the platform you choose.</p>
-                  <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Video Understanding Scout</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Private outputs</span></div>
-                  <Link href="/login?mode=signup" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Build a performance creative <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Turn a product URL into a source-aware Seedance or Veo ad, or let Video Understanding find the strongest hook in long footage and render a captioned short for the platform you choose.</p>
+                  <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Seedance 2.5 Ad Director</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Video Understanding Scout</span></div>
+                  <Link href="/features/performance-creative-studio" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore performance creative <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
@@ -317,7 +336,7 @@ export default function Home() {
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <p className="mb-3 text-sm font-medium text-primary">Simple launch pricing</p>
             <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Choose your creative velocity.</h2>
-            <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Three monthly plans with secure Stripe checkout. Final plan benefits will be added when you provide them.</p>
+            <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Three monthly plans with clear generation budgets, model-aware quality limits, and secure Stripe checkout.</p>
           </div>
           <PricingCards />
         </div>
@@ -340,7 +359,7 @@ export default function Home() {
         <Separator className="mb-8" />
         <div className="flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <Brand />
-          <p>AI video editing, built on a private and durable media pipeline.</p>
+          <div className="flex flex-wrap gap-4"><Link href="/features/ai-video-editor" className="hover:text-foreground">Video editor</Link><Link href="/features/ai-video-generator" className="hover:text-foreground">Video generator</Link><Link href="/features/ai-image-generator" className="hover:text-foreground">Image generator</Link><Link href="/features/performance-creative-studio" className="hover:text-foreground">Performance creative</Link></div>
         </div>
       </footer>
     </main>

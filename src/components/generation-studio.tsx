@@ -31,7 +31,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import type { GenerationView } from "@/lib/data/generations";
-import { agentsForKind } from "@/lib/domain/ai-models";
+import {
+  agentsForKind,
+  videoAgentById,
+  videoAgents,
+  type VideoDuration,
+  type VideoResolution,
+} from "@/lib/domain/ai-models";
 import type { GenerationRoutingProfile } from "@/lib/domain/generation";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.generated";
@@ -161,8 +167,8 @@ export function GenerationStudio({
   const [style, setStyle] = useState("cinematic");
   const [cameraMotion, setCameraMotion] = useState("auto");
   const [mood, setMood] = useState("cinematic");
-  const [duration, setDuration] = useState("8s");
-  const [resolution, setResolution] = useState("1080p");
+  const [duration, setDuration] = useState<VideoDuration>("8s");
+  const [resolution, setResolution] = useState<VideoResolution>("1080p");
   const [generateAudio, setGenerateAudio] = useState(true);
   const [seed, setSeed] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -174,6 +180,27 @@ export function GenerationStudio({
     [generations],
   );
   const selected = generations.find((item) => item.id === selectedId) ?? generations[0];
+  const selectedVideoAgent = kind === "video" ? videoAgentById(agentId) : undefined;
+  const availableDurations = kind === "video"
+    ? selectedVideoAgent?.id === "auto"
+      ? [...new Set(videoAgents.filter((agent) => agent.id !== "auto" && agent.resolutions.includes(resolution)).flatMap((agent) => agent.durations))]
+      : selectedVideoAgent?.durations ?? []
+    : [];
+  const availableResolutions = kind === "video"
+    ? selectedVideoAgent?.id === "auto"
+      ? [...new Set(videoAgents.filter((agent) => agent.id !== "auto" && agent.durations.includes(duration)).flatMap((agent) => agent.resolutions))]
+      : selectedVideoAgent?.resolutions ?? []
+    : [];
+
+  function selectAgent(nextAgentId: string) {
+    setAgentId(nextAgentId);
+    if (kind !== "video") return;
+    const agent = videoAgentById(nextAgentId);
+    if (!agent || agent.id === "auto") return;
+    if (!agent.durations.includes(duration)) setDuration(agent.durations[0]);
+    if (!agent.resolutions.includes(resolution)) setResolution(agent.resolutions[0]);
+    if (!agent.supportsAudio) setGenerateAudio(false);
+  }
 
   useEffect(() => {
     if (!activeIds) return;
@@ -296,7 +323,7 @@ export function GenerationStudio({
                     className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0"
                   />
                   <div className="flex items-center justify-between border-t border-white/[0.06] p-2">
-                    <Select value={agentId} onValueChange={setAgentId}>
+                    <Select value={agentId} onValueChange={selectAgent}>
                       <SelectTrigger aria-label="Select AI model agent" className="h-9 w-[220px] border-white/[0.08] bg-black/15 text-xs">
                         <Bot className="size-3.5 text-primary" />
                         <SelectValue />
@@ -379,8 +406,8 @@ export function GenerationStudio({
                   <div className="space-y-2"><Label>Camera</Label><Select value={cameraMotion} onValueChange={setCameraMotion}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="auto">Autopilot</SelectItem><SelectItem value="static">Locked camera</SelectItem><SelectItem value="dolly-in">Dolly in</SelectItem><SelectItem value="orbit">Orbit</SelectItem><SelectItem value="handheld">Cinematic handheld</SelectItem><SelectItem value="drone">Drone</SelectItem></SelectContent></Select></div>
                   <div className="space-y-2"><Label>Mood</Label><Select value={mood} onValueChange={setMood}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="auto">Autopilot</SelectItem><SelectItem value="cinematic">Cinematic</SelectItem><SelectItem value="energetic">Energetic</SelectItem><SelectItem value="dreamy">Dreamy</SelectItem><SelectItem value="documentary">Documentary</SelectItem><SelectItem value="luxury">Luxury</SelectItem></SelectContent></Select></div>
                   <div className="space-y-2"><Label>Frame</Label><Select value={aspectRatio} onValueChange={setAspectRatio}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="16:9">Landscape 16:9</SelectItem><SelectItem value="9:16">Vertical 9:16</SelectItem></SelectContent></Select></div>
-                  <div className="space-y-2"><Label>Duration</Label><Select value={duration} onValueChange={setDuration}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="4s">4 seconds</SelectItem><SelectItem value="6s">6 seconds</SelectItem><SelectItem value="8s">8 seconds</SelectItem></SelectContent></Select></div>
-                  <div className="space-y-2"><Label>Resolution</Label><Select value={resolution} onValueChange={setResolution}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="720p">720p fast preview</SelectItem><SelectItem value="1080p">1080p production</SelectItem></SelectContent></Select></div>
+                  <div className="space-y-2"><Label>Duration</Label><Select value={duration} onValueChange={(value) => setDuration(value as VideoDuration)}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent>{availableDurations.map((value) => <SelectItem key={value} value={value}>{Number.parseInt(value, 10)} seconds</SelectItem>)}</SelectContent></Select></div>
+                  <div className="space-y-2"><Label>Resolution</Label><Select value={resolution} onValueChange={(value) => setResolution(value as VideoResolution)}><SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger><SelectContent>{availableResolutions.map((value) => <SelectItem key={value} value={value}>{selectedVideoAgent?.id === "kling-3-pro" ? "Provider-managed HD" : value === "720p" ? "720p efficient" : value === "1080p" ? "1080p production" : "4K premium"}</SelectItem>)}</SelectContent></Select></div>
                   <div className="flex h-[66px] items-end"><div className="flex h-10 w-full items-center justify-between rounded-lg border border-input bg-input/20 px-3"><span className="inline-flex items-center gap-2 text-sm"><AudioLines className="size-4 text-primary" /> Native audio</span><Switch checked={generateAudio} onCheckedChange={setGenerateAudio} aria-label="Generate synchronized audio" /></div></div>
                 </div>
               )}

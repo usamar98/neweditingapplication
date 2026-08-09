@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, LoaderCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, Coins, LoaderCircle, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,15 @@ export function PricingCards() {
               <p className="mt-2 min-h-12 text-sm leading-6 text-muted-foreground">{plan.description}</p>
               <div className="mt-7 flex items-end gap-2"><span className="text-4xl font-semibold tracking-[-0.05em]">{plan.price}</span><span className="pb-1 text-xs text-muted-foreground">/ month</span></div>
               <div className="my-7 h-px bg-border" />
-              <p className="flex-1 text-sm leading-6 text-muted-foreground">Plan benefits will be published here when the final plan details are ready.</p>
+              <div className="flex items-center gap-3 rounded-xl border border-primary/15 bg-primary/[0.055] p-3">
+                <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary"><Coins className="size-4" /></span>
+                <div><p className="text-sm font-medium">{plan.credits} monthly credits</p><p className="mt-0.5 text-[11px] text-muted-foreground">Used by model, seconds, audio, and resolution</p></div>
+              </div>
+              <ul className="mt-6 flex-1 space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex gap-2.5 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>{feature}</span></li>
+                ))}
+              </ul>
               <Button variant={"popular" in plan && plan.popular ? "default" : "outline"} className="mt-8 h-11 w-full" onClick={() => void checkout(plan.key)} disabled={pending !== null}>
                 {pending === plan.key ? <LoaderCircle className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
                 {pending === plan.key ? "Opening Stripe…" : `Choose ${plan.name}`}
@@ -59,6 +67,9 @@ export function PricingCards() {
           </Card>
         ))}
       </div>
+      <p className="mx-auto mt-5 max-w-3xl text-center text-[11px] leading-5 text-muted-foreground">
+        Video-minute estimates are planning guides, not fixed quotas. Actual credit use varies by model, duration, native audio, and resolution. 4K and maximum shot length appear only when the selected model supports them; Editing App does not advertise native 8K generation.
+      </p>
     </div>
   );
 }

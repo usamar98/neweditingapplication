@@ -25,9 +25,24 @@ describe("fal model routing", () => {
 
   it("routes premium generations to the highest-quality compatible models", () => {
     expect(resolveFalModel({ capability: "text-to-image", profile: "quality" }).endpointId)
-      .toBe("fal-ai/flux-2-max");
+      .toBe("fal-ai/recraft/v4.1/pro/text-to-image");
     expect(resolveFalModel({ capability: "text-to-video", profile: "quality" }).endpointId)
-      .toBe("fal-ai/veo3.1");
+      .toBe("fal-ai/ltx-2.3/text-to-video");
+  });
+
+  it("limits Autopilot to endpoints compatible with the requested controls", () => {
+    expect(resolveFalModel({
+      capability: "text-to-video",
+      compatibleEndpointIds: ["bytedance/seedance-2.5/text-to-video"],
+      profile: "quality",
+    }).endpointId).toBe("bytedance/seedance-2.5/text-to-video");
+  });
+
+  it("selects an analysis model when candidates share an endpoint", () => {
+    expect(resolveFalModel({
+      capability: "content-analysis",
+      preferredModel: "openai/gpt-5-mini",
+    })).toMatchObject({ model: "openai/gpt-5-mini", source: "user-selection" });
   });
 
   it("explains the selected generation model", () => {
@@ -71,6 +86,18 @@ describe("fal model routing", () => {
     const result = resolveFalModel({ capability: "content-analysis", overrides, profile: "balanced" });
 
     expect(result.model).toBe("google/gemini-2.5-flash");
+  });
+
+  it("rejects an operations override that cannot satisfy the requested controls", () => {
+    const overrides = falModelOverridesEnvSchema.parse(JSON.stringify({
+      "text-to-video": "fal-ai/ltx-2.3/text-to-video",
+    }));
+
+    expect(() => resolveFalModel({
+      capability: "text-to-video",
+      compatibleEndpointIds: ["bytedance/seedance-2.5/text-to-video"],
+      overrides,
+    })).toThrow(/not compatible/i);
   });
 
   it("rejects malformed override configuration at startup", () => {

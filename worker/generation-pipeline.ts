@@ -12,6 +12,7 @@ import {
   type GenerationJobPayload,
 } from "../src/lib/domain/generation";
 import {
+  compatibleVideoEndpoints,
   endpointForAgent,
   endpointForPerformanceCreativeAgent,
 } from "../src/lib/domain/ai-models";
@@ -323,20 +324,133 @@ async function planLongVideoCreative(
 }
 
 function imageInput(payload: Extract<GenerationJobPayload, { kind: "image" }>, endpointId: string) {
+  const prompt = buildGenerationPrompt(payload);
+  if (endpointId === "fal-ai/nano-banana-2") {
+    const aspectRatios = {
+      landscape_16_9: "16:9", landscape_4_3: "4:3", portrait_16_9: "9:16", portrait_4_3: "3:4", square_hd: "1:1",
+    } as const;
+    return {
+      aspect_ratio: aspectRatios[payload.aspectRatio],
+      limit_generations: true,
+      num_images: 1,
+      output_format: "png",
+      prompt,
+      resolution: "2K",
+      safety_tolerance: "2",
+      ...(payload.seed === undefined ? {} : { seed: payload.seed }),
+    };
+  }
   const base = {
     enable_safety_checker: true,
     image_size: payload.aspectRatio,
-    prompt: buildGenerationPrompt(payload),
+    prompt,
     ...(payload.seed === undefined ? {} : { seed: payload.seed }),
   };
   if (endpointId === "fal-ai/flux-2-max") {
     return { ...base, output_format: "jpeg", safety_tolerance: "2" };
+  }
+  if (endpointId === "bytedance/seedream/v5/pro/text-to-image") {
+    return { enable_safety_checker: true, image_size: "auto_2K", num_images: 1, output_format: "png", prompt };
+  }
+  if (endpointId === "bytedance/seedream/v5/lite/text-to-image") {
+    return { enable_safety_checker: true, image_size: "auto_3K", max_images: 1, num_images: 1, prompt };
+  }
+  if (endpointId === "fal-ai/recraft/v4.1/pro/text-to-image") {
+    return { enable_safety_checker: true, image_size: payload.aspectRatio, prompt };
   }
   return {
     ...base,
     enable_prompt_expansion: true,
     num_images: 1,
     output_format: "png",
+  };
+}
+
+function videoInput(
+  payload: Extract<GenerationJobPayload, { kind: "video" }>,
+  endpointId: string,
+  endUserId: string,
+) {
+  const prompt = buildGenerationPrompt(payload);
+  const duration = Number.parseInt(payload.duration, 10);
+  if (endpointId === "bytedance/seedance-2.5/text-to-video") {
+    return {
+      aspect_ratio: payload.aspectRatio,
+      duration: String(duration),
+      end_user_id: endUserId,
+      generate_audio: payload.generateAudio,
+      prompt,
+      resolution: "720p",
+      ...(payload.seed === undefined ? {} : { seed: payload.seed }),
+    };
+  }
+  if (endpointId === "fal-ai/ltx-2.3/text-to-video") {
+    return {
+      aspect_ratio: payload.aspectRatio,
+      duration,
+      fps: 25,
+      generate_audio: payload.generateAudio,
+      prompt,
+      resolution: payload.resolution === "4k" ? "2160p" : "1080p",
+    };
+  }
+  if (endpointId === "fal-ai/kling-video/v3/pro/text-to-video") {
+    return {
+      aspect_ratio: payload.aspectRatio,
+      cfg_scale: 0.5,
+      duration: String(duration),
+      generate_audio: payload.generateAudio,
+      negative_prompt: "blur, distortion, unstable subjects, duplicated objects, low quality",
+      prompt,
+      shot_type: "intelligent",
+    };
+  }
+  return {
+    aspect_ratio: payload.aspectRatio,
+    auto_fix: true,
+    duration: payload.duration,
+    generate_audio: payload.generateAudio,
+    prompt,
+    resolution: payload.resolution,
+    safety_tolerance: "2",
+    ...(payload.seed === undefined ? {} : { seed: payload.seed }),
+  };
+}
+
+function productVideoInput({
+  endpointId,
+  endUserId,
+  imageUrl,
+  payload,
+  prompt,
+}: {
+  endpointId: string;
+  endUserId: string;
+  imageUrl: string;
+  payload: Extract<GenerationJobPayload, { kind: "performance_creative" }>;
+  prompt: string;
+}) {
+  const aspectRatio = performanceCreativePlatformPresets[payload.platform].aspectRatio;
+  if (endpointId === "bytedance/seedance-2.5/image-to-video") {
+    return {
+      aspect_ratio: aspectRatio,
+      duration: "8",
+      end_user_id: endUserId,
+      generate_audio: true,
+      image_url: imageUrl,
+      prompt,
+      resolution: "720p",
+    };
+  }
+  return {
+    aspect_ratio: aspectRatio,
+    auto_fix: true,
+    duration: "8s",
+    generate_audio: true,
+    image_url: imageUrl,
+    prompt,
+    resolution: "1080p",
+    safety_tolerance: "2",
   };
 }
 
@@ -399,6 +513,7 @@ async function generateImage(context: GenerationContext, payload: Extract<Genera
 async function generateVideo(context: GenerationContext, payload: Extract<GenerationJobPayload, { kind: "video" }>) {
   const selectedRouting = resolveFalModel({
     capability: "text-to-video",
+    compatibleEndpointIds: compatibleVideoEndpoints(payload.duration, payload.resolution),
     overrides: context.config.FAL_MODEL_OVERRIDES,
     preferredEndpointId: endpointForAgent("video", payload.agentId),
     profile: payload.profile,
@@ -427,16 +542,7 @@ async function generateVideo(context: GenerationContext, payload: Extract<Genera
   } else {
     const client = createWorkerFalClient(context.config.FAL_KEY);
     const response = await client.subscribe(routing.endpointId, {
-      input: {
-        aspect_ratio: payload.aspectRatio,
-        auto_fix: true,
-        duration: payload.duration,
-        generate_audio: payload.generateAudio,
-        prompt: buildGenerationPrompt(payload),
-        resolution: payload.resolution,
-        safety_tolerance: "2",
-        ...(payload.seed === undefined ? {} : { seed: payload.seed }),
-      },
+      input: videoInput(payload, routing.endpointId, context.generation.user_id),
       logs: false,
     });
     const result = videoResultSchema.parse(response.data);
@@ -467,20 +573,18 @@ async function generateVideo(context: GenerationContext, payload: Extract<Genera
     },
   });
   const fileStat = await stat(filePath);
-  const durationSeconds = Number.parseInt(payload.duration, 10);
-  const landscape = payload.aspectRatio === "16:9";
-  const longEdge = payload.resolution === "1080p" ? 1920 : 1280;
-  const shortEdge = payload.resolution === "1080p" ? 1080 : 720;
+  const media = await probeMedia(filePath);
+  const durationSeconds = media.duration;
   await updateGeneration(context, {
     duration_seconds: durationSeconds,
-    height: landscape ? shortEdge : longEdge,
+    height: media.height,
     last_error: null,
     output_bucket: VIDEO_OUTPUT_BUCKET,
     output_mime: outputMime,
     output_path: outputPath,
     seed: payload.seed ?? null,
     status: "completed",
-    width: landscape ? longEdge : shortEdge,
+    width: media.width,
   });
   await recordGenerationUsage(context, "ai_video_generation", durationSeconds, asJson({
     bytes: fileStat.size,
@@ -537,23 +641,21 @@ async function generatePerformanceCreative(
       await context.report("Resuming delivery of the existing paid ad render", 70);
     } else {
       const client = createWorkerFalClient(context.config.FAL_KEY);
+      const creativePrompt = [
+        buildGenerationPrompt(payload),
+        `Product: ${product.title}. Source description: ${product.description || "No merchant description supplied."}`,
+        `Hook: ${plan.hook}. Headline: ${plan.headline}. Script: ${plan.script}.`,
+        `Visual direction: ${plan.visualDirection}. End CTA: ${plan.callToAction}.`,
+        "Preserve the exact product identity, packaging, label text, proportions, colors, and material details from the supplied image.",
+      ].join("\n");
       const response = await client.subscribe(routing.endpointId, {
-        input: {
-          aspect_ratio: performanceCreativePlatformPresets[payload.platform].aspectRatio,
-          auto_fix: true,
-          duration: "8s",
-          generate_audio: true,
-          image_url: product.imageUrl,
-          prompt: [
-            buildGenerationPrompt(payload),
-            `Product: ${product.title}. Source description: ${product.description || "No merchant description supplied."}`,
-            `Hook: ${plan.hook}. Headline: ${plan.headline}. Script: ${plan.script}.`,
-            `Visual direction: ${plan.visualDirection}. End CTA: ${plan.callToAction}.`,
-            "Preserve the exact product identity, packaging, label text, proportions, colors, and material details from the supplied image.",
-          ].join("\n"),
-          resolution: "1080p",
-          safety_tolerance: "2",
-        },
+        input: productVideoInput({
+          endpointId: routing.endpointId,
+          endUserId: context.generation.user_id,
+          imageUrl: product.imageUrl,
+          payload,
+          prompt: creativePrompt,
+        }),
         logs: false,
       });
       const result = videoResultSchema.parse(response.data);
@@ -590,18 +692,19 @@ async function generatePerformanceCreative(
       },
     });
     const fileStat = await stat(filePath);
+    const media = await probeMedia(filePath);
     await updateGeneration(context, {
-      duration_seconds: 8,
-      height: 1920,
+      duration_seconds: media.duration,
+      height: media.height,
       last_error: null,
       output_bucket: VIDEO_OUTPUT_BUCKET,
       output_mime: outputMime,
       output_path: outputPath,
       settings: asJson({ ...payload, creativePlan: plan, product }),
       status: "completed",
-      width: 1080,
+      width: media.width,
     });
-    await recordGenerationUsage(context, "performance_creative", 8, asJson({
+    await recordGenerationUsage(context, "performance_creative", media.duration, asJson({
       bytes: fileStat.size,
       platform: payload.platform,
       routing,

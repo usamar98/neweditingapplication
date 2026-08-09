@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Captions,
+  Bot,
   Check,
   CircleAlert,
   Download,
@@ -38,6 +39,7 @@ import {
   type EditSettings,
   type TranscriptSegment,
 } from "@/lib/domain/video";
+import { editorAgents, type EditorAgentId } from "@/lib/domain/ai-models";
 import type { ProjectEditorData } from "@/lib/data/projects";
 import { formatDuration } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
@@ -138,6 +140,8 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
   const [playing, setPlaying] = useState(false);
   const [saving, setSaving] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [editorAgentId, setEditorAgentId] = useState<EditorAgentId>("auto");
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [realtimeState, setRealtimeState] = useState<"connecting" | "live" | "degraded">("connecting");
@@ -250,6 +254,27 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
     }
   }
 
+  async function requestAnalysis() {
+    setAnalyzing(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const response = await fetch(`/api/projects/${project.id}/jobs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ agentId: editorAgentId, kind: "analyze" }),
+      });
+      if (!response.ok) throw new Error(await readApiError(response));
+      const data = (await response.json()) as { job: Job };
+      setJobs((current) => [data.job, ...current]);
+      setNotice("AI analysis queued with your selected editor model.");
+    } catch (analysisError) {
+      setError(analysisError instanceof Error ? analysisError.message : "Unable to start AI analysis.");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-[1680px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
       <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -260,6 +285,23 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {notice && <span className="mr-2 text-xs text-primary">{notice}</span>}
+          <Select value={editorAgentId} onValueChange={(value) => setEditorAgentId(value as EditorAgentId)}>
+            <SelectTrigger aria-label="Select AI editor model" className="h-9 w-[210px] bg-card/60 text-xs">
+              <Bot className="size-3.5 text-primary" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent align="end" className="w-[310px]">
+              {editorAgents.map((agent) => (
+                <SelectItem key={agent.id} value={agent.id}>
+                  <span className="font-medium">{agent.label}</span>
+                  <span className="ml-2 text-[10px] text-muted-foreground">{agent.tag}</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" onClick={requestAnalysis} disabled={analyzing || Boolean(activeJob && ["queued", "processing", "retrying"].includes(activeJob.status))}>
+            {analyzing ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />} {analyzing ? "Queueing" : "Analyze"}
+          </Button>
           <Button variant="outline" onClick={() => void saveSettings()} disabled={saving || exporting}><Save className="size-4" /> {saving ? "Saving" : "Save"}</Button>
           {project.exportUrl && <Button variant="outline" asChild><a href={project.exportUrl} target="_blank" rel="noreferrer"><Download className="size-4" /> Download latest</a></Button>}
           <Button onClick={requestExport} disabled={exporting || saving || project.duration <= 0}><Download className="size-4" /> {exporting ? "Queueing" : "Export MP4"}</Button>

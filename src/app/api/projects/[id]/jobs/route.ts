@@ -18,6 +18,7 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
     }
 
     const job = await enqueueProjectJob({
+      agentId: input.kind === "analyze" ? input.agentId : undefined,
       kind: input.kind,
       projectId: id,
       requestId,

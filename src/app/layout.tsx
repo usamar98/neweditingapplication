@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SiteHeader } from "@/components/site-header";
 import { getCurrentAccount } from "@/lib/auth";
+import { getSiteUrl, siteDescription, siteName } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,13 +17,42 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  applicationName: siteName,
   title: {
-    default: "Editing App — AI creative studio",
+    default: "Editing App — AI video editor and creative studio",
     template: "%s · Editing App",
   },
-  description:
-    "Edit footage and create production-ready AI videos and images in one private creative workspace.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
+  description: siteDescription,
+  metadataBase: getSiteUrl(),
+  alternates: { canonical: "/" },
+  keywords: [
+    "AI video editor",
+    "AI video generator",
+    "AI image generator",
+    "product URL to video ad",
+    "long video to shorts",
+    "background remover",
+    "Seedance 2.5",
+    "LTX 2.3",
+    "Veo 3.1",
+  ],
+  creator: siteName,
+  publisher: siteName,
+  category: "technology",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName,
+    title: "Editing App — AI video editor and creative studio",
+    description: siteDescription,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Editing App — AI video editor and creative studio",
+    description: siteDescription,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -36,11 +66,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       }
     : null;
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
       <body>
         <TooltipProvider>
           <SiteHeader account={account} />
