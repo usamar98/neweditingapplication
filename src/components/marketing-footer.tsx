@@ -1,7 +1,6 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { Brand } from "@/components/brand";
-import { Separator } from "@/components/ui/separator";
 import { marketingFeatures } from "@/lib/marketing/features";
 import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
 
@@ -21,7 +20,7 @@ const toolLabels: Record<(typeof searchIntentPages)[number]["slug"], string> = {
 export function MarketingFooter() {
   return (
     <footer className="mx-auto max-w-7xl px-5 pb-10 pt-6 sm:px-8">
-      <Separator className="mb-10" />
+      <div aria-hidden="true" className="mb-10 h-px w-full bg-border" />
       <div className="grid gap-10 md:grid-cols-[1.25fr_2fr]">
         <div className="max-w-sm">
           <Brand />
@@ -30,7 +29,7 @@ export function MarketingFooter() {
             product ads, short-form clips, and precise background removal.
           </p>
         </div>
-        <nav aria-label="Footer navigation" className="grid gap-8 sm:grid-cols-3">
+        <nav aria-label="Footer navigation" className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
           <div>
             <h2 className="text-sm font-semibold">Creative features</h2>
             <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
@@ -72,11 +71,23 @@ export function MarketingFooter() {
               ))}
             </ul>
           </div>
+          <div>
+            <h2 className="text-sm font-semibold">Trust & legal</h2>
+            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              <li><Link href={"/legal" as Route} className="hover:text-foreground">Legal Center</Link></li>
+              <li><Link href={"/legal/terms" as Route} className="hover:text-foreground">Terms of Service</Link></li>
+              <li><Link href={"/legal/privacy" as Route} className="hover:text-foreground">Privacy Policy</Link></li>
+              <li><Link href={"/legal/subscriptions-credits-refunds" as Route} className="hover:text-foreground">Billing & refunds</Link></li>
+              <li><Link href={"/legal/acceptable-use" as Route} className="hover:text-foreground">Acceptable use</Link></li>
+              <li><Link href={"/legal/security" as Route} className="hover:text-foreground">Security</Link></li>
+            </ul>
+          </div>
         </nav>
       </div>
-      <p className="mt-10 border-t border-border pt-6 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Editing App. Model availability and provider capabilities can change.
-      </p>
+      <div className="mt-10 flex flex-col gap-3 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <p>© {new Date().getFullYear()} Editing App. Model availability and provider capabilities can change.</p>
+        <div className="flex flex-wrap gap-x-4 gap-y-2"><Link href={"/legal/privacy" as Route} className="hover:text-foreground">Privacy</Link><Link href={"/legal/terms" as Route} className="hover:text-foreground">Terms</Link><Link href={"/legal/cookies" as Route} className="hover:text-foreground">Cookies</Link></div>
+      </div>
     </footer>
   );
 }

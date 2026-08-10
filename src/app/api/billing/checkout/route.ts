@@ -46,6 +46,7 @@ export async function POST(request: Request) {
     const session = await stripe.checkout.sessions.create({
       cancel_url: `${appUrl}/#pricing`,
       client_reference_id: authData.user.id,
+      consent_collection: { terms_of_service: "required" },
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       metadata: { plan, supabase_user_id: authData.user.id },

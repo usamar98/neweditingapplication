@@ -21,6 +21,8 @@ describe("crawler metadata", () => {
     expect(urls).toContain("https://www.editingapp.live/tools");
     expect(urls).toContain("https://www.editingapp.live/compare");
     expect(urls).toContain("https://www.editingapp.live/pricing");
+    expect(urls).toContain("https://www.editingapp.live/legal");
+    expect(urls).toContain("https://www.editingapp.live/legal/privacy");
     expect(urls).toContain("https://www.editingapp.live/tools/product-url-to-video");
     expect(urls).toContain("https://www.editingapp.live/tools/long-video-to-shorts");
     expect(urls).toContain("https://www.editingapp.live/compare/editing-app-vs-veed");
@@ -40,5 +42,6 @@ describe("crawler metadata", () => {
     expect(rules.flatMap((rule) => rule.disallow ?? [])).toContain("/api/");
     expect(rules.flatMap((rule) => rule.disallow ?? [])).toContain("/dashboard");
     expect(rules.flatMap((rule) => rule.allow ?? [])).toContain("/pricing");
+    expect(rules.flatMap((rule) => rule.allow ?? [])).toContain("/legal");
   });
 });

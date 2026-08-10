@@ -27,7 +27,7 @@ import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
 import videoEditorVisual from "@/assets/media/video-editor.webp";
 import { MarketingFooter } from "@/components/marketing-footer";
-import { PricingCards } from "@/components/pricing-cards";
+import { PricingPreview } from "@/components/pricing-preview";
 import { FeatureReveal } from "@/components/feature-reveal";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteDescription } from "@/lib/site";
@@ -124,7 +124,6 @@ export default function Home() {
                   src={videoEditorVisual}
                   alt="A professional editor refining an interview in a post-production studio"
                   fill
-                  priority
                   placeholder="blur"
                   sizes="(max-width: 1024px) 92vw, 44vw"
                   className="object-cover"
@@ -367,7 +366,7 @@ export default function Home() {
             <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Choose your creative velocity.</h2>
             <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Three monthly plans with clear generation budgets, model-aware quality limits, and secure Stripe checkout.</p>
           </div>
-          <PricingCards />
+          <PricingPreview />
           <div className="mt-8 text-center"><Link href={"/pricing" as Route} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">See full plan details and credit FAQs <ArrowRight className="size-3.5" /></Link></div>
         </div>
       </section>

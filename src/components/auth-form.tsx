@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -33,11 +34,16 @@ export function AuthForm() {
     const password = String(form.get("password") ?? "");
     const displayName = String(form.get("displayName") ?? "").trim();
     const username = String(form.get("username") ?? "").trim().toLowerCase();
+    const legalAccepted = form.get("legalAccepted") === "on";
     setError(null);
     setNotice(null);
 
     if (mode === "signup" && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password)) {
       setError("Use at least 8 characters with uppercase, lowercase, and a number.");
+      return;
+    }
+    if (mode === "signup" && !legalAccepted) {
+      setError("Review and accept the Terms of Service and Privacy Policy to create an account.");
       return;
     }
 
@@ -48,7 +54,7 @@ export function AuthForm() {
           email,
           password,
           options: {
-            data: { display_name: displayName, username },
+            data: { display_name: displayName, legal_acceptance_version: "2026-08-10", username },
             emailRedirectTo: `${window.location.origin}/auth/confirm`,
           },
         });
@@ -99,6 +105,12 @@ export function AuthForm() {
           </div>
           {mode === "signup" && <p className="text-xs text-muted-foreground">At least 8 characters with upper/lowercase letters and a number.</p>}
         </div>
+        {mode === "signup" && (
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-muted/45 p-3 text-xs leading-5 text-muted-foreground">
+            <input name="legalAccepted" type="checkbox" required className="mt-0.5 size-4 shrink-0 accent-[var(--primary)]" />
+            <span>I agree to the <Link href="/legal/terms" target="_blank" rel="noreferrer" className="font-medium text-foreground underline underline-offset-4">Terms of Service</Link> and acknowledge the <Link href="/legal/privacy" target="_blank" rel="noreferrer" className="font-medium text-foreground underline underline-offset-4">Privacy Policy</Link>.</span>
+          </label>
+        )}
         {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
         {notice && <Alert><AlertDescription>{notice}</AlertDescription></Alert>}
         <Button className="w-full" size="lg" disabled={pending}>
@@ -112,6 +124,11 @@ export function AuthForm() {
           {mode === "signup" ? "Sign in" : "Create one"}
         </button>
       </p>
+      <nav aria-label="Legal" className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground">
+        <Link href="/legal/terms" className="hover:text-foreground">Terms</Link>
+        <Link href="/legal/privacy" className="hover:text-foreground">Privacy</Link>
+        <Link href="/legal/cookies" className="hover:text-foreground">Cookies</Link>
+      </nav>
     </div>
   );
 }

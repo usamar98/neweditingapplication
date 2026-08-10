@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowRight, Check, Coins, LoaderCircle, ShieldCheck } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,7 @@ export function PricingCards() {
       });
       const body = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string }; url?: string } | null;
       if (response.status === 401) {
-        router.push(`/login?mode=signup&next=${encodeURIComponent("/#pricing")}`);
+        router.push(`/login?mode=signup&next=${encodeURIComponent("/pricing")}`);
         return;
       }
       if (!response.ok || !body?.url) throw new Error(body?.error?.message ?? "Checkout is unavailable.");
@@ -42,7 +43,7 @@ export function PricingCards() {
       {error && <Alert variant="destructive" className="mx-auto mb-5 max-w-2xl"><AlertDescription>{error}</AlertDescription></Alert>}
       <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
         {billingPlans.map((plan) => (
-          <Card key={plan.key} className={cn("relative border-border bg-card/70", "popular" in plan && plan.popular && "border-primary/35 bg-primary/[0.045] shadow-2xl shadow-primary/5 lg:-translate-y-3")}>
+          <Card id={plan.key} key={plan.key} className={cn("relative scroll-mt-24 border-border bg-card/70", "popular" in plan && plan.popular && "border-primary/35 bg-primary/[0.045] shadow-2xl shadow-primary/5 lg:-translate-y-3")}>
             {"popular" in plan && plan.popular && <Badge className="absolute right-5 top-4 shadow-lg">Most popular</Badge>}
             <CardContent className="flex h-full flex-col p-6 sm:p-7">
               <h3 className="text-lg font-medium">{plan.name}</h3>
@@ -69,6 +70,9 @@ export function PricingCards() {
       </div>
       <p className="mx-auto mt-5 max-w-3xl text-center text-[11px] leading-5 text-muted-foreground">
         Video-minute estimates are planning guides, not fixed quotas. Actual credit use varies by model, duration, native audio, and resolution. 4K and maximum shot length appear only when the selected model supports them; Editing App does not advertise native 8K generation.
+      </p>
+      <p className="mx-auto mt-3 max-w-3xl text-center text-[11px] leading-5 text-muted-foreground">
+        Plans renew monthly until cancelled online. Checkout requires acceptance of the <Link href="/legal/terms" className="font-medium text-foreground underline underline-offset-4">Terms</Link>. See the <Link href="/legal/subscriptions-credits-refunds" className="font-medium text-foreground underline underline-offset-4">Subscription, Credits & Refund Policy</Link> before purchasing.
       </p>
     </div>
   );
