@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/config";
 import { getSafeRedirectPath } from "@/lib/safe-redirect";
 
-export const metadata = { title: "Sign in" };
+export const metadata = { title: "Sign in", robots: { index: false, follow: false } };
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   if (!isSupabaseConfigured()) {

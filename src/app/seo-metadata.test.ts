@@ -16,11 +16,18 @@ describe("crawler metadata", () => {
     const urls = entries.map((entry) => entry.url);
 
     expect(urls.every((url) => url.startsWith("https://www.editingapp.live/"))).toBe(true);
+    expect(new Set(urls).size).toBe(urls.length);
+    expect(urls).toContain("https://www.editingapp.live/features");
+    expect(urls).toContain("https://www.editingapp.live/tools");
+    expect(urls).toContain("https://www.editingapp.live/compare");
+    expect(urls).toContain("https://www.editingapp.live/pricing");
     expect(urls).toContain("https://www.editingapp.live/tools/product-url-to-video");
     expect(urls).toContain("https://www.editingapp.live/tools/long-video-to-shorts");
     expect(urls).toContain("https://www.editingapp.live/compare/editing-app-vs-veed");
     expect(urls).toContain("https://www.editingapp.live/compare/editing-app-vs-creatify");
     expect(urls).toContain("https://www.editingapp.live/compare/editing-app-vs-opusclip");
+    expect(urls.some((url) => url.includes("/dashboard") || url.includes("/login"))).toBe(false);
+    expect(entries.every((entry) => entry.lastModified instanceof Date)).toBe(true);
   });
 
   it("advertises the www sitemap and blocks private API routes", () => {
@@ -31,5 +38,7 @@ describe("crawler metadata", () => {
     expect(metadata.sitemap).toBe("https://www.editingapp.live/sitemap.xml");
     expect(metadata.host).toBe("https://www.editingapp.live");
     expect(rules.flatMap((rule) => rule.disallow ?? [])).toContain("/api/");
+    expect(rules.flatMap((rule) => rule.disallow ?? [])).toContain("/dashboard");
+    expect(rules.flatMap((rule) => rule.allow ?? [])).toContain("/pricing");
   });
 });

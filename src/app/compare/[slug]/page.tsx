@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, ExternalLink, Scale } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MarketingFooter } from "@/components/marketing-footer";
 import { comparisonPages, getComparisonPage } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
 
@@ -21,11 +22,11 @@ export async function generateMetadata({ params }: ComparisonPageProps): Promise
   if (!page) return {};
   const path = `/compare/${page.slug}`;
   return {
-    title: page.title,
+    title: page.seoTitle,
     description: page.description,
     alternates: { canonical: path },
-    openGraph: { title: page.title, description: page.description, type: "article", url: path },
-    twitter: { card: "summary_large_image", title: page.title, description: page.description },
+    openGraph: { title: page.seoTitle, description: page.description, type: "article", url: path },
+    twitter: { card: "summary_large_image", title: page.seoTitle, description: page.description },
   };
 }
 
@@ -37,10 +38,11 @@ export default async function ComparisonPage({ params }: ComparisonPageProps) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
-      { "@type": "WebPage", name: page.title, description: page.description, url: pageUrl, dateModified: "2026-08-09", isPartOf: { "@type": "WebSite", name: siteName, url: getSiteUrl().toString() } },
+      { "@type": "WebPage", name: page.title, description: page.description, url: pageUrl, dateModified: "2026-08-10", inLanguage: "en", isPartOf: { "@type": "WebSite", name: siteName, url: getSiteUrl().toString() } },
       { "@type": "BreadcrumbList", itemListElement: [
         { "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl().toString() },
-        { "@type": "ListItem", position: 2, name: `Editing App vs ${page.competitor}`, item: pageUrl },
+        { "@type": "ListItem", position: 2, name: "Comparisons", item: new URL("/compare", getSiteUrl()).toString() },
+        { "@type": "ListItem", position: 3, name: `Editing App vs ${page.competitor}`, item: pageUrl },
       ] },
     ],
   };
@@ -51,7 +53,7 @@ export default async function ComparisonPage({ params }: ComparisonPageProps) {
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[620px]" />
 
       <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-16 sm:px-8 lg:pb-24 lg:pt-24">
-        <nav aria-label="Breadcrumb" className="mb-8 text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><span>Comparisons</span><span className="mx-2">/</span><span>{page.competitor}</span></nav>
+        <nav aria-label="Breadcrumb" className="mb-8 text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><Link href={"/compare" as Route} className="hover:text-foreground">Comparisons</Link><span className="mx-2">/</span><span>{page.competitor}</span></nav>
         <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary"><Scale className="size-3.5" /> Factual comparison · reviewed August 2026</Badge>
         <h1 className="mt-6 max-w-5xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">{page.title}</h1>
         <p className="mt-6 max-w-4xl text-balance text-lg leading-8 text-muted-foreground">{page.summary}</p>
@@ -72,8 +74,16 @@ export default async function ComparisonPage({ params }: ComparisonPageProps) {
           {page.rows.map((row) => <div key={row.criterion} className="grid gap-3 border-b border-border bg-card/60 px-5 py-5 last:border-0 md:grid-cols-[0.8fr_1.1fr_1.1fr] md:gap-5"><strong className="text-sm">{row.criterion}</strong><p className="text-sm leading-6 text-muted-foreground"><span className="mb-1 block text-[10px] font-medium uppercase tracking-[0.14em] text-primary md:hidden">Editing App</span>{row.editingApp}</p><p className="text-sm leading-6 text-muted-foreground"><span className="mb-1 block text-[10px] font-medium uppercase tracking-[0.14em] md:hidden">{page.competitor}</span>{row.competitor}</p></div>)}
         </div>
 
-        <p className="mt-5 text-xs leading-5 text-muted-foreground">This comparison uses publicly available product information reviewed on August 9, 2026. Features change frequently; verify a critical capability with each provider before purchasing.</p>
+        <p className="mt-5 text-xs leading-5 text-muted-foreground">This comparison uses publicly available product information reviewed on August 10, 2026. Features change frequently; verify a critical capability with each provider before purchasing.</p>
       </section>
+      <section className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.045] p-6 sm:p-8">
+          <h2 className="text-2xl font-semibold tracking-[-0.03em]">Evaluate the actual Editing App workflow.</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">Review the complete feature set, model limits, and plan budgets before choosing a platform.</p>
+          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-primary"><Link href={"/features" as Route}>Explore all AI features <ArrowRight className="ml-1 inline size-3.5" /></Link><Link href="/ai-video-models">Compare AI video models <ArrowRight className="ml-1 inline size-3.5" /></Link><Link href={"/pricing" as Route}>View plans and pricing <ArrowRight className="ml-1 inline size-3.5" /></Link></div>
+        </div>
+      </section>
+      <MarketingFooter />
     </main>
   );
 }

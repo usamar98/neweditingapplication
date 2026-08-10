@@ -6,6 +6,7 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MarketingFooter } from "@/components/marketing-footer";
 import { getMarketingFeature, marketingFeatures } from "@/lib/marketing/features";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
@@ -21,11 +22,11 @@ export async function generateMetadata({ params }: PageProps<"/features/[slug]">
   if (!feature) return {};
   const path = `/features/${feature.slug}`;
   return {
-    title: feature.title,
+    title: feature.seoTitle,
     description: feature.description,
     alternates: { canonical: path },
-    openGraph: { title: feature.title, description: feature.description, type: "website", url: path },
-    twitter: { card: "summary_large_image", title: feature.title, description: feature.description },
+    openGraph: { title: feature.seoTitle, description: feature.description, type: "website", url: path },
+    twitter: { card: "summary_large_image", title: feature.seoTitle, description: feature.description },
   };
 }
 
@@ -43,13 +44,16 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
         operatingSystem: "Web",
         description: feature.description,
         url: pageUrl,
+        dateModified: "2026-08-10",
+        inLanguage: "en",
         offers: { "@type": "AggregateOffer", lowPrice: "29.99", highPrice: "99.99", priceCurrency: "USD" },
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl().toString() },
-          { "@type": "ListItem", position: 2, name: feature.eyebrow, item: pageUrl },
+          { "@type": "ListItem", position: 2, name: "Features", item: new URL("/features", getSiteUrl()).toString() },
+          { "@type": "ListItem", position: 3, name: feature.eyebrow, item: pageUrl },
         ],
       },
       {
@@ -68,13 +72,13 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[620px]" />
       <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-16 text-center sm:px-8 lg:pb-24 lg:pt-24">
-        <nav aria-label="Breadcrumb" className="mb-8 text-left text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><span>Features</span><span className="mx-2">/</span><span>{feature.eyebrow}</span></nav>
+        <nav aria-label="Breadcrumb" className="mb-8 text-left text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><Link href={"/features" as Route} className="hover:text-foreground">Features</Link><span className="mx-2">/</span><span>{feature.eyebrow}</span></nav>
         <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary"><Sparkles className="size-3.5" /> {feature.eyebrow}</Badge>
         <h1 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">{feature.title}</h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">{feature.description}</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <Button size="lg" asChild><Link href="/login?mode=signup">Start creating <ArrowRight className="size-4" /></Link></Button>
-          <Button size="lg" variant="outline" asChild><Link href="/#pricing">Compare plans</Link></Button>
+          <Button size="lg" variant="outline" asChild><Link href={"/pricing" as Route}>Compare plans</Link></Button>
         </div>
       </section>
 
@@ -91,6 +95,7 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
           {searchIntentPages.map((page) => <Card key={page.slug} className="border-border bg-card/65"><CardContent className="p-6"><h3 className="text-lg font-semibold">{page.title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
         </div>
       </section>
+      <MarketingFooter />
     </main>
   );
 }

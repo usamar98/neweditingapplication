@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
 import { getCurrentAccount, requireUser } from "@/lib/auth";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
+};
 
 export default async function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();

@@ -22,15 +22,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
 import videoEditorVisual from "@/assets/media/video-editor.webp";
-import { Brand } from "@/components/brand";
+import { MarketingFooter } from "@/components/marketing-footer";
 import { PricingCards } from "@/components/pricing-cards";
 import { FeatureReveal } from "@/components/feature-reveal";
-import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
+import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteDescription } from "@/lib/site";
 
 const workflow = [
@@ -179,9 +178,7 @@ export default function Home() {
                 One idea. Five ways to make it perform.
               </h2>
             </div>
-            <p className="max-w-md text-sm leading-6 text-muted-foreground">
-              Each tool is purpose-built, but projects, private storage, background jobs, and model routing live in one workspace.
-            </p>
+            <div className="max-w-md"><p className="text-sm leading-6 text-muted-foreground">Each tool is purpose-built, but projects, private storage, background jobs, and model routing live in one workspace.</p><Link href={"/features" as Route} className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore all AI features <ArrowRight className="size-3.5" /></Link></div>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -371,6 +368,7 @@ export default function Home() {
             <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">Three monthly plans with clear generation budgets, model-aware quality limits, and secure Stripe checkout.</p>
           </div>
           <PricingCards />
+          <div className="mt-8 text-center"><Link href={"/pricing" as Route} className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">See full plan details and credit FAQs <ArrowRight className="size-3.5" /></Link></div>
         </div>
       </section>
 
@@ -387,13 +385,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="mx-auto max-w-7xl px-5 pb-10 sm:px-8">
-        <Separator className="mb-8" />
-        <div className="flex flex-col gap-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <Brand />
-          <div className="flex max-w-3xl flex-wrap justify-end gap-x-4 gap-y-2"><Link href="/features/ai-video-editor" className="hover:text-foreground">Video editor</Link><Link href="/features/ai-video-generator" className="hover:text-foreground">Video generator</Link><Link href="/features/ai-image-generator" className="hover:text-foreground">Image generator</Link><Link href={"/tools/product-url-to-video" as Route} className="hover:text-foreground">URL to video</Link><Link href={"/tools/long-video-to-shorts" as Route} className="hover:text-foreground">Long video to shorts</Link><Link href="/ai-video-models" className="hover:text-foreground">Model guide</Link><Link href={`/compare/${comparisonPages[0].slug}` as Route} className="hover:text-foreground">Compare VEED</Link></div>
-        </div>
-      </footer>
+      <MarketingFooter />
     </main>
   );
 }

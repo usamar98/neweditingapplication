@@ -2,6 +2,7 @@ export const marketingFeatures = [
   {
     slug: "ai-video-editor",
     eyebrow: "AI-assisted editing",
+    seoTitle: "AI Video Editor for Long Videos",
     title: "AI video editor for long footage and precise final cuts",
     description: "Upload long footage, select an AI analysis model, and turn scenes, speech, silences, highlights, captions, crops, and audio cleanup into an editable project.",
     benefits: ["Selectable AI analysis models", "Scene, silence, filler, and highlight suggestions", "Editable captions and transcript navigation", "9:16, 1:1, and 16:9 exports", "Durable background processing for large uploads"],
@@ -16,6 +17,7 @@ export const marketingFeatures = [
   {
     slug: "ai-video-generator",
     eyebrow: "Multi-model video generation",
+    seoTitle: "AI Video Generator with Premium Models",
     title: "AI video generation with the right model for every shot",
     description: "Direct camera movement, mood, aspect ratio, duration, native audio, and resolution, then choose Seedance, LTX, Veo, Kling, or let Model Autopilot route the brief.",
     benefits: ["Seedance 2.5 shots up to 30 seconds at supported resolution", "Native 4K with supported LTX 2.3 Pro and Veo workflows", "Native audio on compatible models", "Server-side capability validation before paid generation", "Private delivery checkpoints prevent duplicate paid renders on retry"],
@@ -30,6 +32,7 @@ export const marketingFeatures = [
   {
     slug: "ai-image-generator",
     eyebrow: "Campaign-ready image generation",
+    seoTitle: "AI Image Generator with Premium Models",
     title: "AI image generator with art direction and premium model choice",
     description: "Create product, editorial, photoreal, cinematic, and illustrated visuals with Seedream, Recraft, Nano Banana, and FLUX models in one controlled workflow.",
     benefits: ["Seedream 5.0 Pro and Lite", "Recraft V4.1 Pro for brand design", "Nano Banana 2 for instruction fidelity", "FLUX.2 Max and Turbo", "Canvas, art direction, seed, and routing controls"],
@@ -44,6 +47,7 @@ export const marketingFeatures = [
   {
     slug: "performance-creative-studio",
     eyebrow: "Performance creative",
+    seoTitle: "AI Ad Creative Studio for Ecommerce",
     title: "Turn product URLs and long videos into platform-ready ad creative",
     description: "Build source-aware ads and short-form content for Facebook, Instagram, TikTok, and YouTube without inventing unsupported product claims.",
     benefits: ["Product URL metadata and image extraction", "Seedance 2.5 and Veo product-ad directors", "Long-video hook discovery", "Platform-aware aspect ratios and calls to action", "Paid-render checkpoints for safe delivery retries"],
@@ -58,6 +62,7 @@ export const marketingFeatures = [
   {
     slug: "background-remover",
     eyebrow: "Precision cutouts",
+    seoTitle: "AI Background Remover for Products",
     title: "AI background remover for people, products, and fine edges",
     description: "Remove image backgrounds with precision or speed agents, private uploads, transparent PNG output, and edge-aware model routing.",
     benefits: ["BiRefNet V2 precision matting", "Fast Rembg option", "Hair and soft-edge preservation", "Transparent PNG delivery", "Private source and output storage"],

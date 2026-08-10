@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentAccount, getCurrentUser } from "@/lib/auth";
 
-export const metadata = { title: "Reactivate account" };
+export const metadata = { title: "Reactivate account", robots: { index: false, follow: false } };
 
 export default async function ReactivatePage() {
   const user = await getCurrentUser();

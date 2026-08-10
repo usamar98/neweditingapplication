@@ -24,22 +24,11 @@ export const metadata: Metadata = {
   applicationName: siteName,
   title: {
     default: "AI Video Editor & Generator | Editing App",
-    template: "%s · Editing App",
+    template: "%s | Editing App",
   },
   description: siteDescription,
   metadataBase: getSiteUrl(),
   alternates: { canonical: "/" },
-  keywords: [
-    "AI video editor",
-    "AI video generator",
-    "AI image generator",
-    "product URL to video ad",
-    "long video to shorts",
-    "background remover",
-    "Seedance 2.5",
-    "LTX 2.3",
-    "Veo 3.1",
-  ],
   creator: siteName,
   publisher: siteName,
   category: "technology",
@@ -68,6 +57,7 @@ export const metadata: Metadata = {
     },
   },
   verification: googleSiteVerification ? { google: googleSiteVerification } : undefined,
+  referrer: "origin-when-cross-origin",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

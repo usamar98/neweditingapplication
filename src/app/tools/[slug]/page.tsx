@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MarketingFooter } from "@/components/marketing-footer";
 import { getSearchIntentPage, searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
 
@@ -21,11 +22,11 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   if (!page) return {};
   const path = `/tools/${page.slug}`;
   return {
-    title: page.title,
+    title: page.seoTitle,
     description: page.description,
     alternates: { canonical: path },
-    openGraph: { title: page.title, description: page.description, type: "website", url: path },
-    twitter: { card: "summary_large_image", title: page.title, description: page.description },
+    openGraph: { title: page.seoTitle, description: page.description, type: "website", url: path },
+    twitter: { card: "summary_large_image", title: page.seoTitle, description: page.description },
   };
 }
 
@@ -42,13 +43,16 @@ export default async function ToolPage({ params }: ToolPageProps) {
         name: page.title,
         description: page.description,
         url: pageUrl,
+        dateModified: "2026-08-10",
+        inLanguage: "en",
         isPartOf: { "@type": "WebSite", name: siteName, url: getSiteUrl().toString() },
       },
       {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Home", item: getSiteUrl().toString() },
-          { "@type": "ListItem", position: 2, name: page.eyebrow, item: pageUrl },
+          { "@type": "ListItem", position: 2, name: "Tools", item: new URL("/tools", getSiteUrl()).toString() },
+          { "@type": "ListItem", position: 3, name: page.eyebrow, item: pageUrl },
         ],
       },
       {
@@ -69,7 +73,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
       <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-16 sm:px-8 lg:pb-24 lg:pt-24">
         <nav aria-label="Breadcrumb" className="mb-8 text-xs text-muted-foreground">
-          <Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><span>{page.eyebrow}</span>
+          <Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><Link href={"/tools" as Route} className="hover:text-foreground">Tools</Link><span className="mx-2">/</span><span>{page.eyebrow}</span>
         </nav>
         <div className="max-w-4xl">
           <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary"><Sparkles className="size-3.5" /> {page.eyebrow}</Badge>
@@ -116,6 +120,18 @@ export default async function ToolPage({ params }: ToolPageProps) {
           {page.faq.map((item) => <Card key={item.question} className="border-border bg-card/65"><CardContent className="p-5 sm:p-6"><h3 className="font-medium">{item.question}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.answer}</p></CardContent></Card>)}
         </div>
       </section>
+      <section className="mx-auto max-w-6xl px-5 pb-20 sm:px-8">
+        <div className="rounded-2xl border border-primary/15 bg-primary/[0.045] p-6 sm:p-8">
+          <p className="text-sm font-medium text-primary">Continue exploring</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">Connect this workflow to the complete creative suite.</h2>
+          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-primary">
+            <Link href={page.featureHref}>View related feature capabilities <ArrowRight className="ml-1 inline size-3.5" /></Link>
+            <Link href={"/ai-video-models" as Route}>Compare AI video models <ArrowRight className="ml-1 inline size-3.5" /></Link>
+            <Link href={"/pricing" as Route}>Compare plans and credits <ArrowRight className="ml-1 inline size-3.5" /></Link>
+          </div>
+        </div>
+      </section>
+      <MarketingFooter />
     </main>
   );
 }
