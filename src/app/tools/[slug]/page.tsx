@@ -5,7 +5,9 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnswerSummary } from "@/components/answer-summary";
 import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingCardMedia } from "@/components/marketing-card-media";
 import { getSearchIntentPage, searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
 
@@ -24,6 +26,7 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   return {
     title: page.seoTitle,
     description: page.description,
+    keywords: [...page.keywords],
     alternates: { canonical: path },
     openGraph: { title: page.seoTitle, description: page.description, type: "website", url: path },
     twitter: { card: "summary_large_image", title: page.seoTitle, description: page.description },
@@ -45,6 +48,8 @@ export default async function ToolPage({ params }: ToolPageProps) {
         url: pageUrl,
         dateModified: "2026-08-10",
         inLanguage: "en",
+        keywords: page.keywords.join(", "),
+        about: page.answer.summary,
         isPartOf: { "@type": "WebSite", name: siteName, url: getSiteUrl().toString() },
       },
       {
@@ -85,6 +90,22 @@ export default async function ToolPage({ params }: ToolPageProps) {
           </div>
         </div>
       </section>
+
+      <section className="mx-auto max-w-6xl px-5 pb-8 sm:px-8">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card/70 shadow-sm">
+          <MarketingCardMedia slug={page.slug} className="border-b-0" />
+        </div>
+      </section>
+
+      <AnswerSummary
+        question={page.answer.question}
+        answer={page.answer.summary}
+        facts={[
+          { label: "Best for", value: page.answer.bestFor },
+          { label: "Starts with", value: page.answer.input },
+          { label: "Produces", value: page.answer.output },
+        ]}
+      />
 
       <section className="mx-auto grid max-w-6xl gap-5 px-5 pb-20 sm:px-8 lg:grid-cols-2 lg:pb-28">
         <Card className="border-border bg-card/70">

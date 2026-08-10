@@ -12,6 +12,9 @@ describe("SEO landing page catalog", () => {
   it("ships substantial, answer-led content for every search-intent page", () => {
     for (const page of searchIntentPages) {
       expect(page.description.length).toBeGreaterThan(100);
+      expect(page.keywords.length).toBeGreaterThanOrEqual(4);
+      expect(page.answer.question).toMatch(/\?$/);
+      expect(page.answer.summary.length).toBeGreaterThan(120);
       expect(page.steps.length).toBeGreaterThanOrEqual(4);
       expect(page.faq.length).toBeGreaterThanOrEqual(4);
     }
@@ -36,6 +39,11 @@ describe("SEO landing page catalog", () => {
   it("keeps feature titles and descriptions unique", () => {
     expect(new Set(marketingFeatures.map((feature) => feature.title)).size).toBe(marketingFeatures.length);
     expect(new Set(marketingFeatures.map((feature) => feature.description)).size).toBe(marketingFeatures.length);
+    for (const feature of marketingFeatures) {
+      expect(feature.keywords.length).toBeGreaterThanOrEqual(4);
+      expect(feature.answer.question).toMatch(/\?$/);
+      expect(feature.answer.summary.length).toBeGreaterThan(120);
+    }
   });
 
   it("keeps search-result titles distinct and concise", () => {

@@ -6,7 +6,9 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AnswerSummary } from "@/components/answer-summary";
 import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingCardMedia } from "@/components/marketing-card-media";
 import { getMarketingFeature, marketingFeatures } from "@/lib/marketing/features";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
@@ -24,6 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/features/[slug]">
   return {
     title: feature.seoTitle,
     description: feature.description,
+    keywords: [...feature.keywords],
     alternates: { canonical: path },
     openGraph: { title: feature.seoTitle, description: feature.description, type: "website", url: path },
     twitter: { card: "summary_large_image", title: feature.seoTitle, description: feature.description },
@@ -39,13 +42,17 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
     "@graph": [
       {
         "@type": "SoftwareApplication",
-        name: `${siteName} — ${feature.eyebrow}`,
+        name: `${siteName} — ${feature.cardTitle}`,
         applicationCategory: "MultimediaApplication",
+        applicationSubCategory: feature.cardTitle,
         operatingSystem: "Web",
         description: feature.description,
         url: pageUrl,
         dateModified: "2026-08-10",
         inLanguage: "en",
+        featureList: feature.benefits,
+        keywords: feature.keywords.join(", "),
+        audience: { "@type": "Audience", audienceType: feature.answer.bestFor },
         offers: { "@type": "AggregateOffer", lowPrice: "29.99", highPrice: "99.99", priceCurrency: "USD" },
       },
       {
@@ -81,6 +88,22 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
           <Button size="lg" variant="outline" asChild><Link href={"/pricing" as Route}>Compare plans</Link></Button>
         </div>
       </section>
+
+      <section className="mx-auto max-w-6xl px-5 pb-8 sm:px-8">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card/70 shadow-sm">
+          <MarketingCardMedia slug={feature.slug} className="border-b-0" />
+        </div>
+      </section>
+
+      <AnswerSummary
+        question={feature.answer.question}
+        answer={feature.answer.summary}
+        facts={[
+          { label: "Best for", value: feature.answer.bestFor },
+          { label: "Starts with", value: feature.answer.input },
+          { label: "Produces", value: feature.answer.output },
+        ]}
+      />
 
       <section className="mx-auto grid max-w-6xl gap-5 px-5 pb-20 sm:px-8 lg:grid-cols-[1.2fr_0.8fr] lg:pb-28">
         <Card className="border-border bg-card/70"><CardContent className="p-6 sm:p-8"><h2 className="text-2xl font-semibold tracking-[-0.03em]">Built for a real production workflow</h2><div className="mt-7 grid gap-4 sm:grid-cols-2">{feature.benefits.map((benefit) => <div key={benefit} className="flex gap-3 rounded-xl border border-border bg-muted/55 p-4 text-sm leading-6 text-muted-foreground"><Check className="mt-1 size-4 shrink-0 text-primary" />{benefit}</div>)}</div></CardContent></Card>

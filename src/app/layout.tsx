@@ -22,6 +22,15 @@ export const metadata: Metadata = {
     template: "%s | Editing App",
   },
   description: siteDescription,
+  keywords: [
+    "AI video editor",
+    "AI video generator",
+    "AI image generator",
+    "AI ad creative generator",
+    "product URL to video",
+    "long video to shorts",
+    "AI background remover",
+  ],
   metadataBase: getSiteUrl(),
   alternates: { canonical: "/" },
   creator: siteName,
@@ -66,9 +75,40 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         username: current.profile?.username ?? `creator_${current.user.id.slice(0, 6)}`,
       }
     : null;
+  const siteUrl = getSiteUrl();
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": new URL("/#organization", siteUrl).toString(),
+        name: siteName,
+        url: siteUrl.toString(),
+        logo: new URL("/icon.svg", siteUrl).toString(),
+        knowsAbout: [
+          "AI video editing",
+          "AI video generation",
+          "AI image generation",
+          "Ecommerce video ads",
+          "Long video repurposing",
+          "Image background removal",
+        ],
+      },
+      {
+        "@type": "WebSite",
+        "@id": new URL("/#website", siteUrl).toString(),
+        name: siteName,
+        url: siteUrl.toString(),
+        description: siteDescription,
+        publisher: { "@id": new URL("/#organization", siteUrl).toString() },
+        inLanguage: "en",
+      },
+    ],
+  };
   return (
     <html lang="en" className={geistSans.variable} suppressHydrationWarning>
       <body>
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
         <SiteHeader account={account} />
         {account ? <AuthActivityTracker /> : null}
         {children}

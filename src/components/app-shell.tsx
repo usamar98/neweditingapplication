@@ -16,7 +16,7 @@ function Navigation({ pathname }: { pathname: string }) {
     { href: "/generate/video" as const, icon: Clapperboard, label: "AI video generator" },
     { href: "/generate/image" as const, icon: ImageIcon, label: "AI image generator" },
     { href: "/remove-background" as const, icon: Scissors, label: "Background remover" },
-    { href: "/creative-studio" as const, icon: Megaphone, label: "Performance creative" },
+    { href: "/creative-studio" as const, icon: Megaphone, label: "AI ad generator" },
   ];
 
   return (

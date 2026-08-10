@@ -2,6 +2,7 @@ import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { ArrowRight, Check, Sparkles } from "lucide-react";
 import { MarketingFooter } from "@/components/marketing-footer";
+import { MarketingCardMedia } from "@/components/marketing-card-media";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { getSiteUrl, siteName } from "@/lib/site";
 export const metadata: Metadata = {
   title: "AI Creative Tools for Video, Images & Ads",
   description: "Explore Editing App's AI video editor, multi-model video and image generators, product ad studio, and precision background remover.",
+  keywords: ["AI creative tools", "AI video editor", "AI video generator", "AI image generator", "AI ad generator", "AI background remover"],
   alternates: { canonical: "/features" },
   openGraph: {
     title: "AI Creative Tools for Video, Images & Ads",
@@ -42,7 +44,7 @@ export default function FeaturesPage() {
           itemListElement: marketingFeatures.map((feature, index) => ({
             "@type": "ListItem",
             position: index + 1,
-            name: feature.eyebrow,
+            name: feature.cardTitle,
             url: new URL(`/features/${feature.slug}`, siteUrl).toString(),
           })),
         },
@@ -78,10 +80,11 @@ export default function FeaturesPage() {
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
         <div className="grid gap-5 md:grid-cols-2">
           {marketingFeatures.map((feature, index) => (
-            <Card key={feature.slug} className={index === 3 ? "border-primary/20 bg-primary/[0.045] md:col-span-2" : "border-border bg-card/70"}>
+            <Card key={feature.slug} className={index === 3 ? "overflow-hidden border-primary/20 bg-primary/[0.045] md:col-span-2" : "overflow-hidden border-border bg-card/70"}>
+              <MarketingCardMedia slug={feature.slug} />
               <CardContent className="p-6 sm:p-8">
                 <p className="text-xs font-medium uppercase tracking-[0.15em] text-primary">{feature.eyebrow}</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{feature.title}</h2>
+                <h2 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{feature.cardTitle}</h2>
                 <p className="mt-4 max-w-3xl text-sm leading-6 text-muted-foreground">{feature.description}</p>
                 <ul className="mt-6 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
                   {feature.benefits.slice(0, 4).map((benefit) => <li key={benefit} className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" />{benefit}</li>)}

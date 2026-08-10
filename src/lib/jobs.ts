@@ -278,7 +278,7 @@ export async function enqueueGenerationJob({
       stage: input.kind === "background_removal"
         ? "Cutout agent is preparing"
         : input.kind === "performance_creative"
-          ? "Performance creative agent is preparing"
+          ? "AI ad creative agent is preparing"
           : "Model Autopilot is preparing",
       status: "queued",
       user_id: user.id,

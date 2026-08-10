@@ -274,10 +274,10 @@ export default function Home() {
                 </div>
                 <div data-feature-copy className="flex flex-col justify-center p-6 sm:p-8">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">New flagship tool</Badge></div>
-                  <h3 className="text-2xl font-semibold tracking-[-0.03em]">AI Performance Creative Studio</h3>
+                  <h3 className="text-2xl font-semibold tracking-[-0.03em]">AI Ad Creative Generator</h3>
                   <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Turn a product URL into a source-aware Seedance or Veo ad, or let Video Understanding find the strongest hook in long footage and render a captioned short for the platform you choose.</p>
                   <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-border px-2.5 py-1">Seedance 2.5 Ad Director</span><span className="rounded-full border border-border px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-border px-2.5 py-1">Video Understanding Scout</span></div>
-                  <Link href="/features/performance-creative-studio" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore performance creative <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/performance-creative-studio" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore AI ad generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
