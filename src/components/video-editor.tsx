@@ -313,7 +313,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.55fr)]">
         <section className="min-w-0 space-y-4">
-          <Card className="overflow-hidden border-white/[0.08] bg-black/25">
+          <Card className="overflow-hidden border-border bg-card/70">
             <CardContent className="p-0">
               <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden bg-black p-3 sm:p-5">
                 <div className={cn("relative w-full max-w-full overflow-hidden rounded-lg bg-black shadow-2xl shadow-black/60", playerRatios[settings.aspectRatio])}>
@@ -336,7 +336,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
                   <button type="button" onClick={togglePlayback} className="absolute inset-0 grid place-items-center opacity-0 transition hover:opacity-100 focus-visible:opacity-100" aria-label={playing ? "Pause video" : "Play video"}><span className="grid size-12 place-items-center rounded-full border border-white/15 bg-black/45 backdrop-blur">{playing ? <Pause className="size-5" /> : <Play className="ml-0.5 size-5" />}</span></button>
                 </div>
               </div>
-              <div className="border-t border-white/[0.06] p-4 sm:p-5">
+              <div className="border-t border-border p-4 sm:p-5">
                 <div className="flex items-center gap-3">
                   <Button size="icon" variant="secondary" onClick={togglePlayback} aria-label={playing ? "Pause video" : "Play video"}>{playing ? <Pause className="size-4" /> : <Play className="size-4" />}</Button>
                   <span className="w-24 font-mono text-xs text-muted-foreground">{formatDuration(currentTime)} / {formatDuration(endTime)}</span>
@@ -351,7 +351,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
             </CardContent>
           </Card>
 
-          <Card className="border-white/[0.08] bg-card/55">
+          <Card className="border-border bg-card/70">
             <CardHeader className="pb-4"><div className="flex items-center justify-between"><CardTitle className="text-sm">Trim & scene timeline</CardTitle><span className="font-mono text-xs text-muted-foreground">{formatDuration(settings.trimStart)} — {formatDuration(endTime)}</span></div></CardHeader>
             <CardContent className="space-y-5">
               <Slider value={[settings.trimStart, endTime]} min={0} max={mediaDuration} step={0.1} minStepsBetweenThumbs={1} onValueChange={(value) => setSettings((current) => ({ ...current, trimStart: value[0], trimEnd: value[1] }))} />
@@ -365,7 +365,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
         </section>
 
         <aside className="min-w-0">
-          <Card className="border-white/[0.08] bg-card/55 xl:sticky xl:top-20">
+          <Card className="border-border bg-card/70 xl:sticky xl:top-20">
             <Tabs defaultValue="captions">
               <CardHeader className="pb-3"><TabsList className="grid w-full grid-cols-5"><TabsTrigger value="captions" aria-label="Captions"><Type className="size-4" /></TabsTrigger><TabsTrigger value="cleanup" aria-label="Cleanup"><Scissors className="size-4" /></TabsTrigger><TabsTrigger value="format" aria-label="Format"><Ratio className="size-4" /></TabsTrigger><TabsTrigger value="audio" aria-label="Audio"><Volume2 className="size-4" /></TabsTrigger><TabsTrigger value="transcript" aria-label="Transcript"><Captions className="size-4" /></TabsTrigger></TabsList></CardHeader>
               <CardContent className="pt-1">
@@ -410,7 +410,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
       </div>
 
       {project.analysis.highlights.length > 0 && (
-        <Card className="mt-4 border-white/[0.08] bg-card/55"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Sparkles className="size-4 text-primary" /> AI highlight picks</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{project.analysis.highlights.map((highlight, index) => <button key={`${highlight.start}-${index}`} type="button" onClick={() => seek(highlight.start)} className="rounded-xl border border-white/[0.07] bg-black/10 p-4 text-left transition hover:border-primary/20 hover:bg-primary/[0.035]"><div className="flex items-center justify-between"><span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><WandSparkles className="size-4" /></span><span className="font-mono text-[10px] text-muted-foreground">{formatDuration(highlight.start)}–{formatDuration(highlight.end)}</span></div><p className="mt-4 text-sm font-medium">Highlight {index + 1}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{highlight.reason}</p></button>)}</CardContent></Card>
+        <Card className="mt-4 border-border bg-card/70"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Sparkles className="size-4 text-primary" /> AI highlight picks</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{project.analysis.highlights.map((highlight, index) => <button key={`${highlight.start}-${index}`} type="button" onClick={() => seek(highlight.start)} className="rounded-xl border border-border bg-muted/55 p-4 text-left transition hover:border-primary/20 hover:bg-primary/[0.035]"><div className="flex items-center justify-between"><span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><WandSparkles className="size-4" /></span><span className="font-mono text-[10px] text-muted-foreground">{formatDuration(highlight.start)}–{formatDuration(highlight.end)}</span></div><p className="mt-4 text-sm font-medium">Highlight {index + 1}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{highlight.reason}</p></button>)}</CardContent></Card>
       )}
     </main>
   );

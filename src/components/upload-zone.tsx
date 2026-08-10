@@ -218,11 +218,11 @@ export function UploadZone() {
           onDragOver={(event) => event.preventDefault()}
           onDrop={(event) => { event.preventDefault(); chooseFile(event.dataTransfer.files[0]); }}
           className={cn(
-            "group flex min-h-56 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-white/[0.14] bg-black/10 px-6 text-center transition",
+            "group flex min-h-56 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/55 px-6 text-center transition",
             "hover:border-primary/35 hover:bg-primary/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           )}
         >
-          <span className="mb-4 grid size-12 place-items-center rounded-2xl border border-white/[0.08] bg-white/[0.035] text-muted-foreground transition group-hover:border-primary/20 group-hover:text-primary">
+          <span className="mb-4 grid size-12 place-items-center rounded-2xl border border-border bg-card text-muted-foreground shadow-sm transition group-hover:border-primary/20 group-hover:text-primary">
             <Upload className="size-5" />
           </span>
           <span className="font-medium">Drop a video here, or browse</span>
@@ -230,7 +230,7 @@ export function UploadZone() {
           <span className="mt-4 rounded-full bg-white/[0.035] px-3 py-1 text-[11px] text-muted-foreground">Uploads resume automatically</span>
         </button>
       ) : (
-        <div className="rounded-2xl border border-white/[0.09] bg-black/10 p-5 sm:p-6">
+        <div className="rounded-2xl border border-border bg-muted/55 p-5 sm:p-6">
           <div className="flex items-start gap-4">
             <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><FileVideo className="size-5" /></span>
             <div className="min-w-0 flex-1">

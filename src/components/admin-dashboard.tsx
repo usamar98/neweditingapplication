@@ -96,7 +96,7 @@ function MetricCard({
     yellow: "bg-amber-400/10 text-amber-300 ring-amber-400/15",
   };
   return (
-    <Card className="border-white/[0.04] bg-card/65 shadow-xl shadow-black/10">
+    <Card className="border-border bg-card/75 shadow-xl shadow-black/5">
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -140,7 +140,7 @@ function GrowthChart({ growth }: Pick<AdminDashboardData, "growth">) {
           const gridY = padding.top + chartHeight - fraction * chartHeight;
           return (
             <g key={fraction}>
-              <line x1={padding.left} x2={width - padding.right} y1={gridY} y2={gridY} stroke="currentColor" className="text-white/[0.07]" />
+              <line x1={padding.left} x2={width - padding.right} y1={gridY} y2={gridY} stroke="currentColor" className="text-foreground/10" />
               <text x={padding.left - 9} y={gridY + 4} textAnchor="end" className="fill-muted-foreground text-[10px]">{Math.round(maxCumulative * fraction)}</text>
             </g>
           );
@@ -210,7 +210,7 @@ function CountryChart({ countries }: Pick<AdminDashboardData, "countries">) {
 }
 
 function SubscriptionBadge({ user }: { user: AdminUserRow }) {
-  if (user.plan === "starter") return <Badge variant="outline" className="border-white/10 text-muted-foreground">Starter</Badge>;
+  if (user.plan === "starter") return <Badge variant="outline" className="border-border text-muted-foreground">Starter</Badge>;
   const active = user.subscriptionStatus === "active" || user.subscriptionStatus === "trialing";
   return (
     <div>
@@ -240,8 +240,8 @@ function UsersTable({ generatedAt, users }: { generatedAt: string; users: AdminU
   const pageUsers = filteredUsers.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
-    <Card className="border-white/[0.04] bg-card/70 shadow-2xl shadow-black/15">
-      <CardHeader className="border-b border-white/[0.06] pb-5">
+    <Card className="border-border bg-card/75 shadow-2xl shadow-black/5">
+      <CardHeader className="border-b border-border pb-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2"><UsersRound className="size-4 text-primary" /> User directory</CardTitle>
@@ -261,7 +261,7 @@ function UsersTable({ generatedAt, users }: { generatedAt: string; users: AdminU
           <TableHeader><TableRow className="hover:bg-transparent"><TableHead className="pl-5">User</TableHead><TableHead>Activity</TableHead><TableHead>Subscription</TableHead><TableHead>Country</TableHead><TableHead>Joined</TableHead><TableHead className="pr-5 text-right">Account</TableHead></TableRow></TableHeader>
           <TableBody>
             {pageUsers.map((user) => (
-              <TableRow key={user.id} className="border-white/[0.05]">
+              <TableRow key={user.id} className="border-border">
                 <TableCell className="min-w-64 pl-5 py-3.5">
                   <div className="flex items-center gap-3">
                     <Avatar className="size-9 ring-1 ring-white/10"><AvatarImage src={user.avatarUrl ?? undefined} alt="" /><AvatarFallback className="bg-primary/10 text-xs text-primary">{user.displayName.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
@@ -278,7 +278,7 @@ function UsersTable({ generatedAt, users }: { generatedAt: string; users: AdminU
             {pageUsers.length === 0 ? <TableRow><TableCell colSpan={6} className="h-40 text-center text-muted-foreground">No users match this view.</TableCell></TableRow> : null}
           </TableBody>
         </Table>
-        <div className="flex flex-col gap-3 border-t border-white/[0.06] px-5 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-border px-5 py-4 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>Showing {filteredUsers.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length} users</p>
           <div className="flex items-center gap-2"><Button size="sm" variant="outline" disabled={safePage <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}><ArrowLeft className="size-3.5" /> Previous</Button><span className="px-2">{safePage} / {pageCount}</span><Button size="sm" variant="outline" disabled={safePage >= pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Next <ArrowRight className="size-3.5" /></Button></div>
         </div>
@@ -294,7 +294,7 @@ export function AdminDashboard({ adminEmail, data }: { adminEmail: string; data:
   const updatedLabel = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone: "UTC", timeZoneName: "short" }).format(new Date(data.generatedAt));
 
   return (
-    <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-black/10">
+    <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-foreground/[0.025]">
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[520px] opacity-50" />
       <div className="relative mx-auto max-w-[1600px] px-4 py-7 sm:px-6 lg:px-8 lg:py-10">
         <header className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -319,25 +319,25 @@ export function AdminDashboard({ adminEmail, data }: { adminEmail: string; data:
         </section>
 
         <section className="mt-4 grid gap-4 xl:grid-cols-[1.65fr_0.75fr]">
-          <Card className="border-white/[0.04] bg-card/70 shadow-2xl shadow-black/15">
+          <Card className="border-border bg-card/75 shadow-2xl shadow-black/5">
             <CardHeader className="flex-row items-start justify-between">
               <div><CardTitle className="flex items-center gap-2"><TrendingUp className="size-4 text-primary" /> User growth</CardTitle><CardDescription className="mt-1">Cumulative accounts and daily signups over 30 days.</CardDescription></div>
               <Badge variant="outline" className="border-primary/15 text-primary"><Sparkles className="size-3" /> 30 days</Badge>
             </CardHeader>
             <CardContent><GrowthChart growth={data.growth} /></CardContent>
           </Card>
-          <Card className="border-white/[0.04] bg-card/70 shadow-2xl shadow-black/15">
+          <Card className="border-border bg-card/75 shadow-2xl shadow-black/5">
             <CardHeader><CardTitle className="flex items-center gap-2"><CheckCircle2 className="size-4 text-violet-300" /> Plan mix</CardTitle><CardDescription>Current account distribution by subscription tier.</CardDescription></CardHeader>
             <CardContent><PlanChart planMix={data.planMix} total={overview.totalUsers} /></CardContent>
           </Card>
         </section>
 
         <section className="mt-4 grid gap-4 xl:grid-cols-[0.75fr_1.65fr]">
-          <Card className="border-white/[0.04] bg-card/70 shadow-2xl shadow-black/15">
+          <Card className="border-border bg-card/75 shadow-2xl shadow-black/5">
             <CardHeader><CardTitle className="flex items-center gap-2"><Globe2 className="size-4 text-blue-300" /> Audience geography</CardTitle><CardDescription>Top countries from recent authenticated activity.</CardDescription></CardHeader>
             <CardContent><CountryChart countries={data.countries} /></CardContent>
           </Card>
-          <Card className="border-white/[0.04] bg-gradient-to-br from-primary/[0.07] via-card/70 to-blue-400/[0.04] shadow-2xl shadow-black/15">
+          <Card className="border-border bg-gradient-to-br from-primary/[0.07] via-card/75 to-blue-400/[0.04] shadow-2xl shadow-black/5">
             <CardContent className="grid h-full min-h-72 content-center gap-7 p-7 sm:grid-cols-[1fr_auto] sm:items-center">
               <div>
                 <Badge className="border-0 bg-primary/10 text-primary"><Clock3 className="size-3" /> Operating snapshot</Badge>
@@ -345,8 +345,8 @@ export function AdminDashboard({ adminEmail, data }: { adminEmail: string; data:
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">Country coverage improves automatically as signed-in users return. Online status is refreshed through a lightweight authenticated heartbeat and expires after five minutes.</p>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:w-72">
-                <div className="rounded-xl border border-white/[0.07] bg-black/15 p-4"><ArrowDownRight className="size-4 rotate-180 text-primary" /><p className="mt-4 text-2xl font-semibold">{formatNumber(overview.conversionRate, 1)}%</p><p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Conversion</p></div>
-                <div className="rounded-xl border border-white/[0.07] bg-black/15 p-4"><BadgeDollarSign className="size-4 text-amber-300" /><p className="mt-4 text-2xl font-semibold">{formatMoney(overview.monthlyRecurringRevenue)}</p><p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Active MRR</p></div>
+                <div className="rounded-xl border border-border bg-muted/55 p-4"><ArrowDownRight className="size-4 rotate-180 text-primary" /><p className="mt-4 text-2xl font-semibold">{formatNumber(overview.conversionRate, 1)}%</p><p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Conversion</p></div>
+                <div className="rounded-xl border border-border bg-muted/55 p-4"><BadgeDollarSign className="size-4 text-amber-700" /><p className="mt-4 text-2xl font-semibold">{formatMoney(overview.monthlyRecurringRevenue)}</p><p className="mt-1 text-[10px] uppercase tracking-[0.12em] text-muted-foreground">Active MRR</p></div>
               </div>
             </CardContent>
           </Card>

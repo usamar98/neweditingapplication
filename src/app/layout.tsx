@@ -82,7 +82,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       }
     : null;
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <body>
         <TooltipProvider>
           <SiteHeader account={account} />

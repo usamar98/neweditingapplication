@@ -265,7 +265,7 @@ export function GenerationStudio({
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-card/50 px-5 py-7 sm:px-7">
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card/70 px-5 py-7 sm:px-7">
         <div className="surface-grid pointer-events-none absolute inset-0 opacity-35" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
@@ -283,7 +283,7 @@ export function GenerationStudio({
           </div>
           <div className="grid grid-cols-3 gap-2 text-center text-xs sm:min-w-[360px]">
             {["Best-fit model", "Private output", "Visible routing"].map((item) => (
-              <div key={item} className="rounded-lg border border-white/[0.06] bg-black/15 px-3 py-3 text-muted-foreground">
+              <div key={item} className="rounded-lg border border-border bg-muted/55 px-3 py-3 text-muted-foreground">
                 <Check className="mx-auto mb-2 size-3.5 text-primary" />{item}
               </div>
             ))}
@@ -292,7 +292,7 @@ export function GenerationStudio({
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
-        <Card className="border-white/[0.08] bg-card/55">
+        <Card className="border-border bg-card/70">
           <CardContent className="p-5 sm:p-7">
             <form onSubmit={submit} className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
@@ -322,9 +322,9 @@ export function GenerationStudio({
                     placeholder={examples[0]}
                     className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0"
                   />
-                  <div className="flex items-center justify-between border-t border-white/[0.06] p-2">
+                  <div className="flex items-center justify-between border-t border-border p-2">
                     <Select value={agentId} onValueChange={selectAgent}>
-                      <SelectTrigger aria-label="Select AI model agent" className="h-9 w-[220px] border-white/[0.08] bg-black/15 text-xs">
+                      <SelectTrigger aria-label="Select AI model agent" className="h-9 w-[220px] border-border bg-card text-xs">
                         <Bot className="size-3.5 text-primary" />
                         <SelectValue />
                       </SelectTrigger>
@@ -342,7 +342,7 @@ export function GenerationStudio({
                 </div>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {examples.slice(1).map((example, index) => (
-                    <button key={example} type="button" onClick={() => setPrompt(example)} className="rounded-full border border-white/[0.08] px-3 py-1.5 text-left text-[11px] text-muted-foreground transition hover:border-primary/25 hover:text-foreground">
+                    <button key={example} type="button" onClick={() => setPrompt(example)} className="rounded-full border border-border bg-card/65 px-3 py-1.5 text-left text-[11px] text-muted-foreground transition hover:border-primary/25 hover:text-foreground">
                       Try direction {index + 1}
                     </button>
                   ))}
@@ -360,7 +360,7 @@ export function GenerationStudio({
                       onClick={() => setProfile(item.value)}
                       className={cn(
                         "rounded-xl border p-3 text-left transition",
-                        profile === item.value ? "border-primary/35 bg-primary/[0.08]" : "border-white/[0.07] bg-black/10 hover:border-white/15",
+                        profile === item.value ? "border-primary/35 bg-primary/[0.08]" : "border-border bg-muted/55 hover:border-primary/20",
                       )}
                     >
                       <item.icon className={cn("mb-4 size-4 text-muted-foreground", profile === item.value && "text-primary")} />
@@ -414,7 +414,7 @@ export function GenerationStudio({
 
               {error && <Alert variant="destructive"><CircleAlert className="size-4" /><AlertDescription>{error}</AlertDescription></Alert>}
 
-              <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs leading-5 text-muted-foreground">
                   {agentId === "auto"
                     ? "Autopilot makes a fresh routing decision for every brief and preserves the reason with your result."
@@ -431,7 +431,7 @@ export function GenerationStudio({
 
         <div className="space-y-4">
           <ModelAutopilot generation={selected} />
-          <Card className="overflow-hidden border-white/[0.08] bg-card/55">
+          <Card className="overflow-hidden border-border bg-card/70">
             {selected ? (
               <>
                 <div className="group relative overflow-hidden bg-black/25">
@@ -451,7 +451,7 @@ export function GenerationStudio({
                 <Image src={isImage ? aiImageVisual : aiVideoVisual} alt="" fill placeholder="blur" sizes="(max-width: 1280px) 100vw, 34vw" className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/10" />
                 <CardContent className="relative grid min-h-80 place-items-end p-6 text-center">
-                  <div className="mx-auto max-w-xs"><Aperture className="mx-auto size-7 text-primary" /><p className="mt-4 text-sm font-medium">Your first {kind} starts here</p><p className="mt-2 text-xs leading-5 text-white/65">Write a creative brief and Model Autopilot will take it from there.</p></div>
+                  <div className="mx-auto max-w-xs"><Aperture className="mx-auto size-7 text-primary" /><p className="mt-4 text-sm font-medium">Your first {kind} starts here</p><p className="mt-2 text-xs leading-5 text-muted-foreground">Write a creative brief and Model Autopilot will take it from there.</p></div>
                 </CardContent>
               </div>
             )}
@@ -467,7 +467,7 @@ export function GenerationStudio({
         {generations.length ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {generations.map((generation) => (
-              <button key={generation.id} type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className={cn("group overflow-hidden rounded-xl border bg-card/50 text-left transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-white/[0.07]")}>
+              <button key={generation.id} type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className={cn("group overflow-hidden rounded-xl border bg-card/65 text-left transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-border")}>
                 <div className="relative overflow-hidden"><MediaPreview controls={false} generation={generation} kind={kind} /><div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div>
                 <div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.model_endpoint ?? "Autopilot selecting model"}</p></div>
               </button>

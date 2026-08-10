@@ -156,7 +156,7 @@ export function BackgroundRemover({
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-card/50 px-5 py-7 sm:px-7">
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card/70 px-5 py-7 sm:px-7">
         <div className="surface-grid pointer-events-none absolute inset-0 opacity-35" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl">
@@ -165,13 +165,13 @@ export function BackgroundRemover({
             <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">Private source uploads, precision matting for hair and products, a transparent PNG result, and a faster agent when speed matters.</p>
           </div>
           <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-            {["20 MB source", "Private processing", "Transparent PNG"].map((item) => <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.07] bg-black/15 px-3 py-2"><Check className="size-3 text-primary" />{item}</span>)}
+            {["20 MB source", "Private processing", "Transparent PNG"].map((item) => <span key={item} className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted/60 px-3 py-2"><Check className="size-3 text-primary" />{item}</span>)}
           </div>
         </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <Card className="border-white/[0.08] bg-card/55">
+        <Card className="border-border bg-card/70">
           <CardContent className="space-y-5 p-5 sm:p-7">
             <div className="space-y-2">
               <Label htmlFor="cutout-name">Result name</Label>
@@ -183,7 +183,7 @@ export function BackgroundRemover({
               onClick={() => fileInput.current?.click()}
               onDragOver={(event) => event.preventDefault()}
               onDrop={(event) => { event.preventDefault(); chooseFile(event.dataTransfer.files[0] ?? null); }}
-              className="group relative grid min-h-80 w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-white/15 bg-black/15 text-center transition hover:border-primary/35"
+              className="group relative grid min-h-80 w-full place-items-center overflow-hidden rounded-2xl border border-dashed border-border bg-muted/55 text-center transition hover:border-primary/35"
             >
               {previewUrl ? (
                 <img src={previewUrl} alt="Selected source" className="absolute inset-0 h-full w-full object-contain" />
@@ -196,9 +196,9 @@ export function BackgroundRemover({
 
             {error && <Alert variant="destructive"><CircleAlert className="size-4" /><AlertDescription>{error}</AlertDescription></Alert>}
 
-            <div className="flex flex-col gap-3 rounded-xl border border-white/[0.07] bg-black/10 p-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/55 p-2 sm:flex-row sm:items-center sm:justify-between">
               <Select value={agentId} onValueChange={setAgentId}>
-                <SelectTrigger aria-label="Select background removal agent" className="h-10 w-full bg-black/20 sm:w-[250px]"><Bot className="size-4 text-primary" /><SelectValue /></SelectTrigger>
+                <SelectTrigger aria-label="Select background removal agent" className="h-10 w-full bg-card sm:w-[250px]"><Bot className="size-4 text-primary" /><SelectValue /></SelectTrigger>
                 <SelectContent align="start" className="w-[320px]">
                   {backgroundAgents.map((agent) => <SelectItem key={agent.id} value={agent.id}><span className="font-medium">{agent.label}</span><span className="ml-2 text-[10px] text-muted-foreground">{agent.tag}</span></SelectItem>)}
                 </SelectContent>
@@ -211,7 +211,7 @@ export function BackgroundRemover({
           </CardContent>
         </Card>
 
-        <Card className="overflow-hidden border-white/[0.08] bg-card/55">
+        <Card className="overflow-hidden border-border bg-card/70">
           <div className="grid min-h-[420px] place-items-center bg-[linear-gradient(45deg,oklch(0.22_0.01_265)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.22_0.01_265)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.22_0.01_265)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.22_0.01_265)_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0px]">
             {selected?.outputUrl ? (
               <img src={selected.outputUrl} alt={selected.name} className="max-h-[560px] w-full object-contain" />
@@ -227,7 +227,7 @@ export function BackgroundRemover({
 
       <section>
         <div className="mb-4 flex items-end justify-between"><div><h2 className="text-xl font-semibold">Recent cutouts</h2><p className="mt-1 text-sm text-muted-foreground">Private source processing and transparent results.</p></div><span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><RefreshCw className={cn("size-3", activeIds && "animate-spin")} />{activeIds ? "Live updates" : `${generations.length} total`}</span></div>
-        {generations.length > 0 && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{generations.map((generation) => <button key={generation.id} type="button" onClick={() => setSelectedId(generation.id)} className={cn("overflow-hidden rounded-xl border bg-card/50 text-left", selected?.id === generation.id ? "border-primary/35" : "border-white/[0.07]")}><div className="grid aspect-[4/3] place-items-center bg-black/20">{generation.outputUrl ? <img src={generation.outputUrl} alt={generation.name} className="h-full w-full object-contain" /> : <LoaderCircle className="size-5 animate-spin text-primary" />}</div><div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.status}</p></div></button>)}</div>}
+        {generations.length > 0 && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{generations.map((generation) => <button key={generation.id} type="button" onClick={() => setSelectedId(generation.id)} className={cn("overflow-hidden rounded-xl border bg-card/65 text-left", selected?.id === generation.id ? "border-primary/35" : "border-border")}><div className="grid aspect-[4/3] place-items-center bg-muted/60">{generation.outputUrl ? <img src={generation.outputUrl} alt={generation.name} className="h-full w-full object-contain" /> : <LoaderCircle className="size-5 animate-spin text-primary" />}</div><div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.status}</p></div></button>)}</div>}
       </section>
     </main>
   );

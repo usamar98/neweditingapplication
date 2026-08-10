@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <main className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="relative hidden overflow-hidden border-r border-white/[0.06] bg-black/10 p-10 lg:flex lg:flex-col">
+      <section className="relative hidden overflow-hidden border-r border-border bg-foreground/[0.025] p-10 lg:flex lg:flex-col">
         <div className="surface-grid pointer-events-none absolute inset-0" />
         <div className="relative z-10 my-auto max-w-xl">
           <span className="mb-7 grid size-12 place-items-center rounded-2xl border border-primary/15 bg-primary/10 text-primary"><Film className="size-5" /></span>
@@ -41,7 +41,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           <Link href="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground transition hover:text-foreground"><ArrowLeft className="size-4" /> Back home</Link>
         </div>
         <div className="my-auto flex justify-center py-12">
-          <Card className="w-full max-w-md border-white/[0.08] bg-card/85 shadow-2xl shadow-black/30">
+          <Card className="w-full max-w-md border-border bg-card/90 shadow-2xl shadow-black/10">
             <CardContent className="p-6 sm:p-8">
               <Suspense fallback={<div className="h-[420px] animate-pulse rounded-xl bg-muted" />}>
                 <AuthForm />

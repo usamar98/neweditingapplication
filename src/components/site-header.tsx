@@ -31,7 +31,7 @@ export function SiteHeader({ account }: { account: HeaderAccount }) {
   const pathname = usePathname();
   const initials = (account?.displayName || account?.username || account?.email || "EA").slice(0, 2).toUpperCase();
   return (
-    <header className="sticky top-0 z-50 h-16 border-b border-white/[0.07] bg-background/88 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 h-16 border-b border-border bg-background/88 shadow-sm shadow-black/[0.03] backdrop-blur-xl">
       <div className="mx-auto flex h-full max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           {account && (
@@ -47,9 +47,9 @@ export function SiteHeader({ account }: { account: HeaderAccount }) {
           <Brand />
         </div>
 
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-white/[0.07] bg-black/15 p-1 text-sm text-muted-foreground md:flex">
-          <Link href="/#features" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-foreground">Features</Link>
-          <Link href="/#pricing" className="rounded-full px-4 py-2 transition hover:bg-white/[0.05] hover:text-foreground">Pricing</Link>
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-card/70 p-1 text-sm text-muted-foreground shadow-sm md:flex">
+          <Link href="/#features" className="rounded-full px-4 py-2 transition hover:bg-muted hover:text-foreground">Features</Link>
+          <Link href="/#pricing" className="rounded-full px-4 py-2 transition hover:bg-muted hover:text-foreground">Pricing</Link>
         </nav>
 
         {account ? (

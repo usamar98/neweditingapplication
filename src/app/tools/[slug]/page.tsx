@@ -83,11 +83,11 @@ export default async function ToolPage({ params }: ToolPageProps) {
       </section>
 
       <section className="mx-auto grid max-w-6xl gap-5 px-5 pb-20 sm:px-8 lg:grid-cols-2 lg:pb-28">
-        <Card className="border-white/[0.08] bg-card/60">
+        <Card className="border-border bg-card/70">
           <CardContent className="p-6 sm:p-8">
             <h2 className="text-2xl font-semibold tracking-[-0.03em]">What you can produce</h2>
             <div className="mt-7 grid gap-3">
-              {page.outcomes.map((outcome) => <div key={outcome} className="flex gap-3 rounded-xl border border-white/[0.07] bg-black/10 p-4 text-sm leading-6 text-muted-foreground"><Check className="mt-1 size-4 shrink-0 text-primary" />{outcome}</div>)}
+              {page.outcomes.map((outcome) => <div key={outcome} className="flex gap-3 rounded-xl border border-border bg-muted/55 p-4 text-sm leading-6 text-muted-foreground"><Check className="mt-1 size-4 shrink-0 text-primary" />{outcome}</div>)}
             </div>
           </CardContent>
         </Card>
@@ -101,11 +101,11 @@ export default async function ToolPage({ params }: ToolPageProps) {
         </Card>
       </section>
 
-      <section className="border-y border-white/[0.06] bg-black/10">
+      <section className="border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
           <h2 className="text-3xl font-semibold tracking-[-0.035em]">Built for repeatable creative work</h2>
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {page.useCases.map((useCase) => <div key={useCase} className="rounded-xl border border-white/[0.07] bg-card/50 p-5 text-sm font-medium">{useCase}</div>)}
+            {page.useCases.map((useCase) => <div key={useCase} className="rounded-xl border border-border bg-card/65 p-5 text-sm font-medium">{useCase}</div>)}
           </div>
         </div>
       </section>
@@ -113,7 +113,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
       <section className="mx-auto max-w-4xl px-5 py-20 sm:px-8">
         <h2 className="text-center text-3xl font-semibold tracking-[-0.035em]">Frequently asked questions</h2>
         <div className="mt-10 space-y-3">
-          {page.faq.map((item) => <Card key={item.question} className="border-white/[0.07] bg-card/50"><CardContent className="p-5 sm:p-6"><h3 className="font-medium">{item.question}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.answer}</p></CardContent></Card>)}
+          {page.faq.map((item) => <Card key={item.question} className="border-border bg-card/65"><CardContent className="p-5 sm:p-6"><h3 className="font-medium">{item.question}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.answer}</p></CardContent></Card>)}
         </div>
       </section>
     </main>

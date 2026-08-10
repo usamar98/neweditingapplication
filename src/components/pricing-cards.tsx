@@ -42,7 +42,7 @@ export function PricingCards() {
       {error && <Alert variant="destructive" className="mx-auto mb-5 max-w-2xl"><AlertDescription>{error}</AlertDescription></Alert>}
       <div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
         {billingPlans.map((plan) => (
-          <Card key={plan.key} className={cn("relative border-white/[0.08] bg-card/60", "popular" in plan && plan.popular && "border-primary/35 bg-primary/[0.045] shadow-2xl shadow-primary/5 lg:-translate-y-3")}>
+          <Card key={plan.key} className={cn("relative border-border bg-card/70", "popular" in plan && plan.popular && "border-primary/35 bg-primary/[0.045] shadow-2xl shadow-primary/5 lg:-translate-y-3")}>
             {"popular" in plan && plan.popular && <Badge className="absolute right-5 top-4 shadow-lg">Most popular</Badge>}
             <CardContent className="flex h-full flex-col p-6 sm:p-7">
               <h3 className="text-lg font-medium">{plan.name}</h3>

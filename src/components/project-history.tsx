@@ -24,7 +24,7 @@ export function ProjectHistory({ projects }: { projects: ProjectListItem[] }) {
     <>
       <div className="grid gap-3 md:hidden">
         {projects.map((project) => (
-          <Link key={project.id} href={`/projects/${project.id}`} className="rounded-xl border border-white/[0.08] bg-card/55 p-4 transition hover:border-primary/20 hover:bg-card">
+          <Link key={project.id} href={`/projects/${project.id}`} className="rounded-xl border border-border bg-card/70 p-4 transition hover:border-primary/20 hover:bg-card">
             <div className="flex items-start gap-3">
               <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><FileVideo className="size-4" /></span>
               <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{project.name}</p><p className="mt-1 truncate text-xs text-muted-foreground">{project.source_filename}</p></div>
@@ -34,7 +34,7 @@ export function ProjectHistory({ projects }: { projects: ProjectListItem[] }) {
           </Link>
         ))}
       </div>
-      <Card className="hidden overflow-hidden border-white/[0.08] bg-card/55 md:block">
+      <Card className="hidden overflow-hidden border-border bg-card/70 md:block">
         <Table>
           <TableHeader><TableRow className="hover:bg-transparent"><TableHead>Project</TableHead><TableHead>Status</TableHead><TableHead>Duration</TableHead><TableHead>Size</TableHead><TableHead>Updated</TableHead><TableHead className="w-14" /></TableRow></TableHeader>
           <TableBody>

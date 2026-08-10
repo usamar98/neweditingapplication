@@ -210,7 +210,7 @@ export function PerformanceCreativeStudio({
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-card/50 px-5 py-7 sm:px-7">
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card/70 px-5 py-7 sm:px-7">
         <div className="surface-grid pointer-events-none absolute inset-0 opacity-35" />
         <div className="relative grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
           <div className="max-w-3xl">
@@ -221,14 +221,14 @@ export function PerformanceCreativeStudio({
           <div className="grid grid-cols-2 gap-2">
             {platformOptions.map((item) => {
               const preset = performanceCreativePlatformPresets[item.id];
-              return <div key={item.id} className="rounded-xl border border-white/[0.07] bg-black/15 p-3"><item.icon className={cn("size-4", item.accent)} /><p className="mt-3 text-xs font-medium">{preset.label}</p><p className="mt-1 text-[10px] text-muted-foreground">{preset.placement}</p></div>;
+              return <div key={item.id} className="rounded-xl border border-border bg-muted/55 p-3"><item.icon className={cn("size-4", item.accent)} /><p className="mt-3 text-xs font-medium">{preset.label}</p><p className="mt-1 text-[10px] text-muted-foreground">{preset.placement}</p></div>;
             })}
           </div>
         </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
-        <Card className="border-white/[0.08] bg-card/55">
+        <Card className="border-border bg-card/70">
           <CardHeader><CardTitle className="text-lg">Build a performance creative</CardTitle></CardHeader>
           <CardContent>
             <form onSubmit={submit} className="space-y-6">
@@ -255,7 +255,7 @@ export function PerformanceCreativeStudio({
                         <SelectContent>{readyProjects.map((project) => <SelectItem key={project.id} value={project.id}>{project.name} · {Math.round(Number(project.duration_seconds ?? 0))}s</SelectItem>)}</SelectContent>
                       </Select>
                     ) : (
-                      <div className="rounded-xl border border-dashed border-white/[0.1] bg-black/10 p-5 text-center">
+                      <div className="rounded-xl border border-dashed border-border bg-muted/55 p-5 text-center">
                         <Upload className="mx-auto size-5 text-primary" /><p className="mt-3 text-sm">Upload and analyze a long video first.</p>
                         <Button asChild variant="outline" size="sm" className="mt-4"><Link href={"/dashboard#new-project" as Route}>Upload long video</Link></Button>
                       </div>
@@ -270,7 +270,7 @@ export function PerformanceCreativeStudio({
                   {platformOptions.map((item) => {
                     const preset = performanceCreativePlatformPresets[item.id];
                     return (
-                      <button key={item.id} type="button" aria-pressed={platform === item.id} onClick={() => setPlatform(item.id)} className={cn("rounded-xl border p-3 text-left transition", platform === item.id ? "border-primary/35 bg-primary/[0.08]" : "border-white/[0.07] bg-black/10 hover:border-white/15")}>
+                      <button key={item.id} type="button" aria-pressed={platform === item.id} onClick={() => setPlatform(item.id)} className={cn("rounded-xl border p-3 text-left transition", platform === item.id ? "border-primary/35 bg-primary/[0.08]" : "border-border bg-muted/55 hover:border-primary/20")}>
                         <item.icon className={cn("size-4", platform === item.id ? "text-primary" : item.accent)} />
                         <p className="mt-3 text-sm font-medium">{preset.label}</p><p className="mt-1 text-[10px] text-muted-foreground">{preset.placement}</p>
                       </button>
@@ -290,9 +290,9 @@ export function PerformanceCreativeStudio({
                 <div className="flex items-center justify-between"><Label htmlFor="performance-brief">3. Creative brief</Label><span className="text-[11px] text-muted-foreground">{prompt.length}/4000</span></div>
                 <div className="overflow-hidden rounded-xl border border-input bg-input/15 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
                   <Textarea id="performance-brief" value={prompt} onChange={(event) => setPrompt(event.target.value)} minLength={3} maxLength={4000} required className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0" />
-                  <div className="flex items-center justify-between border-t border-white/[0.06] p-2">
+                  <div className="flex items-center justify-between border-t border-border p-2">
                     <Select value={agentId} onValueChange={setAgentId}>
-                      <SelectTrigger aria-label="Select performance creative model" className="h-9 w-[240px] border-white/[0.08] bg-black/15 text-xs"><Bot className="size-3.5 text-primary" /><SelectValue /></SelectTrigger>
+                      <SelectTrigger aria-label="Select performance creative model" className="h-9 w-[240px] border-border bg-card text-xs"><Bot className="size-3.5 text-primary" /><SelectValue /></SelectTrigger>
                       <SelectContent align="start" className="w-[330px]">{agents.map((agent) => <SelectItem key={agent.id} value={agent.id}><span className="font-medium">{agent.label}</span><span className="ml-2 text-[10px] text-muted-foreground">{agent.tag}</span></SelectItem>)}</SelectContent>
                     </Select>
                     <span className="pr-2 text-[10px] text-muted-foreground">Source-aware agent</span>
@@ -302,7 +302,7 @@ export function PerformanceCreativeStudio({
               </div>
 
               {error ? <Alert variant="destructive"><CircleAlert className="size-4" /><AlertDescription>{error}</AlertDescription></Alert> : null}
-              <div className="flex flex-col gap-3 border-t border-white/[0.06] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs leading-5 text-muted-foreground">AI decisions and paid model results are checkpointed before private delivery, so a recoverable upload retry does not regenerate the creative.</p>
                 <Button type="submit" size="lg" disabled={submitting || !name.trim() || !prompt.trim() || !audience.trim() || !callToAction.trim()} className="h-11 px-6">
                   {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}{submitting ? "Queuing…" : "Create performance ad"}
@@ -313,7 +313,7 @@ export function PerformanceCreativeStudio({
         </Card>
 
         <div className="space-y-4">
-          <Card className="overflow-hidden border-white/[0.08] bg-card/55">
+          <Card className="overflow-hidden border-border bg-card/70">
             {selected ? (
               <>
                 <div className="relative aspect-[9/16] max-h-[620px] overflow-hidden bg-black/35">
@@ -330,7 +330,7 @@ export function PerformanceCreativeStudio({
             )}
           </Card>
           {selectedPlan ? (
-            <Card className="border-white/[0.08] bg-card/55"><CardHeader><CardTitle className="text-base">Conversion brief</CardTitle></CardHeader><CardContent className="space-y-4 text-sm"><div><p className="text-[10px] uppercase tracking-[0.16em] text-primary">Hook</p><p className="mt-1 font-medium">{selectedPlan.hook}</p></div><div><p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Headline</p><p className="mt-1">{selectedPlan.headline}</p></div><div><p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Script</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{selectedPlan.script}</p></div><div className="rounded-xl border border-primary/15 bg-primary/5 p-3"><p className="text-[10px] uppercase tracking-[0.16em] text-primary">CTA</p><p className="mt-1 font-medium">{selectedPlan.callToAction}</p></div></CardContent></Card>
+            <Card className="border-border bg-card/70"><CardHeader><CardTitle className="text-base">Conversion brief</CardTitle></CardHeader><CardContent className="space-y-4 text-sm"><div><p className="text-[10px] uppercase tracking-[0.16em] text-primary">Hook</p><p className="mt-1 font-medium">{selectedPlan.hook}</p></div><div><p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Headline</p><p className="mt-1">{selectedPlan.headline}</p></div><div><p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">Script</p><p className="mt-1 text-xs leading-5 text-muted-foreground">{selectedPlan.script}</p></div><div className="rounded-xl border border-primary/15 bg-primary/5 p-3"><p className="text-[10px] uppercase tracking-[0.16em] text-primary">CTA</p><p className="mt-1 font-medium">{selectedPlan.callToAction}</p></div></CardContent></Card>
           ) : null}
         </div>
       </section>
@@ -338,7 +338,7 @@ export function PerformanceCreativeStudio({
       <section>
         <div className="mb-4 flex items-end justify-between gap-4"><div><h2 className="text-xl font-semibold tracking-[-0.025em]">Recent performance creatives</h2><p className="mt-1 text-sm text-muted-foreground">Private outputs with platform and model decisions preserved.</p></div><span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><RefreshCw className={cn("size-3", activeIds && "animate-spin")} /> {activeIds ? "Live updates" : `${generations.length} total`}</span></div>
         {generations.length ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{generations.map((generation) => { const itemSettings = settingsOf(generation.settings); const itemPlatform = itemSettings.platform ? performanceCreativePlatformPresets[itemSettings.platform] : null; return <button key={generation.id} type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className={cn("overflow-hidden rounded-xl border bg-card/50 text-left transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-white/[0.07]")}><div className="relative aspect-video bg-black/30">{generation.outputUrl ? <video src={generation.outputUrl} muted playsInline preload="metadata" className="size-full object-cover" /> : <div className="grid size-full place-items-center"><LoaderCircle className="size-5 animate-spin text-primary" /></div>}<div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div><div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{itemPlatform?.label ?? "Platform"} · {generation.model_endpoint ?? "Agent selecting"}</p></div></button>; })}</div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{generations.map((generation) => { const itemSettings = settingsOf(generation.settings); const itemPlatform = itemSettings.platform ? performanceCreativePlatformPresets[itemSettings.platform] : null; return <button key={generation.id} type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className={cn("overflow-hidden rounded-xl border bg-card/65 text-left transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-border")}><div className="relative aspect-video bg-black/30">{generation.outputUrl ? <video src={generation.outputUrl} muted playsInline preload="metadata" className="size-full object-cover" /> : <div className="grid size-full place-items-center"><LoaderCircle className="size-5 animate-spin text-primary" /></div>}<div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div><div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{itemPlatform?.label ?? "Platform"} · {generation.model_endpoint ?? "Agent selecting"}</p></div></button>; })}</div>
         ) : <Card className="border-dashed bg-card/35"><CardContent className="grid min-h-44 place-items-center p-8 text-center"><div><Megaphone className="mx-auto size-5 text-primary" /><p className="mt-3 text-sm">No performance creatives yet.</p></div></CardContent></Card>}
       </section>
     </main>

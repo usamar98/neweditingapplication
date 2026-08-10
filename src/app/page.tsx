@@ -29,6 +29,7 @@ import aiVideoVisual from "@/assets/media/ai-video.webp";
 import videoEditorVisual from "@/assets/media/video-editor.webp";
 import { Brand } from "@/components/brand";
 import { PricingCards } from "@/components/pricing-cards";
+import { FeatureReveal } from "@/components/feature-reveal";
 import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteDescription } from "@/lib/site";
 
@@ -95,7 +96,7 @@ export default function Home() {
                 Start creating free <ArrowRight className="size-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild className="h-12 border-white/10 bg-white/[0.02] px-6">
+            <Button size="lg" variant="outline" asChild className="h-12 border-border bg-card/55 px-6">
               <Link href="/features/ai-video-generator">Explore the studio</Link>
             </Button>
           </div>
@@ -105,14 +106,14 @@ export default function Home() {
             <span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-primary" /> Live progress</span>
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-2" aria-label="Available premium AI model families">
-            {['Seedance 2.5', 'LTX 2.3', 'Veo 3.1', 'Kling 3', 'Seedream 5'].map((model) => <Link href="/ai-video-models" key={model} className="rounded-full border border-white/[0.08] bg-black/15 px-3 py-1.5 text-[10px] font-medium text-white/60 transition hover:border-primary/25 hover:text-primary">{model}</Link>)}
+            {['Seedance 2.5', 'LTX 2.3', 'Veo 3.1', 'Kling 3', 'Seedream 5'].map((model) => <Link href="/ai-video-models" key={model} className="rounded-full border border-border bg-card/65 px-3 py-1.5 text-[10px] font-medium text-muted-foreground shadow-sm transition hover:border-primary/25 hover:text-primary">{model}</Link>)}
           </div>
         </div>
 
         <div className="relative mx-auto w-full max-w-xl lg:mx-0">
           <div className="absolute -inset-8 -z-10 rounded-[3rem] bg-primary/[0.06] blur-3xl" />
-          <Card className="overflow-hidden border-white/10 bg-card/90 shadow-2xl shadow-black/40 backdrop-blur">
-            <div className="flex h-11 items-center gap-2 border-b border-white/[0.06] px-4">
+          <Card className="overflow-hidden border-border bg-card/90 shadow-2xl shadow-black/10 backdrop-blur">
+            <div className="flex h-11 items-center gap-2 border-b border-border px-4">
               <span className="size-2.5 rounded-full bg-red-400/70" />
               <span className="size-2.5 rounded-full bg-amber-400/70" />
               <span className="size-2.5 rounded-full bg-emerald-400/70" />
@@ -145,7 +146,7 @@ export default function Home() {
                   <span className="font-medium">AI analysis complete</span>
                   <span className="font-mono text-primary">00:08:42</span>
                 </div>
-                <div className="relative h-16 overflow-hidden rounded-lg border border-white/[0.07] bg-black/20 px-3 py-2">
+                <div className="relative h-16 overflow-hidden rounded-lg border border-border bg-muted/70 px-3 py-2">
                   <div className="absolute inset-x-3 top-2 flex h-7 gap-1">
                     {[22, 14, 28, 18, 30, 13, 25, 16, 27, 19, 31, 15, 22, 12, 29, 17].map((height, index) => (
                       <span key={index} className="mt-auto w-full rounded-full bg-primary/45" style={{ height }} />
@@ -159,9 +160,9 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div className="rounded-lg bg-white/[0.035] p-3"><strong className="block text-base text-foreground">18</strong><span className="text-muted-foreground">Scenes</span></div>
-                  <div className="rounded-lg bg-white/[0.035] p-3"><strong className="block text-base text-foreground">6</strong><span className="text-muted-foreground">Highlights</span></div>
-                  <div className="rounded-lg bg-white/[0.035] p-3"><strong className="block text-base text-foreground">32s</strong><span className="text-muted-foreground">Silence</span></div>
+                  <div className="rounded-lg bg-muted/70 p-3"><strong className="block text-base text-foreground">18</strong><span className="text-muted-foreground">Scenes</span></div>
+                  <div className="rounded-lg bg-muted/70 p-3"><strong className="block text-base text-foreground">6</strong><span className="text-muted-foreground">Highlights</span></div>
+                  <div className="rounded-lg bg-muted/70 p-3"><strong className="block text-base text-foreground">32s</strong><span className="text-muted-foreground">Silence</span></div>
                 </div>
               </div>
             </CardContent>
@@ -169,7 +170,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="features" className="scroll-mt-20 border-y border-white/[0.06] bg-black/10">
+      <section id="features" className="scroll-mt-20 border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
           <div className="mb-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
@@ -184,9 +185,10 @@ export default function Home() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="group overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
+            <FeatureReveal>
+            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
               <CardContent className="p-0">
-                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted p-5">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted p-5">
                   <Image src={videoEditorVisual} alt="A film editor working in a professional post-production suite" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/10" />
                   <div className="absolute inset-x-5 bottom-5 rounded-xl border border-white/10 bg-black/35 p-3 backdrop-blur">
@@ -196,7 +198,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="p-6">
+                <div data-feature-copy className="p-6">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Scissors className="size-4.5" /></span><Badge variant="secondary">Available now</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video editor</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Upload long footage and get scenes, transcript, silence cleanup, highlights, captions, reframing, and a precise editable timeline.</p>
@@ -204,10 +206,12 @@ export default function Home() {
                 </div>
               </CardContent>
             </Card>
+            </FeatureReveal>
 
-            <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-sky-400/25">
+            <FeatureReveal>
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-sky-400/25">
               <CardContent className="p-0">
-                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
                   <Image src={aiVideoVisual} alt="A cinematic concept car moving through a rain-lit city" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-black/15" />
                   <div className="absolute left-5 top-5 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1.5 text-[10px] text-sky-200">MODEL AUTOPILOT</div>
@@ -216,49 +220,55 @@ export default function Home() {
                   </div>
                   <Clapperboard className="absolute right-7 top-8 size-14 text-white/15" />
                 </div>
-                <div className="p-6">
-                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-sky-400/10 text-sky-300"><Film className="size-4.5" /></span><Badge variant="outline" className="border-sky-300/20 bg-sky-300/5 text-sky-200">New</Badge></div>
+                <div data-feature-copy className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-sky-500/10 text-sky-700"><Film className="size-4.5" /></span><Badge variant="outline" className="border-sky-700/20 bg-sky-500/5 text-sky-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Direct camera motion, mood, format, duration, resolution, and native audio. Autopilot selects the strongest compatible video model for the job.</p>
-                  <Link href="/features/ai-video-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-300">Explore video generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/ai-video-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-700">Explore video generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </FeatureReveal>
 
-            <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25">
+            <FeatureReveal>
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25">
               <CardContent className="p-0">
-                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-muted">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
                   <Image src={aiImageVisual} alt="A premium smoky-glass perfume bottle in a cinematic product photograph" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
                 </div>
-                <div className="p-6">
-                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-300/10 text-fuchsia-200"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-200/20 bg-fuchsia-200/5 text-fuchsia-100">New</Badge></div>
+                <div data-feature-copy className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-700"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-700/20 bg-fuchsia-500/5 text-fuchsia-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Work from a creative brief, not a mystery prompt box. Shape art direction, canvas, seed, and model intent for repeatable campaign-grade visuals.</p>
-                  <Link href="/features/ai-image-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-200">Explore image generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/ai-image-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-700">Explore image generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </FeatureReveal>
 
-            <Card className="group overflow-hidden border-white/[0.08] bg-card/65 transition hover:-translate-y-1 hover:border-amber-300/25">
+            <FeatureReveal>
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-amber-300/25">
               <CardContent className="p-0">
-                <div className="relative h-52 overflow-hidden border-b border-white/[0.06] bg-[linear-gradient(45deg,oklch(0.25_0.01_265)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.25_0.01_265)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.25_0.01_265)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.25_0.01_265)_75%)] bg-[length:22px_22px]">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-[linear-gradient(45deg,oklch(0.86_0.01_88)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.86_0.01_88)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.86_0.01_88)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.86_0.01_88)_75%)] bg-[length:22px_22px]">
                   <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden border-r border-white/25"><Image src={aiImageVisual} alt="A product photograph ready for background removal" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" /></div>
                   <div className="absolute inset-y-0 right-0 w-1/2"><Image src={aiImageVisual} alt="" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 50vw" className="object-contain mix-blend-lighten" /></div>
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/55 px-3 py-1.5 text-[10px] text-white/80 backdrop-blur">BEFORE / TRANSPARENT</div>
                 </div>
-                <div className="p-6">
-                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-amber-300/10 text-amber-200"><Scissors className="size-4.5" /></span><Badge variant="outline" className="border-amber-200/20 bg-amber-200/5 text-amber-100">New</Badge></div>
+                <div data-feature-copy className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-700"><Scissors className="size-4.5" /></span><Badge variant="outline" className="border-amber-700/20 bg-amber-500/5 text-amber-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">Background remover</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Protect fine hair, product edges, and soft foreground detail with precision matting, private inputs, and downloadable transparent PNG results.</p>
-                  <Link href="/features/background-remover" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-200">Explore background removal <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                  <Link href="/features/background-remover" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-700">Explore background removal <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </FeatureReveal>
 
-            <Card className="group overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 lg:col-span-2">
+            <FeatureReveal className="lg:col-span-2">
+            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
               <CardContent className="grid p-0 lg:grid-cols-[0.95fr_1.05fr]">
-                <div className="relative min-h-64 overflow-hidden border-b border-white/[0.06] bg-muted lg:border-b-0 lg:border-r">
+                <div data-feature-media className="relative min-h-64 overflow-hidden border-b border-border bg-muted lg:border-b-0 lg:border-r">
                   <Image src={aiVideoVisual} alt="A campaign video prepared for performance marketing platforms" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-black/30 to-black/80" />
                   <div className="absolute inset-x-5 bottom-5 grid grid-cols-4 gap-2">
@@ -266,20 +276,21 @@ export default function Home() {
                   </div>
                   <div className="absolute left-5 top-5 rounded-full border border-primary/25 bg-black/45 px-3 py-1.5 text-[10px] text-primary backdrop-blur">SOURCE-AWARE AI AGENTS</div>
                 </div>
-                <div className="flex flex-col justify-center p-6 sm:p-8">
+                <div data-feature-copy className="flex flex-col justify-center p-6 sm:p-8">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">New flagship tool</Badge></div>
                   <h3 className="text-2xl font-semibold tracking-[-0.03em]">AI Performance Creative Studio</h3>
                   <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Turn a product URL into a source-aware Seedance or Veo ad, or let Video Understanding find the strongest hook in long footage and render a captioned short for the platform you choose.</p>
-                  <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Seedance 2.5 Ad Director</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-white/[0.08] px-2.5 py-1">Video Understanding Scout</span></div>
+                  <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-border px-2.5 py-1">Seedance 2.5 Ad Director</span><span className="rounded-full border border-border px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-border px-2.5 py-1">Video Understanding Scout</span></div>
                   <Link href="/features/performance-creative-studio" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore performance creative <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </FeatureReveal>
           </div>
         </div>
       </section>
 
-      <section id="workflow" className="border-y border-white/[0.06] bg-black/10">
+      <section id="workflow" className="border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-24">
           <div className="mb-12 max-w-2xl">
             <p className="mb-3 text-sm font-medium text-primary">One clear workflow</p>
@@ -291,7 +302,7 @@ export default function Home() {
               stays fast and reports every step in realtime.
             </p>
           </div>
-          <div className="grid gap-px overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.07] sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
             {workflow.map((step, index) => (
               <div key={step.label} className="bg-background p-6 lg:p-7">
                 <div className="mb-8 flex items-center justify-between">
@@ -332,7 +343,7 @@ export default function Home() {
             { icon: Scissors, label: "Clean-up", value: "Silence + fillers" },
             { icon: Sparkles, label: "Highlights", value: "Ranked moments" },
           ].map((item) => (
-            <Card key={item.label} className="border-white/[0.07] bg-card/70">
+            <Card key={item.label} className="border-border bg-card/70">
               <CardContent className="p-5 sm:p-6">
                 <item.icon className="mb-8 size-5 text-primary" />
                 <p className="text-xs text-muted-foreground">{item.label}</p>
@@ -343,16 +354,16 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-y border-white/[0.06] bg-black/10">
+      <section className="border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
           <div className="max-w-3xl"><p className="text-sm font-medium text-primary">Focused creative workflows</p><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Start with the outcome, then choose the model.</h2><p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Build a product ad from a real page or turn one long recording into channel-ready clips. Every workflow stays connected to the editor and private project storage.</p></div>
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
-            {searchIntentPages.map((page) => <Card key={page.slug} className="border-white/[0.08] bg-card/60"><CardContent className="p-6 sm:p-8"><p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">{page.eyebrow}</p><h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{page.title}</h3><p className="mt-4 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore the workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
+            {searchIntentPages.map((page) => <Card key={page.slug} className="border-border bg-card/60"><CardContent className="p-6 sm:p-8"><p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">{page.eyebrow}</p><h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{page.title}</h3><p className="mt-4 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore the workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
           </div>
         </div>
       </section>
 
-      <section id="pricing" className="scroll-mt-20 border-y border-white/[0.06] bg-black/10">
+      <section id="pricing" className="scroll-mt-20 border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
           <div className="mx-auto mb-12 max-w-2xl text-center">
             <p className="mb-3 text-sm font-medium text-primary">Simple launch pricing</p>

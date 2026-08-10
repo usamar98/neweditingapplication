@@ -46,10 +46,10 @@ export default function AiVideoModelsPage() {
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">Editing App exposes model choice and hides impossible combinations. Longer does not always mean sharper, and 4K is useful only when the model generates it natively.</p>
       </section>
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
-        <div className="overflow-hidden rounded-2xl border border-white/[0.08]">
-          <div className="hidden grid-cols-[1fr_1.4fr_.8fr_1fr_.65fr] gap-4 border-b border-white/[0.07] bg-black/20 px-5 py-4 text-xs font-medium text-muted-foreground md:grid"><span>Model</span><span>Best for</span><span>Shot length</span><span>Resolution</span><span>Audio</span></div>
+        <div className="overflow-hidden rounded-2xl border border-border">
+          <div className="hidden grid-cols-[1fr_1.4fr_.8fr_1fr_.65fr] gap-4 border-b border-border bg-muted/70 px-5 py-4 text-xs font-medium text-muted-foreground md:grid"><span>Model</span><span>Best for</span><span>Shot length</span><span>Resolution</span><span>Audio</span></div>
           {models.map((model) => (
-            <div key={model.name} className="grid gap-3 border-b border-white/[0.06] bg-card/45 px-5 py-5 last:border-0 md:grid-cols-[1fr_1.4fr_.8fr_1fr_.65fr] md:items-center md:gap-4">
+            <div key={model.name} className="grid gap-3 border-b border-border bg-card/60 px-5 py-5 last:border-0 md:grid-cols-[1fr_1.4fr_.8fr_1fr_.65fr] md:items-center md:gap-4">
               <a href={model.docs} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline">{model.name}<ExternalLink className="size-3" /></a>
               <span className="text-sm text-muted-foreground">{model.bestFor}</span><span className="text-sm">{model.duration}</span><span className="text-sm">{model.resolution}</span><span className="inline-flex items-center gap-1.5 text-sm"><Check className="size-3.5 text-primary" />{model.audio}</span>
             </div>
