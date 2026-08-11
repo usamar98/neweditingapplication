@@ -636,6 +636,10 @@ export type Database = {
     }
     Functions: {
       archive_video_job: { Args: { message_id: number }; Returns: boolean }
+      claim_welcome_credits: {
+        Args: { p_user_id: string }
+        Returns: Json
+      }
       complete_job_with_credits: {
         Args: {
           p_actual_provider_cost_micros?: number

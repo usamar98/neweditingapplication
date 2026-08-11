@@ -4,6 +4,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Aperture,
   ArrowDownToLine,
@@ -30,6 +31,8 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
+import type { CreditSummary } from "@/lib/credits";
 import type { GenerationView } from "@/lib/data/generations";
 import {
   agentsForKind,
@@ -39,6 +42,11 @@ import {
   type VideoResolution,
 } from "@/lib/domain/ai-models";
 import type { GenerationRoutingProfile } from "@/lib/domain/generation";
+import {
+  WELCOME_IMAGE_AGENT_ID,
+  WELCOME_IMAGE_MODEL_LABEL,
+  WELCOME_IMAGE_PROFILE,
+} from "@/lib/domain/credits";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.generated";
 import aiImageVisual from "@/assets/media/ai-image.webp";
@@ -150,19 +158,28 @@ function MediaPreview({ controls = true, generation, kind }: { controls?: boolea
 }
 
 export function GenerationStudio({
+  autoClaimWelcome = false,
+  initialCredits,
   initialGenerations,
+  isAuthenticated,
   kind,
 }: {
+  autoClaimWelcome?: boolean;
+  initialCredits: CreditSummary | null;
   initialGenerations: GenerationView[];
+  isAuthenticated: boolean;
   kind: "image" | "video";
 }) {
+  const router = useRouter();
   const isImage = kind === "image";
   const agents = agentsForKind(kind);
-  const [agentId, setAgentId] = useState("auto");
+  const [credits, setCredits] = useState(initialCredits);
+  const hasPaidSubscription = credits?.active === true;
+  const [agentId, setAgentId] = useState(isImage && !initialCredits?.active ? WELCOME_IMAGE_AGENT_ID : "auto");
   const [generations, setGenerations] = useState(initialGenerations);
   const [name, setName] = useState(isImage ? "Untitled image" : "Untitled video");
   const [prompt, setPrompt] = useState("");
-  const [profile, setProfile] = useState<GenerationRoutingProfile>("balanced");
+  const [profile, setProfile] = useState<GenerationRoutingProfile>(isImage && !initialCredits?.active ? WELCOME_IMAGE_PROFILE : "balanced");
   const [aspectRatio, setAspectRatio] = useState(isImage ? "landscape_16_9" : "16:9");
   const [style, setStyle] = useState("cinematic");
   const [cameraMotion, setCameraMotion] = useState("auto");
@@ -193,6 +210,7 @@ export function GenerationStudio({
     : [];
 
   function selectAgent(nextAgentId: string) {
+    if (!hasPaidSubscription) return;
     setAgentId(nextAgentId);
     if (kind !== "video") return;
     const agent = videoAgentById(nextAgentId);
@@ -234,6 +252,24 @@ export function GenerationStudio({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!isAuthenticated) {
+      router.push(`/login?next=${encodeURIComponent(`/generate/${kind}`)}`);
+      return;
+    }
+    if (!hasPaidSubscription && !isImage) {
+      setError("AI video generation requires an active paid subscription. Choose a plan to unlock every video model.");
+      return;
+    }
+    if (!hasPaidSubscription && !credits?.welcomeClaimed) {
+      setError("Claim your 20 welcome credits before creating your first image.");
+      return;
+    }
+    if (!hasPaidSubscription && (credits?.welcomeImagesRemaining ?? 0) < 1) {
+      setError("Your four welcome images are used. Choose a plan to keep creating and unlock every model.");
+      return;
+    }
+
     setSubmitting(true);
 
     const numericSeed = seed.trim() ? Number(seed) : undefined;
@@ -254,6 +290,11 @@ export function GenerationStudio({
       setSelectedId(next.id);
       setPrompt("");
       setName(isImage ? "Untitled image" : "Untitled video");
+      const creditResponse = await fetch("/api/billing/credits", { cache: "no-store" });
+      if (creditResponse.ok) {
+        const body = (await creditResponse.json()) as { credits: CreditSummary };
+        setCredits(body.credits);
+      }
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to start generation.");
     } finally {
@@ -291,6 +332,13 @@ export function GenerationStudio({
         </div>
       </section>
 
+      <WelcomeCreditsCard
+        autoClaim={autoClaimWelcome && isImage}
+        credits={credits}
+        isAuthenticated={isAuthenticated}
+        onCreditsChange={setCredits}
+      />
+
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
         <Card className="border-border bg-card/70">
           <CardContent className="p-5 sm:p-7">
@@ -323,7 +371,7 @@ export function GenerationStudio({
                     className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0"
                   />
                   <div className="flex items-center justify-between border-t border-border p-2">
-                    <Select value={agentId} onValueChange={selectAgent}>
+                    <Select value={agentId} onValueChange={selectAgent} disabled={!hasPaidSubscription}>
                       <SelectTrigger aria-label="Select AI model agent" className="h-9 w-[220px] border-border bg-card text-xs">
                         <Bot className="size-3.5 text-primary" />
                         <SelectValue />
@@ -337,7 +385,9 @@ export function GenerationStudio({
                         ))}
                       </SelectContent>
                     </Select>
-                    <span className="pr-2 text-[10px] text-muted-foreground">Approved model agent</span>
+                    <span className="pr-2 text-[10px] text-muted-foreground">
+                      {hasPaidSubscription ? "Approved model agent" : isImage ? `${WELCOME_IMAGE_MODEL_LABEL} · free default` : "Models unlock with a plan"}
+                    </span>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-1">
@@ -357,9 +407,10 @@ export function GenerationStudio({
                       key={item.value}
                       type="button"
                       aria-pressed={profile === item.value}
+                      disabled={!hasPaidSubscription}
                       onClick={() => setProfile(item.value)}
                       className={cn(
-                        "rounded-xl border p-3 text-left transition",
+                        "rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-60",
                         profile === item.value ? "border-primary/35 bg-primary/[0.08]" : "border-border bg-muted/55 hover:border-primary/20",
                       )}
                     >
@@ -416,13 +467,27 @@ export function GenerationStudio({
 
               <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs leading-5 text-muted-foreground">
-                  {agentId === "auto"
-                    ? "Autopilot makes a fresh routing decision for every brief and preserves the reason with your result."
-                    : "Your selected agent is allowlisted on the server and recorded with the result."}
+                  {!hasPaidSubscription && isImage
+                    ? `Welcome images always use ${WELCOME_IMAGE_MODEL_LABEL} at 5 credits each. Subscribe to choose another model or routing intent.`
+                    : !hasPaidSubscription
+                      ? "Sign in and choose a paid plan to unlock model selection and generation."
+                      : agentId === "auto"
+                        ? "Autopilot makes a fresh routing decision for every brief and preserves the reason with your result."
+                        : "Your selected agent is allowlisted on the server and recorded with the result."}
                 </p>
                 <Button type="submit" size="lg" disabled={submitting || !prompt.trim() || !name.trim()} className="h-11 px-6">
                   {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <WandSparkles className="size-4" />}
-                  {submitting ? "Queuing…" : `Generate ${kind}`}
+                  {submitting
+                    ? "Queuing…"
+                    : !isAuthenticated
+                      ? `Sign in to generate ${kind}`
+                      : !hasPaidSubscription && !isImage
+                        ? "Choose a plan to generate video"
+                        : !hasPaidSubscription && !credits?.welcomeClaimed
+                          ? "Claim free credits above"
+                          : !hasPaidSubscription && (credits?.welcomeImagesRemaining ?? 0) < 1
+                            ? "Choose a plan to continue"
+                            : `Generate ${kind}`}
                 </Button>
               </div>
             </form>

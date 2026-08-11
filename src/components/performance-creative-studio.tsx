@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import type { Route } from "next";
+import { useRouter } from "next/navigation";
 import {
   ArrowDownToLine,
   Bot,
@@ -30,6 +31,8 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
+import type { CreditSummary } from "@/lib/credits";
 import type { GenerationView } from "@/lib/data/generations";
 import type { ProjectListItem } from "@/lib/data/projects";
 import {
@@ -92,12 +95,19 @@ function GenerationStatus({ generation }: { generation: GenerationView }) {
 }
 
 export function PerformanceCreativeStudio({
+  initialCredits,
   initialGenerations,
+  isAuthenticated,
   projects,
 }: {
+  initialCredits: CreditSummary | null;
   initialGenerations: GenerationView[];
+  isAuthenticated: boolean;
   projects: ProjectListItem[];
 }) {
+  const router = useRouter();
+  const [credits, setCredits] = useState(initialCredits);
+  const hasPaidSubscription = credits?.active === true;
   const readyProjects = useMemo(
     () => projects.filter((project) => ["ready", "completed"].includes(project.status) && Number(project.duration_seconds ?? 0) >= 4),
     [projects],
@@ -168,6 +178,14 @@ export function PerformanceCreativeStudio({
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    if (!isAuthenticated) {
+      router.push(`/login?next=${encodeURIComponent("/creative-studio")}`);
+      return;
+    }
+    if (!hasPaidSubscription) {
+      setError("AI ad creative generation requires an active paid subscription. Your welcome credits remain available for four default-model images.");
+      return;
+    }
     if (sourceType === "product_url" && !productUrl.trim()) {
       setError("Enter a public HTTPS product page URL.");
       return;
@@ -201,6 +219,11 @@ export function PerformanceCreativeStudio({
       const next: GenerationView = { ...result.generation, job: result.job, outputUrl: null };
       setGenerations((current) => [next, ...current]);
       setSelectedId(next.id);
+      const creditResponse = await fetch("/api/billing/credits", { cache: "no-store" });
+      if (creditResponse.ok) {
+        const body = (await creditResponse.json()) as { credits: CreditSummary };
+        setCredits(body.credits);
+      }
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to start the performance creative.");
     } finally {
@@ -226,6 +249,8 @@ export function PerformanceCreativeStudio({
           </div>
         </div>
       </section>
+
+      <WelcomeCreditsCard credits={credits} isAuthenticated={isAuthenticated} onCreditsChange={setCredits} />
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
         <Card className="border-border bg-card/70">
@@ -291,11 +316,11 @@ export function PerformanceCreativeStudio({
                 <div className="overflow-hidden rounded-xl border border-input bg-input/15 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
                   <Textarea id="performance-brief" value={prompt} onChange={(event) => setPrompt(event.target.value)} minLength={3} maxLength={4000} required className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0" />
                   <div className="flex items-center justify-between border-t border-border p-2">
-                    <Select value={agentId} onValueChange={setAgentId}>
+                    <Select value={agentId} onValueChange={setAgentId} disabled={!hasPaidSubscription}>
                       <SelectTrigger aria-label="Select AI ad creative model" className="h-9 w-[240px] border-border bg-card text-xs"><Bot className="size-3.5 text-primary" /><SelectValue /></SelectTrigger>
                       <SelectContent align="start" className="w-[330px]">{agents.map((agent) => <SelectItem key={agent.id} value={agent.id}><span className="font-medium">{agent.label}</span><span className="ml-2 text-[10px] text-muted-foreground">{agent.tag}</span></SelectItem>)}</SelectContent>
                     </Select>
-                    <span className="pr-2 text-[10px] text-muted-foreground">Source-aware agent</span>
+                    <span className="pr-2 text-[10px] text-muted-foreground">{hasPaidSubscription ? "Source-aware agent" : "Models unlock with a plan"}</span>
                   </div>
                 </div>
                 <p className="text-[11px] leading-5 text-muted-foreground">{agents.find((agent) => agent.id === agentId)?.description}</p>
@@ -305,7 +330,8 @@ export function PerformanceCreativeStudio({
               <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs leading-5 text-muted-foreground">AI decisions and paid model results are checkpointed before private delivery, so a recoverable upload retry does not regenerate the creative.</p>
                 <Button type="submit" size="lg" disabled={submitting || !name.trim() || !prompt.trim() || !audience.trim() || !callToAction.trim()} className="h-11 px-6">
-                  {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}{submitting ? "Queuing…" : "Create performance ad"}
+                  {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+                  {submitting ? "Queuing…" : !isAuthenticated ? "Sign in to create an ad" : !hasPaidSubscription ? "Choose a plan to create an ad" : "Create performance ad"}
                 </Button>
               </div>
             </form>

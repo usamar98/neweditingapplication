@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element -- Previews include local object URLs and short-lived private URLs. */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowDownToLine, Bot, Check, CircleAlert, ImagePlus, LoaderCircle, RefreshCw, Scissors, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
+import type { CreditSummary } from "@/lib/credits";
 import type { GenerationView } from "@/lib/data/generations";
 import { backgroundAgents } from "@/lib/domain/ai-models";
 import { createClient } from "@/lib/supabase/client";
@@ -27,17 +30,24 @@ async function apiMessage(response: Response) {
 }
 
 export function BackgroundRemover({
+  initialCredits,
   initialGenerations,
+  isAuthenticated,
   userId,
 }: {
+  initialCredits: CreditSummary | null;
   initialGenerations: GenerationView[];
-  userId: string;
+  isAuthenticated: boolean;
+  userId: string | null;
 }) {
+  const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
   const previewRef = useRef<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [agentId, setAgentId] = useState("auto");
+  const [credits, setCredits] = useState(initialCredits);
+  const hasPaidSubscription = credits?.active === true;
   const [name, setName] = useState("Background-free image");
   const [generations, setGenerations] = useState(initialGenerations);
   const [selectedId, setSelectedId] = useState(initialGenerations[0]?.id ?? null);
@@ -111,6 +121,14 @@ export function BackgroundRemover({
 
   async function submit() {
     if (!file || !name.trim()) return;
+    if (!isAuthenticated || !userId) {
+      router.push(`/login?next=${encodeURIComponent("/remove-background")}`);
+      return;
+    }
+    if (!hasPaidSubscription) {
+      setError("Background removal requires an active paid subscription. Your welcome credits can still create four default-model images.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     const extension = file.type === "image/jpeg" ? "jpg" : file.type === "image/webp" ? "webp" : "png";
@@ -147,6 +165,11 @@ export function BackgroundRemover({
       setSelectedId(next.id);
       chooseFile(null);
       if (fileInput.current) fileInput.current.value = "";
+      const creditResponse = await fetch("/api/billing/credits", { cache: "no-store" });
+      if (creditResponse.ok) {
+        const body = (await creditResponse.json()) as { credits: CreditSummary };
+        setCredits(body.credits);
+      }
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to start background removal.");
     } finally {
@@ -169,6 +192,8 @@ export function BackgroundRemover({
           </div>
         </div>
       </section>
+
+      <WelcomeCreditsCard credits={credits} isAuthenticated={isAuthenticated} onCreditsChange={setCredits} />
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <Card className="border-border bg-card/70">
@@ -197,7 +222,7 @@ export function BackgroundRemover({
             {error && <Alert variant="destructive"><CircleAlert className="size-4" /><AlertDescription>{error}</AlertDescription></Alert>}
 
             <div className="flex flex-col gap-3 rounded-xl border border-border bg-muted/55 p-2 sm:flex-row sm:items-center sm:justify-between">
-              <Select value={agentId} onValueChange={setAgentId}>
+              <Select value={agentId} onValueChange={setAgentId} disabled={!hasPaidSubscription}>
                 <SelectTrigger aria-label="Select background removal agent" className="h-10 w-full bg-card sm:w-[250px]"><Bot className="size-4 text-primary" /><SelectValue /></SelectTrigger>
                 <SelectContent align="start" className="w-[320px]">
                   {backgroundAgents.map((agent) => <SelectItem key={agent.id} value={agent.id}><span className="font-medium">{agent.label}</span><span className="ml-2 text-[10px] text-muted-foreground">{agent.tag}</span></SelectItem>)}
@@ -205,7 +230,7 @@ export function BackgroundRemover({
               </Select>
               <Button onClick={() => void submit()} disabled={!file || !name.trim() || submitting} size="lg" className="h-10">
                 {submitting ? <LoaderCircle className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-                {submitting ? "Uploading…" : "Remove background"}
+                {submitting ? "Uploading…" : !isAuthenticated ? "Sign in to remove background" : !hasPaidSubscription ? "Choose a plan to continue" : "Remove background"}
               </Button>
             </div>
           </CardContent>

@@ -8,14 +8,14 @@ export async function POST(request: Request, context: { params: Promise<{ id: st
   const requestId = getRequestId(request);
 
   try {
-    const { id } = await context.params;
-    z.string().uuid().parse(id);
-    const input = enqueueJobSchema.parse(await request.json());
     const supabase = await createClient();
     const { data: authData, error: authError } = await supabase.auth.getUser();
     if (authError || !authData.user) {
       throw new HttpError(401, "Sign in to process a video.", "UNAUTHENTICATED");
     }
+    const { id } = await context.params;
+    z.string().uuid().parse(id);
+    const input = enqueueJobSchema.parse(await request.json());
 
     const job = await enqueueProjectJob({
       agentId: input.kind === "analyze" ? input.agentId : undefined,

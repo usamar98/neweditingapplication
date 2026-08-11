@@ -29,6 +29,7 @@ import videoEditorVisual from "@/assets/media/video-editor.webp";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { PricingPreview } from "@/components/pricing-preview";
 import { FeatureReveal } from "@/components/feature-reveal";
+import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteDescription } from "@/lib/site";
 
@@ -91,7 +92,7 @@ export default function Home() {
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild className="h-12 px-6 shadow-xl shadow-primary/10">
-              <Link href="/login?mode=signup">
+              <Link href="/generate/image?claim=welcome">
                 Start creating free <ArrowRight className="size-4" />
               </Link>
             </Button>
@@ -166,6 +167,10 @@ export default function Home() {
             </CardContent>
           </Card>
         </div>
+      </section>
+
+      <section className="relative mx-auto max-w-7xl px-5 pb-20 sm:px-8 lg:pb-24">
+        <WelcomeCreditsCard credits={null} isAuthenticated={false} />
       </section>
 
       <section id="features" className="scroll-mt-20 border-y border-border bg-foreground/[0.025]">

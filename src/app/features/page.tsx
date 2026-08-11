@@ -74,7 +74,7 @@ export default function FeaturesPage() {
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">
           Edit long footage, generate premium video and images, build source-aware product ads, and remove backgrounds in one private, model-aware workspace.
         </p>
-        <Button size="lg" asChild className="mt-8"><Link href="/login?mode=signup">Start creating <ArrowRight className="size-4" /></Link></Button>
+        <Button size="lg" asChild className="mt-8"><Link href="/generate/image?claim=welcome">Open the image studio <ArrowRight className="size-4" /></Link></Button>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">

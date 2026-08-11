@@ -13,6 +13,14 @@ import { getMarketingFeature, marketingFeatures } from "@/lib/marketing/features
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
 
+const featureStudioPaths: Record<(typeof marketingFeatures)[number]["slug"], Route> = {
+  "ai-video-editor": "/dashboard",
+  "ai-video-generator": "/generate/video",
+  "ai-image-generator": "/generate/image",
+  "performance-creative-studio": "/creative-studio",
+  "background-remover": "/remove-background",
+};
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -84,7 +92,7 @@ export default async function FeaturePage({ params }: PageProps<"/features/[slug
         <h1 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">{feature.title}</h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">{feature.description}</p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button size="lg" asChild><Link href="/login?mode=signup">Start creating <ArrowRight className="size-4" /></Link></Button>
+          <Button size="lg" asChild><Link href={featureStudioPaths[feature.slug]}>Open the full studio <ArrowRight className="size-4" /></Link></Button>
           <Button size="lg" variant="outline" asChild><Link href={"/pricing" as Route}>Compare plans</Link></Button>
         </div>
       </section>

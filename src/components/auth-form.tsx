@@ -55,7 +55,7 @@ export function AuthForm() {
           password,
           options: {
             data: { display_name: displayName, legal_acceptance_version: "2026-08-10", username },
-            emailRedirectTo: `${window.location.origin}/auth/confirm`,
+            emailRedirectTo: `${window.location.origin}/auth/confirm?next=${encodeURIComponent(redirectPath)}`,
           },
         });
         if (authError) {

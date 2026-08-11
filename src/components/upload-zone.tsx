@@ -67,7 +67,13 @@ async function readApiError(response: Response) {
   return body?.error?.message ?? "The request failed. Please try again.";
 }
 
-export function UploadZone() {
+export function UploadZone({
+  hasPaidSubscription,
+  isAuthenticated,
+}: {
+  hasPaidSubscription: boolean;
+  isAuthenticated: boolean;
+}) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadRef = useRef<TusUpload | null>(null);
@@ -98,6 +104,14 @@ export function UploadZone() {
   async function startUpload() {
     if (!file || !name.trim()) return;
     setError(null);
+    if (!isAuthenticated) {
+      router.push(`/login?next=${encodeURIComponent("/dashboard#new-project")}`);
+      return;
+    }
+    if (!hasPaidSubscription) {
+      setError("AI video editing and analysis require an active paid subscription. Choose a plan before uploading footage.");
+      return;
+    }
     setPhase("authorizing");
 
     try {
@@ -257,7 +271,15 @@ export function UploadZone() {
             ) : (
               <Button onClick={startUpload} disabled={busy || !name.trim()}>
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
-                {phase === "authorizing" ? "Securing upload" : phase === "processing" ? "Starting analysis" : "Upload & analyze"}
+                {phase === "authorizing"
+                  ? "Securing upload"
+                  : phase === "processing"
+                    ? "Starting analysis"
+                    : !isAuthenticated
+                      ? "Sign in to upload"
+                      : !hasPaidSubscription
+                        ? "Choose a plan to upload"
+                        : "Upload & analyze"}
               </Button>
             )}
             <Button variant="ghost" onClick={() => inputRef.current?.click()} disabled={busy}>Choose another</Button>

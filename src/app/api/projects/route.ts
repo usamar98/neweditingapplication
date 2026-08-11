@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       throw new HttpError(503, "Supabase is not configured.", "NOT_CONFIGURED");
     }
 
-    const input = createProjectSchema.parse(await request.json());
     const supabase = await createClient();
     const { data: authData, error: authError } = await supabase.auth.getUser();
     if (authError || !authData.user) {
@@ -30,6 +29,7 @@ export async function POST(request: Request) {
     }
 
     await requireActiveSubscription(createAdminClient(), authData.user.id);
+    const input = createProjectSchema.parse(await request.json());
 
     await consumeRateLimit(supabase, input.resumeProjectId ? "upload:resume" : "project:create", input.resumeProjectId ? 120 : 20, 3600);
 

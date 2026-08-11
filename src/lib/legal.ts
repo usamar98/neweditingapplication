@@ -294,6 +294,7 @@ export const legalDocuments: LegalDocument[] = [
           "Credits are Service units used to measure eligible AI generation and media processing; they are not money, stored value, or a cryptocurrency.",
           "Credit cost can vary by feature, selected model, duration, resolution, audio, output count, and other settings. Any cost shown in the product for a request controls over general estimates on a marketing page.",
           "Video-minute and output estimates are planning guides, not fixed quotas. Provider capabilities and cost can change.",
+          "An eligible account may claim a one-time welcome allocation of 20 credits without payment. It is limited to four image requests at five credits each using the fixed welcome image model. Model selection and all other generation or processing features require an active paid subscription. The allocation is limited to one claim per account and does not renew or convert to cash.",
           "Included credits are allocated for the applicable subscription period. Unless a plan expressly says otherwise, unused included credits do not roll over and have no cash or refund value.",
           "Credits may not be sold, transferred between unrelated accounts, redeemed for money, or obtained through abuse, chargeback, or circumvention.",
           "The Service reserves the displayed credits before an operation starts so simultaneous requests cannot overspend the same balance. A reservation is settled when the operation completes.",
@@ -335,7 +336,7 @@ export const legalDocuments: LegalDocument[] = [
         id: "trials-promotions",
         title: "7. Trials and promotions",
         paragraphs: [
-          "If we offer a trial, coupon, or promotion, the specific offer terms control. Unless checkout clearly says otherwise, a trial that requires a payment method converts to the displayed paid subscription when the trial ends and then renews until cancelled. Promotional credits may expire and may be limited to one account, customer, or organisation.",
+          "If we offer a trial, coupon, or promotion, the specific offer terms control. Unless checkout clearly says otherwise, a trial that requires a payment method converts to the displayed paid subscription when the trial ends and then renews until cancelled. Promotional credits may expire and may be limited to one account, customer, or organisation. The 20-credit welcome image allocation is a one-time, non-renewing offer and does not itself start a paid subscription.",
         ],
       },
       {

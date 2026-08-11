@@ -6,9 +6,11 @@ import type { GenerationRequest } from "@/lib/domain/generation";
 import {
   billingMetadataForQuote,
   failUnstartedJob,
+  generationRequestForAccess,
   quoteGenerationCredits,
   quoteProjectCredits,
   requireActiveSubscription,
+  requireGenerationAccess,
   reserveCredits,
 } from "@/lib/credits";
 import { HttpError } from "@/lib/http";
@@ -235,17 +237,18 @@ export async function enqueueGenerationJob({
     60,
   );
   const admin = createAdminClient();
-  await requireActiveSubscription(admin, user.id);
+  const accessMode = await requireGenerationAccess(admin, user.id, input.kind);
+  const effectiveInput = generationRequestForAccess(input, accessMode);
 
-  if (input.kind === "background_removal") {
-    if (!input.sourcePath.startsWith(`${user.id}/`)) {
+  if (effectiveInput.kind === "background_removal") {
+    if (!effectiveInput.sourcePath.startsWith(`${user.id}/`)) {
       throw new HttpError(403, "The source image does not belong to this account.", "SOURCE_FORBIDDEN");
     }
-    const sourceParts = input.sourcePath.split("/");
+    const sourceParts = effectiveInput.sourcePath.split("/");
     const sourceName = sourceParts.pop();
     const sourceFolder = sourceParts.join("/");
     const { data: sourceFiles, error: sourceError } = await supabase.storage
-      .from(input.sourceBucket)
+      .from(effectiveInput.sourceBucket)
       .list(sourceFolder, { limit: 5, search: sourceName });
     if (sourceError || !sourceName || !sourceFiles?.some((file) => file.name === sourceName)) {
       throw new HttpError(409, "Upload the source image before starting removal.", "SOURCE_NOT_READY");
@@ -253,21 +256,21 @@ export async function enqueueGenerationJob({
   }
 
   let sourceDurationSeconds: number | null = null;
-  if (input.kind === "performance_creative") {
-    if (!performanceCreativeAgentSupportsSource(input.agentId, input.source.type)) {
+  if (effectiveInput.kind === "performance_creative") {
+    if (!performanceCreativeAgentSupportsSource(effectiveInput.agentId, effectiveInput.source.type)) {
       throw new HttpError(400, "That creative agent does not support the selected source.", "AGENT_SOURCE_MISMATCH");
     }
-    if (input.source.type === "product_url" && input.duration !== "8s") {
+    if (effectiveInput.source.type === "product_url" && effectiveInput.duration !== "8s") {
       throw new HttpError(400, "Product URL ads currently support the 8-second generated format.", "DURATION_UNSUPPORTED");
     }
-    if (input.source.type === "long_video" && input.duration === "8s") {
+    if (effectiveInput.source.type === "long_video" && effectiveInput.duration === "8s") {
       throw new HttpError(400, "Long-video creatives support 15- or 30-second cuts.", "DURATION_UNSUPPORTED");
     }
-    if (input.source.type === "long_video") {
+    if (effectiveInput.source.type === "long_video") {
       const { data: sourceProject, error: sourceProjectError } = await supabase
         .from("projects")
         .select("id,status,source_path,duration_seconds")
-        .eq("id", input.source.projectId)
+        .eq("id", effectiveInput.source.projectId)
         .maybeSingle();
       if (sourceProjectError || !sourceProject) {
         throw new HttpError(404, "The selected source video was not found.", "SOURCE_NOT_FOUND");
@@ -282,15 +285,15 @@ export async function enqueueGenerationJob({
     }
   }
 
-  const creditQuote = quoteGenerationCredits(input, sourceDurationSeconds);
+  const creditQuote = quoteGenerationCredits(effectiveInput, sourceDurationSeconds);
   const { data: generation, error: generationError } = await admin
     .from("generations")
     .insert({
-      kind: input.kind,
-      name: input.name,
-      prompt: input.prompt,
-      routing_profile: input.profile,
-      settings: input as unknown as Json,
+      kind: effectiveInput.kind,
+      name: effectiveInput.name,
+      prompt: effectiveInput.prompt,
+      routing_profile: effectiveInput.profile,
+      settings: effectiveInput as unknown as Json,
       status: "queued",
       user_id: user.id,
     })
@@ -301,11 +304,11 @@ export async function enqueueGenerationJob({
     throw new HttpError(500, "Unable to create the generation.", "GENERATION_CREATE_FAILED");
   }
 
-  const kind = input.kind === "image"
+  const kind = effectiveInput.kind === "image"
     ? "generate_image"
-    : input.kind === "video"
+    : effectiveInput.kind === "video"
       ? "generate_video"
-      : input.kind === "background_removal"
+      : effectiveInput.kind === "background_removal"
         ? "generate_background_removal"
         : "generate_performance_creative";
   const { data: job, error: jobError } = await admin
@@ -314,13 +317,13 @@ export async function enqueueGenerationJob({
       generation_id: generation.id,
       kind,
       payload: {
-        ...input,
+        ...effectiveInput,
         billing: billingMetadataForQuote(creditQuote),
         requestId,
       } as unknown as Json,
-      stage: input.kind === "background_removal"
+      stage: effectiveInput.kind === "background_removal"
         ? "Cutout agent is preparing"
-        : input.kind === "performance_creative"
+        : effectiveInput.kind === "performance_creative"
           ? "AI ad creative agent is preparing"
           : "Model Autopilot is preparing",
       status: "queued",
@@ -398,7 +401,7 @@ export async function enqueueGenerationJob({
   );
 
   return {
-    credit: { quote: creditQuote, reservation },
+    credit: { accessMode, quote: creditQuote, reservation },
     generation,
     job: { ...job, queue_message_id: queueMessageId },
   };
