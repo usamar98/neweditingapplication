@@ -114,6 +114,7 @@ class OpenAICompatibleContentAnalysisProvider implements ContentAnalysisProvider
 
   constructor(
     private readonly config: WorkerConfig,
+    private readonly markProviderBillingStarted: () => Promise<void>,
     providerName: "openai" | "openai-compatible",
   ) {
     this.name = providerName;
@@ -125,6 +126,7 @@ class OpenAICompatibleContentAnalysisProvider implements ContentAnalysisProvider
       throw new Error(`${this.name} content analysis requires CONTENT_ANALYSIS_API_KEY.`);
     }
 
+    await this.markProviderBillingStarted();
     const response = await fetch(this.config.CONTENT_ANALYSIS_API_URL, {
       method: "POST",
       headers: {
@@ -165,7 +167,11 @@ class FalContentAnalysisProvider implements ContentAnalysisProvider {
   readonly name = "fal";
   readonly routing: FalModelSelection;
 
-  constructor(private readonly config: WorkerConfig, preferredModel?: string | null) {
+  constructor(
+    private readonly config: WorkerConfig,
+    private readonly markProviderBillingStarted: () => Promise<void>,
+    preferredModel?: string | null,
+  ) {
     this.routing = resolveFalModel({
       capability: "content-analysis",
       overrides: config.FAL_MODEL_OVERRIDES,
@@ -180,6 +186,7 @@ class FalContentAnalysisProvider implements ContentAnalysisProvider {
 
   async analyze(input: AnalysisInput) {
     const client = createWorkerFalClient(this.config.FAL_KEY);
+    await this.markProviderBillingStarted();
     const result = await client.subscribe(this.routing.endpointId, {
       input: {
         max_tokens: 3000,
@@ -203,17 +210,21 @@ function selectedProvider(config: WorkerConfig) {
   return "local";
 }
 
-export function createContentAnalysisProvider(config: WorkerConfig, agentId: EditorAgentId = "auto"): ContentAnalysisProvider {
+export function createContentAnalysisProvider(
+  config: WorkerConfig,
+  markProviderBillingStarted: () => Promise<void>,
+  agentId: EditorAgentId = "auto",
+): ContentAnalysisProvider {
   const selected = endpointForEditorAgent(agentId);
   if (selected === "local") return new LocalContentAnalysisProvider();
   if (selected) {
     if (!config.FAL_KEY) {
       throw new Error("The selected editor model requires FAL_KEY in the worker environment.");
     }
-    return new FalContentAnalysisProvider(config, selected);
+    return new FalContentAnalysisProvider(config, markProviderBillingStarted, selected);
   }
   const provider = selectedProvider(config);
   if (provider === "local") return new LocalContentAnalysisProvider();
-  if (provider === "fal") return new FalContentAnalysisProvider(config);
-  return new OpenAICompatibleContentAnalysisProvider(config, provider);
+  if (provider === "fal") return new FalContentAnalysisProvider(config, markProviderBillingStarted);
+  return new OpenAICompatibleContentAnalysisProvider(config, markProviderBillingStarted, provider);
 }

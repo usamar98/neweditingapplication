@@ -296,7 +296,8 @@ export const legalDocuments: LegalDocument[] = [
           "Video-minute and output estimates are planning guides, not fixed quotas. Provider capabilities and cost can change.",
           "Included credits are allocated for the applicable subscription period. Unless a plan expressly says otherwise, unused included credits do not roll over and have no cash or refund value.",
           "Credits may not be sold, transferred between unrelated accounts, redeemed for money, or obtained through abuse, chargeback, or circumvention.",
-          "If a paid generation fails before a usable provider result is delivered, the applicable usage should not be treated as successfully consumed. Contact us if the account record appears incorrect.",
+          "The Service reserves the displayed credits before an operation starts so simultaneous requests cannot overspend the same balance. A reservation is settled when the operation completes.",
+          "If an operation reaches terminal failure before paid provider processing begins, its reserved credits are released automatically. After paid provider processing begins, some or all reserved credits may be consumed because the third-party cost may already have been incurred, even if a usable output is not returned. Contact us if the account record appears incorrect.",
         ],
       },
       {

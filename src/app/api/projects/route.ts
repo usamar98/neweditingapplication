@@ -1,8 +1,10 @@
 import { createProjectSchema, VIDEO_SOURCE_BUCKET } from "@/lib/domain/video";
+import { requireActiveSubscription } from "@/lib/credits";
 import { errorResponse, getRequestId, HttpError } from "@/lib/http";
 import { consumeRateLimit } from "@/lib/jobs";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getDirectStorageUrl, isSupabaseConfigured } from "@/lib/config";
 
 const extensionByMime = {
@@ -26,6 +28,8 @@ export async function POST(request: Request) {
     if (authError || !authData.user) {
       throw new HttpError(401, "Sign in to upload a video.", "UNAUTHENTICATED");
     }
+
+    await requireActiveSubscription(createAdminClient(), authData.user.id);
 
     await consumeRateLimit(supabase, input.resumeProjectId ? "upload:resume" : "project:create", input.resumeProjectId ? 120 : 20, 3600);
 

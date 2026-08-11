@@ -26,6 +26,15 @@ const data: AdminDashboardData = {
     totalUsers: 1,
   },
   planMix: [{ color: "#a78bfa", count: 1, key: "studio", label: "Studio", share: 100 }],
+  profitability: {
+    collectedRevenue: 49.99,
+    creditsConsumed: 50,
+    creditsReserved: 10,
+    estimatedApiCost: 0.4,
+    grossMargin: 99.2,
+    grossProfit: 49.59,
+    models: [{ creditsConsumed: 50, estimatedApiCost: 0.4, jobs: 1, modelKey: "fal-ai/veo3.1/fast" }],
+  },
   users: [{
     accountStatus: "active",
     avatarUrl: null,

@@ -13,8 +13,6 @@ import {
 } from "../src/lib/domain/generation";
 import {
   compatibleVideoEndpoints,
-  endpointForAgent,
-  endpointForPerformanceCreativeAgent,
 } from "../src/lib/domain/ai-models";
 import {
   defaultEditSettings,
@@ -40,6 +38,7 @@ type GenerationContext = {
   config: WorkerConfig;
   generation: Generation;
   job: Job;
+  markProviderBillingStarted: () => Promise<void>;
   report: ProgressReporter;
   supabase: SupabaseClient<Database>;
   tempDir: string;
@@ -246,10 +245,13 @@ async function planProductCreative(
   const routing = resolveFalModel({
     capability: "content-analysis",
     overrides: context.config.FAL_MODEL_OVERRIDES,
+    preferredEndpointId: payload.billing.secondaryEndpoint,
+    preferredModel: payload.billing.secondaryModel,
     profile: payload.profile,
   });
   if (!routing.model) throw new Error("Performance creative planning requires a routed LLM model.");
   const client = createWorkerFalClient(context.config.FAL_KEY);
+  await context.markProviderBillingStarted();
   const response = await client.subscribe(routing.endpointId, {
     input: {
       max_tokens: 1800,
@@ -289,11 +291,12 @@ async function planLongVideoCreative(
   const routing = resolveFalModel({
     capability: "video-understanding",
     overrides: context.config.FAL_MODEL_OVERRIDES,
-    preferredEndpointId: endpointForPerformanceCreativeAgent(payload.agentId, "long_video"),
+    preferredEndpointId: payload.billing.primaryEndpoint,
     profile: payload.profile,
   });
   const targetDuration = creativeDuration(payload);
   const client = createWorkerFalClient(context.config.FAL_KEY);
+  await context.markProviderBillingStarted();
   const response = await client.subscribe(routing.endpointId, {
     input: {
       detailed_analysis: true,
@@ -458,7 +461,7 @@ async function generateImage(context: GenerationContext, payload: Extract<Genera
   const routing = resolveFalModel({
     capability: "text-to-image",
     overrides: context.config.FAL_MODEL_OVERRIDES,
-    preferredEndpointId: endpointForAgent("image", payload.agentId),
+    preferredEndpointId: payload.billing.primaryEndpoint,
     profile: payload.profile,
   });
   await updateGeneration(context, {
@@ -470,6 +473,7 @@ async function generateImage(context: GenerationContext, payload: Extract<Genera
   await context.report(`Model Autopilot selected ${routing.endpointId}`, 18);
 
   const client = createWorkerFalClient(context.config.FAL_KEY);
+  await context.markProviderBillingStarted();
   const response = await client.subscribe(routing.endpointId, {
     input: imageInput(payload, routing.endpointId),
     logs: false,
@@ -515,7 +519,7 @@ async function generateVideo(context: GenerationContext, payload: Extract<Genera
     capability: "text-to-video",
     compatibleEndpointIds: compatibleVideoEndpoints(payload.duration, payload.resolution),
     overrides: context.config.FAL_MODEL_OVERRIDES,
-    preferredEndpointId: endpointForAgent("video", payload.agentId),
+    preferredEndpointId: payload.billing.primaryEndpoint,
     profile: payload.profile,
   });
   const checkpointResult = videoDeliveryCheckpointSchema.safeParse(context.job.result);
@@ -541,6 +545,7 @@ async function generateVideo(context: GenerationContext, payload: Extract<Genera
     await context.report("Resuming secure delivery of the existing video", 68);
   } else {
     const client = createWorkerFalClient(context.config.FAL_KEY);
+    await context.markProviderBillingStarted();
     const response = await client.subscribe(routing.endpointId, {
       input: videoInput(payload, routing.endpointId, context.generation.user_id),
       logs: false,
@@ -610,6 +615,8 @@ async function generatePerformanceCreative(
       ? { plan: previous.plan, routing: resolveFalModel({
           capability: "content-analysis",
           overrides: context.config.FAL_MODEL_OVERRIDES,
+          preferredEndpointId: payload.billing.secondaryEndpoint,
+          preferredModel: payload.billing.secondaryModel,
           profile: payload.profile,
         }) }
       : await planProductCreative(context, payload, product);
@@ -625,7 +632,7 @@ async function generatePerformanceCreative(
     const routing = resolveFalModel({
       capability: "image-to-video",
       overrides: context.config.FAL_MODEL_OVERRIDES,
-      preferredEndpointId: endpointForPerformanceCreativeAgent(payload.agentId, "product_url"),
+      preferredEndpointId: payload.billing.primaryEndpoint,
       profile: payload.profile,
     });
     await updateGeneration(context, {
@@ -648,6 +655,7 @@ async function generatePerformanceCreative(
         `Visual direction: ${plan.visualDirection}. End CTA: ${plan.callToAction}.`,
         "Preserve the exact product identity, packaging, label text, proportions, colors, and material details from the supplied image.",
       ].join("\n");
+      await context.markProviderBillingStarted();
       const response = await client.subscribe(routing.endpointId, {
         input: productVideoInput({
           endpointId: routing.endpointId,
@@ -729,7 +737,7 @@ async function generatePerformanceCreative(
   const routing = resolveFalModel({
     capability: "video-understanding",
     overrides: context.config.FAL_MODEL_OVERRIDES,
-    preferredEndpointId: endpointForPerformanceCreativeAgent(payload.agentId, "long_video"),
+    preferredEndpointId: payload.billing.primaryEndpoint,
     profile: payload.profile,
   });
   await updateGeneration(context, {
@@ -848,7 +856,7 @@ async function removeBackground(
   const routing = resolveFalModel({
     capability: "background-removal",
     overrides: context.config.FAL_MODEL_OVERRIDES,
-    preferredEndpointId: endpointForAgent("background_removal", payload.agentId),
+    preferredEndpointId: payload.billing.primaryEndpoint,
     profile: payload.profile,
   });
   await updateGeneration(context, {
@@ -867,6 +875,7 @@ async function removeBackground(
   }
 
   const client = createWorkerFalClient(context.config.FAL_KEY);
+  await context.markProviderBillingStarted();
   const response = await client.subscribe(routing.endpointId, {
     input: routing.endpointId === "fal-ai/birefnet/v2"
       ? {

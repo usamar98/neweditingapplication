@@ -42,6 +42,20 @@ export type AdminDashboardData = {
     totalUsers: number;
   };
   planMix: { color: string; count: number; key: string; label: string; share: number }[];
+  profitability: {
+    collectedRevenue: number;
+    creditsConsumed: number;
+    creditsReserved: number;
+    estimatedApiCost: number;
+    grossMargin: number;
+    grossProfit: number;
+    models: {
+      creditsConsumed: number;
+      estimatedApiCost: number;
+      jobs: number;
+      modelKey: string;
+    }[];
+  };
   users: AdminUserRow[];
 };
 
@@ -116,7 +130,20 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   await requireAdmin();
   const now = new Date();
   const nowMs = now.getTime();
-  const { activityRows, authUsers, billingAccounts, profiles } = await loadAllUsers();
+  const admin = createAdminClient();
+  const [directory, revenueResult, costResult, creditAccountsResult] = await Promise.all([
+    loadAllUsers(),
+    admin.from("billing_revenue_events").select("amount_paid_cents"),
+    admin
+      .from("credit_reservations")
+      .select("actual_provider_cost_micros,credits_reserved,estimated_provider_cost_micros,model_key")
+      .eq("status", "settled"),
+    admin.from("credit_accounts").select("consumed_credits,reserved_credits"),
+  ]);
+  if (revenueResult.error) throw new Error(`Unable to load collected revenue: ${revenueResult.error.message}`);
+  if (costResult.error) throw new Error(`Unable to load provider costs: ${costResult.error.message}`);
+  if (creditAccountsResult.error) throw new Error(`Unable to load credit utilization: ${creditAccountsResult.error.message}`);
+  const { activityRows, authUsers, billingAccounts, profiles } = directory;
   const profileById = new Map(profiles.map((profile) => [profile.id, profile]));
   const billingById = new Map(billingAccounts.map((billing) => [billing.user_id, billing]));
   const activityById = new Map(activityRows.map((activity) => [activity.user_id, activity]));
@@ -211,6 +238,35 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
 
+  const collectedRevenue = revenueResult.data.reduce(
+    (total, row) => total + row.amount_paid_cents / 100,
+    0,
+  );
+  const estimatedApiCost = costResult.data.reduce(
+    (total, row) => total + Number(row.actual_provider_cost_micros ?? row.estimated_provider_cost_micros) / 1_000_000,
+    0,
+  );
+  const grossProfit = collectedRevenue - estimatedApiCost;
+  const modelTotals = new Map<string, {
+    creditsConsumed: number;
+    estimatedApiCost: number;
+    jobs: number;
+  }>();
+  for (const row of costResult.data) {
+    const modelKey = row.model_key ?? "unclassified";
+    const current = modelTotals.get(modelKey) ?? { creditsConsumed: 0, estimatedApiCost: 0, jobs: 0 };
+    current.creditsConsumed += row.credits_reserved;
+    current.estimatedApiCost += Number(row.actual_provider_cost_micros ?? row.estimated_provider_cost_micros) / 1_000_000;
+    current.jobs += 1;
+    modelTotals.set(modelKey, current);
+  }
+  const models = [...modelTotals.entries()]
+    .map(([modelKey, totals]) => ({ modelKey, ...totals }))
+    .sort((left, right) => right.estimatedApiCost - left.estimatedApiCost)
+    .slice(0, 10);
+  const creditsConsumed = creditAccountsResult.data.reduce((total, row) => total + row.consumed_credits, 0);
+  const creditsReserved = creditAccountsResult.data.reduce((total, row) => total + row.reserved_credits, 0);
+
   return {
     countries,
     generatedAt: now.toISOString(),
@@ -225,6 +281,15 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
       totalUsers: users.length,
     },
     planMix,
+    profitability: {
+      collectedRevenue,
+      creditsConsumed,
+      creditsReserved,
+      estimatedApiCost,
+      grossMargin: collectedRevenue > 0 ? (grossProfit / collectedRevenue) * 100 : 0,
+      grossProfit,
+      models,
+    },
     users,
   };
 }

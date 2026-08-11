@@ -318,6 +318,18 @@ export function AdminDashboard({ adminEmail, data }: { adminEmail: string; data:
           <MetricCard label="Logins today" value={formatNumber(overview.loginsToday)} detail="Successful sign-ins since 00:00 UTC" icon={LogIn} tone="blue" />
         </section>
 
+        <section aria-label="Revenue and API cost" className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard label="Collected revenue" value={formatMoney(data.profitability.collectedRevenue)} detail="Paid Stripe invoices recorded by verified webhooks" icon={BadgeDollarSign} />
+          <MetricCard label="Estimated API cost" value={formatMoney(data.profitability.estimatedApiCost)} detail="Settled provider-cost estimates from the versioned model catalog" icon={Clock3} tone="yellow" />
+          <MetricCard label="Gross profit" value={formatMoney(data.profitability.grossProfit)} detail={`${formatNumber(data.profitability.grossMargin, 1)}% revenue less estimated API cost`} icon={TrendingUp} tone="blue" />
+          <MetricCard label="Credits in flight" value={formatNumber(data.profitability.creditsReserved)} detail={`${formatNumber(data.profitability.creditsConsumed)} credits consumed across billing periods`} icon={Sparkles} tone="purple" />
+        </section>
+
+        <Card className="mt-4 border-border bg-card/75 shadow-2xl shadow-black/5">
+          <CardHeader><CardTitle className="flex items-center gap-2"><BadgeDollarSign className="size-4 text-primary" /> Cost by AI model</CardTitle><CardDescription>Settled jobs grouped by the model or model chain reserved before processing.</CardDescription></CardHeader>
+          <CardContent className="px-0 pb-0"><Table><TableHeader><TableRow className="hover:bg-transparent"><TableHead className="pl-6">Model cost key</TableHead><TableHead className="text-right">Jobs</TableHead><TableHead className="text-right">Credits</TableHead><TableHead className="pr-6 text-right">Estimated API cost</TableHead></TableRow></TableHeader><TableBody>{data.profitability.models.map((model) => <TableRow key={model.modelKey}><TableCell className="max-w-xl truncate pl-6 font-mono text-xs">{model.modelKey}</TableCell><TableCell className="text-right">{formatNumber(model.jobs)}</TableCell><TableCell className="text-right">{formatNumber(model.creditsConsumed)}</TableCell><TableCell className="pr-6 text-right font-medium">{formatMoney(model.estimatedApiCost)}</TableCell></TableRow>)}{data.profitability.models.length === 0 ? <TableRow><TableCell colSpan={4} className="h-28 text-center text-muted-foreground">Cost data appears after the first credit-settled operation.</TableCell></TableRow> : null}</TableBody></Table></CardContent>
+        </Card>
+
         <section className="mt-4 grid gap-4 xl:grid-cols-[1.65fr_0.75fr]">
           <Card className="border-border bg-card/75 shadow-2xl shadow-black/5">
             <CardHeader className="flex-row items-start justify-between">
@@ -353,7 +365,7 @@ export function AdminDashboard({ adminEmail, data }: { adminEmail: string; data:
         </section>
 
         <section className="mt-4"><UsersTable generatedAt={data.generatedAt} users={data.users} /></section>
-        <footer className="mt-5 flex flex-col gap-2 text-[10px] leading-5 text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><p>Private admin data · Protected by verified Supabase authentication and server-side role checks.</p><p>MRR is estimated from active monthly plan prices and excludes refunds, tax, discounts, and annualized revenue.</p></footer>
+        <footer className="mt-5 flex flex-col gap-2 text-[10px] leading-5 text-muted-foreground sm:flex-row sm:items-center sm:justify-between"><p>Private admin data · Protected by verified Supabase authentication and server-side role checks.</p><p>Collected revenue uses paid Stripe invoices. API cost remains an estimate until a provider returns authoritative per-request billing.</p></footer>
       </div>
     </main>
   );

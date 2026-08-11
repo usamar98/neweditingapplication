@@ -157,11 +157,22 @@ export const generationRequestSchema = z.discriminatedUnion("kind", [
   performanceCreativeRequestSchema,
 ]);
 
+export const billingJobMetadataSchema = z.object({
+  credits: z.number().int().positive(),
+  estimatedProviderCostMicros: z.number().int().nonnegative(),
+  modelKey: z.string().trim().min(2).max(240),
+  pricingVersion: z.string().trim().min(1).max(40),
+  primaryEndpoint: z.string().trim().min(2).max(200),
+  secondaryEndpoint: z.string().trim().min(2).max(200).optional(),
+  secondaryModel: z.string().trim().min(1).max(200).optional(),
+}).strict();
+export type BillingJobMetadata = z.infer<typeof billingJobMetadataSchema>;
+
 export const generationJobPayloadSchema = z.discriminatedUnion("kind", [
-  imageGenerationRequestSchema.extend({ requestId: z.string().uuid() }),
-  videoGenerationRequestSchema.extend({ requestId: z.string().uuid() }),
-  backgroundRemovalRequestSchema.extend({ requestId: z.string().uuid() }),
-  performanceCreativeRequestSchema.extend({ requestId: z.string().uuid() }),
+  imageGenerationRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
+  videoGenerationRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
+  backgroundRemovalRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
+  performanceCreativeRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
 ]);
 
 export const generationQueueMessageSchema = z.union([

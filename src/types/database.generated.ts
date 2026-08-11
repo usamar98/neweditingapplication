@@ -17,6 +17,9 @@ export type Database = {
       billing_accounts: {
         Row: {
           cancel_at_period_end: boolean
+          current_period_end: string | null
+          current_period_start: string | null
+          latest_paid_invoice_id: string | null
           plan_key: string | null
           stripe_customer_id: string | null
           stripe_price_id: string | null
@@ -27,6 +30,9 @@ export type Database = {
         }
         Insert: {
           cancel_at_period_end?: boolean
+          current_period_end?: string | null
+          current_period_start?: string | null
+          latest_paid_invoice_id?: string | null
           plan_key?: string | null
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
@@ -37,11 +43,227 @@ export type Database = {
         }
         Update: {
           cancel_at_period_end?: boolean
+          current_period_end?: string | null
+          current_period_start?: string | null
+          latest_paid_invoice_id?: string | null
           plan_key?: string | null
           stripe_customer_id?: string | null
           stripe_price_id?: string | null
           stripe_subscription_id?: string | null
           subscription_status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_plan_entitlements: {
+        Row: {
+          concurrency_limit: number
+          hourly_generation_limit: number
+          monthly_credits: number
+          monthly_price_cents: number
+          plan_key: string
+          updated_at: string
+        }
+        Insert: {
+          concurrency_limit: number
+          hourly_generation_limit: number
+          monthly_credits: number
+          monthly_price_cents: number
+          plan_key: string
+          updated_at?: string
+        }
+        Update: {
+          concurrency_limit?: number
+          hourly_generation_limit?: number
+          monthly_credits?: number
+          monthly_price_cents?: number
+          plan_key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_revenue_events: {
+        Row: {
+          amount_paid_cents: number
+          created_at: string
+          currency: string
+          id: number
+          paid_at: string
+          period_end: string
+          period_start: string
+          plan_key: string
+          stripe_event_id: string
+          stripe_invoice_id: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid_cents: number
+          created_at?: string
+          currency: string
+          id?: never
+          paid_at: string
+          period_end: string
+          period_start: string
+          plan_key: string
+          stripe_event_id: string
+          stripe_invoice_id: string
+          user_id: string
+        }
+        Update: {
+          amount_paid_cents?: number
+          created_at?: string
+          currency?: string
+          id?: never
+          paid_at?: string
+          period_end?: string
+          period_start?: string
+          plan_key?: string
+          stripe_event_id?: string
+          stripe_invoice_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_accounts: {
+        Row: {
+          allocated_credits: number
+          consumed_credits: number
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          plan_key: string
+          reserved_credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allocated_credits: number
+          consumed_credits?: number
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          plan_key: string
+          reserved_credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allocated_credits?: number
+          consumed_credits?: number
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          plan_key?: string
+          reserved_credits?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_ledger: {
+        Row: {
+          created_at: string
+          credit_account_id: string
+          credits_delta: number
+          description: string
+          entry_type: string
+          id: number
+          idempotency_key: string
+          model_key: string | null
+          provider_cost_micros: number
+          reservation_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit_account_id: string
+          credits_delta: number
+          description: string
+          entry_type: string
+          id?: never
+          idempotency_key: string
+          model_key?: string | null
+          provider_cost_micros?: number
+          reservation_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credit_account_id?: string
+          credits_delta?: number
+          description?: string
+          entry_type?: string
+          id?: never
+          idempotency_key?: string
+          model_key?: string | null
+          provider_cost_micros?: number
+          reservation_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_reservations: {
+        Row: {
+          actual_provider_cost_micros: number | null
+          created_at: string
+          credit_account_id: string
+          credits_reserved: number
+          estimated_provider_cost_micros: number
+          failure_reason: string | null
+          id: string
+          idempotency_key: string
+          job_id: string
+          model_key: string
+          operation_key: string
+          pricing_version: string
+          provider_started_at: string | null
+          released_at: string | null
+          settled_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_provider_cost_micros?: number | null
+          created_at?: string
+          credit_account_id: string
+          credits_reserved: number
+          estimated_provider_cost_micros: number
+          failure_reason?: string | null
+          id?: string
+          idempotency_key: string
+          job_id: string
+          model_key: string
+          operation_key: string
+          pricing_version: string
+          provider_started_at?: string | null
+          released_at?: string | null
+          settled_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_provider_cost_micros?: number | null
+          created_at?: string
+          credit_account_id?: string
+          credits_reserved?: number
+          estimated_provider_cost_micros?: number
+          failure_reason?: string | null
+          id?: string
+          idempotency_key?: string
+          job_id?: string
+          model_key?: string
+          operation_key?: string
+          pricing_version?: string
+          provider_started_at?: string | null
+          released_at?: string | null
+          settled_at?: string | null
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -414,6 +636,15 @@ export type Database = {
     }
     Functions: {
       archive_video_job: { Args: { message_id: number }; Returns: boolean }
+      complete_job_with_credits: {
+        Args: {
+          p_actual_provider_cost_micros?: number
+          p_job_id: string
+          p_result: Json
+          p_stage: string
+        }
+        Returns: Json
+      }
       consume_rate_limit: {
         Args: {
           request_limit: number
@@ -432,7 +663,45 @@ export type Database = {
           vt: string
         }[]
       }
+      fail_job_with_credits: {
+        Args: {
+          p_attempt: number
+          p_error_code: string
+          p_error_message: string
+          p_force_terminal?: boolean
+          p_job_id: string
+          p_stage: string
+        }
+        Returns: Json
+      }
+      get_my_credit_summary: { Args: never; Returns: Json }
+      mark_job_provider_started: {
+        Args: { p_job_id: string }
+        Returns: boolean
+      }
       queue_video_job: { Args: { message: Json }; Returns: number }
+      reserve_job_credits: {
+        Args: {
+          p_credits: number
+          p_estimated_provider_cost_micros: number
+          p_idempotency_key: string
+          p_job_id: string
+          p_model_key: string
+          p_operation_key: string
+          p_pricing_version: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      sync_credit_period: {
+        Args: {
+          p_period_end: string
+          p_period_start: string
+          p_plan_key: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       generation_kind:

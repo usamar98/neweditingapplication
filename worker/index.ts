@@ -128,6 +128,17 @@ async function markJobStarted(job: Job) {
   return attempt;
 }
 
+async function requireCreditReservation(jobId: string) {
+  const { data, error } = await supabase
+    .from("credit_reservations")
+    .select("id,status")
+    .eq("job_id", jobId)
+    .maybeSingle();
+  if (error || !data || data.status !== "reserved") {
+    throw new Error("The job does not have an active subscription credit reservation.");
+  }
+}
+
 async function markJobComplete(job: Job, result: Json) {
   const completionStage: Record<Job["kind"], string> = {
     analyze: "Analysis complete",
@@ -137,30 +148,30 @@ async function markJobComplete(job: Job, result: Json) {
     generate_performance_creative: "Performance creative ready",
     generate_video: "Video ready",
   };
-  const { error } = await supabase.from("jobs").update({
-    error_code: null,
-    error_message: null,
-    finished_at: new Date().toISOString(),
-    progress: 100,
-    result,
-    stage: completionStage[job.kind],
-    status: "completed",
-  }).eq("id", job.id);
-  if (error) throw new Error(`Unable to complete job: ${error.message}`);
+  const { error } = await supabase.rpc("complete_job_with_credits", {
+    p_actual_provider_cost_micros: undefined,
+    p_job_id: job.id,
+    p_result: result,
+    p_stage: completionStage[job.kind],
+  });
+  if (error) throw new Error(`Unable to complete and settle job: ${error.message}`);
 }
 
 async function markJobFailed(job: Job, target: WorkTarget, attempt: number, error: unknown) {
   const details = errorDetails(error);
-  const exhausted = attempt >= job.max_attempts;
-  const { error: jobError } = await supabase.from("jobs").update({
-    error_code: details.code,
-    error_message: details.message,
-    finished_at: exhausted ? new Date().toISOString() : null,
-    progress: 0,
-    stage: exhausted ? "Processing failed" : `Retry scheduled (${attempt}/${job.max_attempts})`,
-    status: exhausted ? "failed" : "retrying",
-  }).eq("id", job.id);
+  const expectedExhausted = attempt >= job.max_attempts;
+  const { data, error: jobError } = await supabase.rpc("fail_job_with_credits", {
+    p_attempt: attempt,
+    p_error_code: details.code,
+    p_error_message: details.message,
+    p_force_terminal: false,
+    p_job_id: job.id,
+    p_stage: expectedExhausted ? "Processing failed" : `Retry scheduled (${attempt}/${job.max_attempts})`,
+  });
   if (jobError) workerLogger.error({ error: jobError.message, jobId: job.id }, "Unable to persist job failure");
+  const exhausted = data && typeof data === "object" && !Array.isArray(data)
+    ? data.exhausted === true
+    : expectedExhausted;
 
   if (target.type === "project") {
     const { error: projectError } = await supabase.from("projects").update({
@@ -176,6 +187,13 @@ async function markJobFailed(job: Job, target: WorkTarget, attempt: number, erro
     if (generationError) workerLogger.error({ error: generationError.message, generationId: target.generation.id }, "Unable to persist generation failure");
   }
   return { details, exhausted };
+}
+
+async function markProviderBillingStarted(jobId: string) {
+  const { data, error } = await supabase.rpc("mark_job_provider_started", { p_job_id: jobId });
+  if (error || !data) {
+    throw new Error(`Unable to mark provider billing start: ${error?.message ?? "credit reservation is not active"}`);
+  }
 }
 
 async function markTargetStarted(job: Job, target: WorkTarget) {
@@ -230,6 +248,7 @@ async function processQueueRow(row: QueueRow) {
       return;
     }
 
+    await requireCreditReservation(job.id);
     attempt = await markJobStarted(job);
     await markTargetStarted(job, target);
     tempDir = await mkdtemp(resolve(config.WORKER_TEMP_ROOT, `${job.id}-`));
@@ -238,6 +257,7 @@ async function processQueueRow(row: QueueRow) {
       ? await runPipeline({
           config,
           job: { ...job, attempt },
+          markProviderBillingStarted: () => markProviderBillingStarted(job!.id),
           project: target.project,
           report: createReporter(job.id),
           supabase,
@@ -247,6 +267,7 @@ async function processQueueRow(row: QueueRow) {
           config,
           generation: target.generation,
           job: { ...job, attempt },
+          markProviderBillingStarted: () => markProviderBillingStarted(job!.id),
           report: createReporter(job.id),
           supabase,
           tempDir,

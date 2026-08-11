@@ -69,6 +69,7 @@ class OpenAICompatibleTranscriptionProvider implements TranscriptionProvider {
 
   constructor(
     private readonly config: WorkerConfig,
+    private readonly markProviderBillingStarted: () => Promise<void>,
     providerName: "openai" | "openai-compatible",
   ) {
     this.name = providerName;
@@ -88,6 +89,7 @@ class OpenAICompatibleTranscriptionProvider implements TranscriptionProvider {
     form.append("timestamp_granularities[]", "segment");
     form.append("timestamp_granularities[]", "word");
 
+    await this.markProviderBillingStarted();
     const response = await fetch(this.config.TRANSCRIPTION_API_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${this.config.TRANSCRIPTION_API_KEY}` },
@@ -182,7 +184,10 @@ class FalTranscriptionProvider implements TranscriptionProvider {
   readonly name = "fal";
   readonly routing: FalModelSelection;
 
-  constructor(private readonly config: WorkerConfig) {
+  constructor(
+    private readonly config: WorkerConfig,
+    private readonly markProviderBillingStarted: () => Promise<void>,
+  ) {
     this.routing = resolveFalModel({
       capability: "transcription",
       overrides: config.FAL_MODEL_OVERRIDES,
@@ -197,6 +202,7 @@ class FalTranscriptionProvider implements TranscriptionProvider {
     const audioUrl = await client.storage.upload(new File([audio], "speech.mp3", { type: "audio/mpeg" }), {
       lifecycle: { expiresIn: "1h" },
     });
+    await this.markProviderBillingStarted();
     const result = await client.subscribe(this.routing.endpointId, {
       input: {
         audio_url: audioUrl,
@@ -218,9 +224,12 @@ function selectedProvider(config: WorkerConfig) {
   return "local";
 }
 
-export function createTranscriptionProvider(config: WorkerConfig): TranscriptionProvider {
+export function createTranscriptionProvider(
+  config: WorkerConfig,
+  markProviderBillingStarted: () => Promise<void>,
+): TranscriptionProvider {
   const provider = selectedProvider(config);
   if (provider === "local") return new LocalTranscriptionProvider();
-  if (provider === "fal") return new FalTranscriptionProvider(config);
-  return new OpenAICompatibleTranscriptionProvider(config, provider);
+  if (provider === "fal") return new FalTranscriptionProvider(config, markProviderBillingStarted);
+  return new OpenAICompatibleTranscriptionProvider(config, markProviderBillingStarted, provider);
 }

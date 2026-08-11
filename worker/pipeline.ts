@@ -44,6 +44,7 @@ export type ProgressReporter = (stage: string, progress: number) => Promise<void
 type PipelineContext = {
   config: WorkerConfig;
   job: Job;
+  markProviderBillingStarted: () => Promise<void>;
   project: Project;
   report: ProgressReporter;
   supabase: SupabaseClient<Database>;
@@ -110,7 +111,10 @@ async function analyzeVideo(context: PipelineContext) {
   ]);
 
   let transcript: Transcript = emptyTranscript;
-  const transcriptionProvider = createTranscriptionProvider(context.config);
+  const transcriptionProvider = createTranscriptionProvider(
+    context.config,
+    context.markProviderBillingStarted,
+  );
   if (probe.hasAudio) {
     await context.report("Preparing speech audio", 42);
     await extractSpeechAudio(sourcePath, audioPath);
@@ -120,7 +124,11 @@ async function analyzeVideo(context: PipelineContext) {
 
   const parsedPayload = z.object({ agentId: editorAgentIdSchema.default("auto") }).passthrough().safeParse(context.job.payload);
   const editorAgentId = parsedPayload.success ? parsedPayload.data.agentId : "auto";
-  const analysisProvider = createContentAnalysisProvider(context.config, editorAgentId);
+  const analysisProvider = createContentAnalysisProvider(
+    context.config,
+    context.markProviderBillingStarted,
+    editorAgentId,
+  );
   await context.report(`Analyzing content with ${analysisProvider.name}`, 68);
   const content = await analysisProvider.analyze({
     duration: probe.duration,

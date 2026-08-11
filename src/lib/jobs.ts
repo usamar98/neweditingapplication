@@ -3,6 +3,14 @@ import "server-only";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { editorAgentIdSchema, performanceCreativeAgentSupportsSource } from "@/lib/domain/ai-models";
 import type { GenerationRequest } from "@/lib/domain/generation";
+import {
+  billingMetadataForQuote,
+  failUnstartedJob,
+  quoteGenerationCredits,
+  quoteProjectCredits,
+  requireActiveSubscription,
+  reserveCredits,
+} from "@/lib/credits";
 import { HttpError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -57,6 +65,8 @@ export async function enqueueProjectJob({
   const selectedEditorAgent = kind === "analyze" ? editorAgentIdSchema.parse(agentId ?? "auto") : undefined;
   await requireActiveAccount(supabase, user.id);
   await consumeRateLimit(supabase, `job:${kind}`, kind === "export" ? 8 : 12, 60);
+  const admin = createAdminClient();
+  await requireActiveSubscription(admin, user.id);
 
   const [{ data: project, error: projectError }, { data: activeJob }] = await Promise.all([
     supabase
@@ -104,7 +114,6 @@ export async function enqueueProjectJob({
       throw new HttpError(500, "Unable to confirm the upload.", "UPLOAD_CONFIRM_FAILED");
     }
 
-    const admin = createAdminClient();
     await admin.from("usage_events").insert({
       event_type: "upload_bytes",
       metadata: { requestId },
@@ -114,8 +123,16 @@ export async function enqueueProjectJob({
     });
   }
 
-  const payload: Json = { requestId, ...(selectedEditorAgent ? { agentId: selectedEditorAgent } : {}) };
-  const admin = createAdminClient();
+  const creditQuote = quoteProjectCredits({
+    agentId: selectedEditorAgent,
+    durationSeconds: Number(project.duration_seconds ?? 60),
+    kind,
+  });
+  const payload: Json = {
+    billing: billingMetadataForQuote(creditQuote),
+    requestId,
+    ...(selectedEditorAgent ? { agentId: selectedEditorAgent } : {}),
+  };
   const { data: job, error: insertError } = await admin
     .from("jobs")
     .insert({
@@ -136,6 +153,27 @@ export async function enqueueProjectJob({
     throw new HttpError(500, "Unable to create the processing job.", "JOB_CREATE_FAILED");
   }
 
+  let reservation;
+  try {
+    reservation = await reserveCredits(admin, {
+      jobId: job.id,
+      quote: creditQuote,
+      requestId,
+      userId: user.id,
+    });
+  } catch (error) {
+    await failUnstartedJob(
+      admin,
+      job.id,
+      "CREDIT_RESERVATION_FAILED",
+      "The job could not reserve subscription credits.",
+      "Credit reservation failed",
+    ).catch((releaseError) => {
+      logger.error({ err: releaseError, jobId: job.id, requestId }, "Unable to reconcile failed credit reservation");
+    });
+    throw error;
+  }
+
   const queueMessage: Json = {
     jobId: job.id,
     kind,
@@ -147,16 +185,13 @@ export async function enqueueProjectJob({
   });
 
   if (queueError || queueMessageId === null) {
-    await admin
-      .from("jobs")
-      .update({
-        error_code: "QUEUE_SUBMIT_FAILED",
-        error_message: "The job could not be added to the durable queue.",
-        finished_at: new Date().toISOString(),
-        stage: "Queue submission failed",
-        status: "failed",
-      })
-      .eq("id", job.id);
+    await failUnstartedJob(
+      admin,
+      job.id,
+      "QUEUE_SUBMIT_FAILED",
+      "The job could not be added to the durable queue.",
+      "Queue submission failed",
+    );
     logger.error({ err: queueError, jobId: job.id, requestId }, "Queue submission failed");
     throw new HttpError(503, "Processing queue is unavailable.", "QUEUE_UNAVAILABLE");
   }
@@ -178,7 +213,7 @@ export async function enqueueProjectJob({
     "Video job queued",
   );
 
-  return { ...job, queue_message_id: queueMessageId };
+  return { ...job, credit: { quote: creditQuote, reservation }, queue_message_id: queueMessageId };
 }
 
 export async function enqueueGenerationJob({
@@ -199,6 +234,8 @@ export async function enqueueGenerationJob({
     input.kind === "video" || input.kind === "performance_creative" ? 2 : 8,
     60,
   );
+  const admin = createAdminClient();
+  await requireActiveSubscription(admin, user.id);
 
   if (input.kind === "background_removal") {
     if (!input.sourcePath.startsWith(`${user.id}/`)) {
@@ -215,6 +252,7 @@ export async function enqueueGenerationJob({
     }
   }
 
+  let sourceDurationSeconds: number | null = null;
   if (input.kind === "performance_creative") {
     if (!performanceCreativeAgentSupportsSource(input.agentId, input.source.type)) {
       throw new HttpError(400, "That creative agent does not support the selected source.", "AGENT_SOURCE_MISMATCH");
@@ -240,10 +278,11 @@ export async function enqueueGenerationJob({
       if (!sourceProject.source_path.startsWith(`${user.id}/`)) {
         throw new HttpError(403, "The selected source video does not belong to this account.", "SOURCE_FORBIDDEN");
       }
+      sourceDurationSeconds = Number(sourceProject.duration_seconds);
     }
   }
 
-  const admin = createAdminClient();
+  const creditQuote = quoteGenerationCredits(input, sourceDurationSeconds);
   const { data: generation, error: generationError } = await admin
     .from("generations")
     .insert({
@@ -274,7 +313,11 @@ export async function enqueueGenerationJob({
     .insert({
       generation_id: generation.id,
       kind,
-      payload: { ...input, requestId } as unknown as Json,
+      payload: {
+        ...input,
+        billing: billingMetadataForQuote(creditQuote),
+        requestId,
+      } as unknown as Json,
       stage: input.kind === "background_removal"
         ? "Cutout agent is preparing"
         : input.kind === "performance_creative"
@@ -291,6 +334,33 @@ export async function enqueueGenerationJob({
     throw new HttpError(500, "Unable to create the generation job.", "JOB_CREATE_FAILED");
   }
 
+  let reservation;
+  try {
+    reservation = await reserveCredits(admin, {
+      jobId: job.id,
+      quote: creditQuote,
+      requestId,
+      userId: user.id,
+    });
+  } catch (error) {
+    await Promise.all([
+      failUnstartedJob(
+        admin,
+        job.id,
+        "CREDIT_RESERVATION_FAILED",
+        "The generation could not reserve subscription credits.",
+        "Credit reservation failed",
+      ).catch((releaseError) => {
+        logger.error({ err: releaseError, generationId: generation.id, jobId: job.id, requestId }, "Unable to reconcile failed generation credit reservation");
+      }),
+      admin
+        .from("generations")
+        .update({ last_error: "Subscription credits could not be reserved.", status: "failed" })
+        .eq("id", generation.id),
+    ]);
+    throw error;
+  }
+
   const queueMessage: Json = {
     generationId: generation.id,
     jobId: job.id,
@@ -302,23 +372,17 @@ export async function enqueueGenerationJob({
   });
 
   if (queueError || queueMessageId === null) {
-    const finishedAt = new Date().toISOString();
-    await Promise.all([
-      admin
-        .from("jobs")
-        .update({
-          error_code: "QUEUE_SUBMIT_FAILED",
-          error_message: "The generation could not be added to the durable queue.",
-          finished_at: finishedAt,
-          stage: "Queue submission failed",
-          status: "failed",
-        })
-        .eq("id", job.id),
-      admin
-        .from("generations")
-        .update({ last_error: "The generation could not be queued.", status: "failed" })
-        .eq("id", generation.id),
-    ]);
+    await failUnstartedJob(
+      admin,
+      job.id,
+      "QUEUE_SUBMIT_FAILED",
+      "The generation could not be added to the durable queue.",
+      "Queue submission failed",
+    );
+    await admin
+      .from("generations")
+      .update({ last_error: "The generation could not be queued.", status: "failed" })
+      .eq("id", generation.id);
     logger.error({ err: queueError, generationId: generation.id, jobId: job.id, requestId }, "Generation queue submission failed");
     throw new HttpError(503, "Processing queue is unavailable.", "QUEUE_UNAVAILABLE");
   }
@@ -334,6 +398,7 @@ export async function enqueueGenerationJob({
   );
 
   return {
+    credit: { quote: creditQuote, reservation },
     generation,
     job: { ...job, queue_message_id: queueMessageId },
   };
