@@ -8,8 +8,30 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isValidUsername, normalizeUsername } from "@/lib/domain/username";
 import { createClient } from "@/lib/supabase/client";
 import { getSafeRedirectPath } from "@/lib/safe-redirect";
+
+type UsernameAvailabilityResponse = {
+  available?: boolean;
+  error?: { message?: string };
+};
+
+async function checkUsernameAvailability(username: string) {
+  const response = await fetch("/api/auth/username-availability", {
+    body: JSON.stringify({ username }),
+    cache: "no-store",
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  });
+  const body = (await response.json().catch(() => null)) as UsernameAvailabilityResponse | null;
+
+  if (!response.ok) {
+    throw new Error(body?.error?.message ?? "Username availability cannot be checked right now.");
+  }
+
+  return body?.available === true;
+}
 
 export function AuthForm() {
   const router = useRouter();
@@ -33,7 +55,7 @@ export function AuthForm() {
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
     const displayName = String(form.get("displayName") ?? "").trim();
-    const username = String(form.get("username") ?? "").trim().toLowerCase();
+    const username = normalizeUsername(String(form.get("username") ?? ""));
     const legalAccepted = form.get("legalAccepted") === "on";
     setError(null);
     setNotice(null);
@@ -46,10 +68,29 @@ export function AuthForm() {
       setError("Review and accept the Terms of Service and Privacy Policy to create an account.");
       return;
     }
+    if (mode === "signup" && !isValidUsername(username)) {
+      setError("Use 3–30 lowercase letters, numbers, or underscores for your username.");
+      return;
+    }
 
     startTransition(async () => {
       const supabase = createClient();
       if (mode === "signup") {
+        try {
+          const usernameAvailable = await checkUsernameAvailability(username);
+          if (!usernameAvailable) {
+            setError("That username is already taken. Choose another one.");
+            return;
+          }
+        } catch (availabilityError) {
+          setError(
+            availabilityError instanceof Error
+              ? availabilityError.message
+              : "Username availability cannot be checked right now.",
+          );
+          return;
+        }
+
         const { data, error: authError } = await supabase.auth.signUp({
           email,
           password,
@@ -59,6 +100,13 @@ export function AuthForm() {
           },
         });
         if (authError) {
+          if (/database error saving new user/i.test(authError.message)) {
+            const usernameAvailable = await checkUsernameAvailability(username).catch(() => true);
+            if (!usernameAvailable) {
+              setError("That username was just taken. Choose another one.");
+              return;
+            }
+          }
           setError(authError.message);
           return;
         }

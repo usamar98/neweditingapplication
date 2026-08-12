@@ -4,13 +4,14 @@ import { redirect } from "next/navigation";
 import type { Route } from "next";
 import { z } from "zod";
 import { getPublicSupabaseConfig } from "@/lib/config";
+import { USERNAME_PATTERN } from "@/lib/domain/username";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 const profileSchema = z.object({
   displayName: z.string().trim().min(2).max(80),
-  username: z.string().trim().toLowerCase().regex(/^[a-z0-9_]{3,30}$/),
+  username: z.string().trim().toLowerCase().regex(USERNAME_PATTERN),
 });
 
 async function authenticatedUser() {
