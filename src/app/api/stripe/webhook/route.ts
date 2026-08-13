@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlanForStripePrice, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
+import { getPlanForStripeSubscription, getStripe, getStripeWebhookSecret } from "@/lib/stripe";
 
 export const runtime = "nodejs";
 
@@ -15,7 +15,7 @@ async function syncSubscription(subscription: Stripe.Subscription, paidInvoiceId
   const currentPeriodEnd = subscriptionItem?.current_period_end
     ? new Date(subscriptionItem.current_period_end * 1000).toISOString()
     : null;
-  const plan = priceId ? getPlanForStripePrice(priceId) : null;
+  const plan = getPlanForStripeSubscription(subscription);
   let userId = subscription.metadata.supabase_user_id || null;
   if (!userId) {
     const { data } = await admin

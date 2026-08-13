@@ -17,7 +17,7 @@ import {
   WELCOME_IMAGE_PROFILE,
 } from "@/lib/domain/credits";
 import { HttpError } from "@/lib/http";
-import { getPlanForStripePrice, getStripe } from "@/lib/stripe";
+import { getPlanForStripeSubscription, getStripe } from "@/lib/stripe";
 import type { Database, Json } from "@/types/database.generated";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolveFalModel } from "../../worker/providers/fal/routing";
@@ -296,7 +296,7 @@ async function refreshStripeEntitlement(
   const subscription = await stripe.subscriptions.retrieve(billing.stripe_subscription_id);
   const item = subscription.items.data[0];
   const priceId = item?.price.id ?? null;
-  const plan = priceId ? getPlanForStripePrice(priceId) : null;
+  const plan = getPlanForStripeSubscription(subscription);
   const periodStart = item?.current_period_start
     ? new Date(item.current_period_start * 1000).toISOString()
     : null;

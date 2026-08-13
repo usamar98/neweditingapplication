@@ -1,7 +1,11 @@
 import "server-only";
 
 import Stripe from "stripe";
-import type { BillingPlanKey } from "@/lib/domain/billing";
+import {
+  billingPlanKeySchema,
+  getBillingPlan,
+  type BillingPlanKey,
+} from "@/lib/domain/billing";
 
 let stripeClient: Stripe | null | undefined;
 
@@ -34,14 +38,26 @@ export function getPlanForStripePrice(priceId: string): BillingPlanKey | null {
   return null;
 }
 
+export function getPlanForStripeSubscription(subscription: Stripe.Subscription): BillingPlanKey | null {
+  const item = subscription.items.data[0];
+  const metadataPlan = billingPlanKeySchema.safeParse(subscription.metadata.plan);
+
+  if (metadataPlan.success) {
+    const expectedPlan = getBillingPlan(metadataPlan.data);
+    const price = item?.price;
+    const matchesServerPrice = price?.currency.toLowerCase() === "usd"
+      && price.unit_amount === expectedPlan.amountCents
+      && price.recurring?.interval === "month"
+      && (price.recurring.interval_count ?? 1) === 1;
+    return matchesServerPrice ? metadataPlan.data : null;
+  }
+
+  // Keep recognizing subscriptions created before inline pricing was enabled.
+  return item?.price.id ? getPlanForStripePrice(item.price.id) : null;
+}
+
 export function isStripeConfigured() {
-  return Boolean(
-    getStripe()
-      && getStripeWebhookSecret()
-      && getStripePriceId("creator")
-      && getStripePriceId("studio")
-      && getStripePriceId("business"),
-  );
+  return Boolean(getStripe() && getStripeWebhookSecret());
 }
 
 export function getAppUrl() {

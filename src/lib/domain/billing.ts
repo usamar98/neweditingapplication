@@ -6,6 +6,7 @@ export type BillingPlanKey = z.infer<typeof billingPlanKeySchema>;
 
 export const billingPlans = [
   {
+    amountCents: 2_999,
     credits: "1,500",
     description: "For individual creators building a consistent weekly content engine.",
     features: [
@@ -19,6 +20,7 @@ export const billingPlans = [
     price: "$29.99",
   },
   {
+    amountCents: 4_999,
     credits: "3,500",
     description: "For brands and agencies producing premium creative every week.",
     features: [
@@ -34,6 +36,7 @@ export const billingPlans = [
     price: "$49.99",
   },
   {
+    amountCents: 9_999,
     credits: "8,000",
     description: "For high-volume teams running a serious creative pipeline.",
     features: [
@@ -48,3 +51,7 @@ export const billingPlans = [
     price: "$99.99",
   },
 ] as const;
+
+export function getBillingPlan(plan: BillingPlanKey) {
+  return billingPlans.find((candidate) => candidate.key === plan)!;
+}

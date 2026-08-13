@@ -1,8 +1,8 @@
-import { billingPlanKeySchema } from "@/lib/domain/billing";
+import { billingPlanKeySchema, getBillingPlan } from "@/lib/domain/billing";
 import { errorResponse, getRequestId, HttpError } from "@/lib/http";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { getAppUrl, getStripe, getStripePriceId } from "@/lib/stripe";
+import { getAppUrl, getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   const requestId = getRequestId(request);
@@ -15,8 +15,8 @@ export async function POST(request: Request) {
     if (authError || !authData.user) throw new HttpError(401, "Sign in before choosing a plan.", "UNAUTHENTICATED");
 
     const stripe = getStripe();
-    const priceId = getStripePriceId(plan);
-    if (!stripe || !priceId) throw new HttpError(503, "Stripe billing is not configured yet.", "BILLING_NOT_CONFIGURED");
+    if (!stripe) throw new HttpError(503, "Stripe billing is not configured yet.", "BILLING_NOT_CONFIGURED");
+    const selectedPlan = getBillingPlan(plan);
 
     const admin = createAdminClient();
     const { data: billing } = await admin
@@ -48,7 +48,19 @@ export async function POST(request: Request) {
       client_reference_id: authData.user.id,
       consent_collection: { terms_of_service: "required" },
       customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [{
+        price_data: {
+          currency: "usd",
+          product_data: {
+            description: `${selectedPlan.credits} monthly Editing App credits`,
+            metadata: { plan },
+            name: `Editing App ${selectedPlan.name}`,
+          },
+          recurring: { interval: "month", interval_count: 1 },
+          unit_amount: selectedPlan.amountCents,
+        },
+        quantity: 1,
+      }],
       metadata: { plan, supabase_user_id: authData.user.id },
       mode: "subscription",
       subscription_data: { metadata: { plan, supabase_user_id: authData.user.id } },
