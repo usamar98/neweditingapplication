@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Check, Coins, LoaderCircle, ShieldCheck } from "lucide-react";
@@ -13,10 +13,13 @@ import { cn } from "@/lib/utils";
 
 export function PricingCards() {
   const router = useRouter();
+  const checkoutInFlight = useRef(false);
   const [pending, setPending] = useState<BillingPlanKey | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function checkout(plan: BillingPlanKey) {
+    if (checkoutInFlight.current) return;
+    checkoutInFlight.current = true;
     setPending(plan);
     setError(null);
     try {
@@ -27,12 +30,15 @@ export function PricingCards() {
       });
       const body = (await response.json().catch(() => null)) as { error?: { code?: string; message?: string }; url?: string } | null;
       if (response.status === 401) {
+        checkoutInFlight.current = false;
+        setPending(null);
         router.push(`/login?mode=signup&next=${encodeURIComponent("/pricing")}`);
         return;
       }
       if (!response.ok || !body?.url) throw new Error(body?.error?.message ?? "Checkout is unavailable.");
       window.location.assign(body.url);
     } catch (checkoutError) {
+      checkoutInFlight.current = false;
       setError(checkoutError instanceof Error ? checkoutError.message : "Checkout is unavailable.");
       setPending(null);
     }
@@ -59,7 +65,14 @@ export function PricingCards() {
                   <li key={feature} className="flex gap-2.5 text-sm leading-5 text-muted-foreground"><Check className="mt-0.5 size-4 shrink-0 text-primary" /><span>{feature}</span></li>
                 ))}
               </ul>
-              <Button variant={"popular" in plan && plan.popular ? "default" : "outline"} className="mt-8 h-11 w-full" onClick={() => void checkout(plan.key)} disabled={pending !== null}>
+              <Button
+                variant={"popular" in plan && plan.popular ? "default" : "outline"}
+                className="mt-8 h-11 w-full"
+                onClick={() => void checkout(plan.key)}
+                disabled={pending === plan.key}
+                aria-busy={pending === plan.key}
+                aria-disabled={pending !== null && pending !== plan.key}
+              >
                 {pending === plan.key ? <LoaderCircle className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
                 {pending === plan.key ? "Opening Stripe…" : `Choose ${plan.name}`}
               </Button>
