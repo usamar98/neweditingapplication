@@ -71,7 +71,6 @@ export function PricingCards() {
                 onClick={() => void checkout(plan.key)}
                 disabled={pending === plan.key}
                 aria-busy={pending === plan.key}
-                aria-disabled={pending !== null && pending !== plan.key}
               >
                 {pending === plan.key ? <LoaderCircle className="size-4 animate-spin" /> : <ArrowRight className="size-4" />}
                 {pending === plan.key ? "Opening Stripe…" : `Choose ${plan.name}`}
