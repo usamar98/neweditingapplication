@@ -28,8 +28,8 @@ describe("SEO landing page catalog", () => {
     }
   });
 
-  it("links every search-intent page to a real feature page", () => {
-    const featurePaths = new Set(marketingFeatures.map((feature) => `/features/${feature.slug}`));
+  it("links every search-intent page directly to a real tool", () => {
+    const featurePaths = new Set(marketingFeatures.map((feature) => feature.href));
     for (const page of searchIntentPages) {
       expect(featurePaths.has(page.featureHref)).toBe(true);
       expect(page.title).not.toBe(page.eyebrow);

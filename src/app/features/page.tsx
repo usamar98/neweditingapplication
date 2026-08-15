@@ -11,12 +11,12 @@ import { getSiteUrl, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "AI Creative Tools for Video, Images & Ads",
-  description: "Explore Editing App's AI video editor, multi-model video and image generators, product ad studio, and precision background remover.",
-  keywords: ["AI creative tools", "AI video editor", "AI video generator", "AI image generator", "AI ad generator", "AI background remover"],
+  description: "Explore Editing App's AI video editor, multi-model generators, image and video ad studio for online and local businesses, and precision background remover.",
+  keywords: ["AI creative tools", "AI video editor", "AI video generator", "AI image generator", "AI ad generator", "local business ad generator", "AI background remover"],
   alternates: { canonical: "/features" },
   openGraph: {
     title: "AI Creative Tools for Video, Images & Ads",
-    description: "One private workspace for AI video editing, generation, campaign images, product ads, and background removal.",
+    description: "One private workspace for AI video editing, generation, image and video ads, local-business campaigns, and background removal.",
     type: "website",
     url: "/features",
   },
@@ -45,7 +45,7 @@ export default function FeaturesPage() {
             "@type": "ListItem",
             position: index + 1,
             name: feature.cardTitle,
-            url: new URL(`/features/${feature.slug}`, siteUrl).toString(),
+            url: new URL(feature.href, siteUrl).toString(),
           })),
         },
       },
@@ -72,15 +72,16 @@ export default function FeaturesPage() {
           AI creative tools for every stage from first brief to final export.
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">
-          Edit long footage, generate premium video and images, build source-aware product ads, and remove backgrounds in one private, model-aware workspace.
+          Edit long footage, generate premium video and images, build source-aware image and video ads for online or local businesses, and remove backgrounds in one private workspace.
         </p>
         <Button size="lg" asChild className="mt-8"><Link href="/generate/image?claim=welcome">Open the image studio <ArrowRight className="size-4" /></Link></Button>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
-        <div className="grid gap-5 md:grid-cols-2">
-          {marketingFeatures.map((feature, index) => (
-            <Card key={feature.slug} className={index === 3 ? "overflow-hidden border-primary/20 bg-primary/[0.045] md:col-span-2" : "overflow-hidden border-border bg-card/70"}>
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {marketingFeatures.map((feature) => (
+            <Link key={feature.slug} href={feature.href} aria-label={`Open ${feature.cardTitle}`} className="group block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="h-full overflow-hidden border-border bg-card/70 transition group-hover:-translate-y-1 group-hover:border-primary/25 group-hover:shadow-lg">
               <MarketingCardMedia slug={feature.slug} />
               <CardContent className="p-6 sm:p-8">
                 <p className="text-xs font-medium uppercase tracking-[0.15em] text-primary">{feature.eyebrow}</p>
@@ -89,11 +90,9 @@ export default function FeaturesPage() {
                 <ul className="mt-6 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
                   {feature.benefits.slice(0, 4).map((benefit) => <li key={benefit} className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-primary" />{benefit}</li>)}
                 </ul>
-                <Link href={`/features/${feature.slug}` as Route} className="mt-7 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                  Explore {feature.eyebrow.toLowerCase()} <ArrowRight className="size-3.5" />
-                </Link>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
         <div className="mt-12 grid gap-4 rounded-2xl border border-border bg-muted/45 p-6 sm:grid-cols-3 sm:p-8">

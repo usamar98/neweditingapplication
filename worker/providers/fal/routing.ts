@@ -4,6 +4,7 @@ export const falCapabilities = [
   "transcription",
   "content-analysis",
   "text-to-image",
+  "image-to-image",
   "text-to-video",
   "image-to-video",
   "voiceover",
@@ -130,6 +131,13 @@ export const falModelCatalog: Record<FalCapability, readonly FalModelCandidate[]
       endpointId: "fal-ai/flux-2/turbo",
       scores: { cost: 9, quality: 8, reliability: 8, speed: 10 },
       summary: "Low-latency FLUX.2 image generation.",
+    }),
+  ],
+  "image-to-image": [
+    candidate({
+      endpointId: "fal-ai/nano-banana-2/edit",
+      scores: { cost: 6, quality: 10, reliability: 9, speed: 8 },
+      summary: "Reference-led product composition that preserves the supplied product image while building a new campaign layout.",
     }),
   ],
   "text-to-video": [

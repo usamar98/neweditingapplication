@@ -55,16 +55,21 @@ export const videoMoods = [
 export const performanceCreativePlatforms = ["facebook", "instagram", "tiktok", "youtube"] as const;
 export const performanceCreativePlatformSchema = z.enum(performanceCreativePlatforms);
 export type PerformanceCreativePlatform = z.infer<typeof performanceCreativePlatformSchema>;
+export const performanceCreativeOutputTypes = ["image", "video"] as const;
+export const performanceCreativeOutputTypeSchema = z.enum(performanceCreativeOutputTypes);
+export type PerformanceCreativeOutputType = z.infer<typeof performanceCreativeOutputTypeSchema>;
 
 export const performanceCreativePlatformPresets: Record<PerformanceCreativePlatform, {
   aspectRatio: "16:9" | "9:16";
+  imageAspectRatio: (typeof imageAspectRatios)[number];
+  imagePlacement: string;
   label: string;
   placement: string;
 }> = {
-  facebook: { aspectRatio: "9:16", label: "Facebook", placement: "Feed + Reels" },
-  instagram: { aspectRatio: "9:16", label: "Instagram", placement: "Reels + Stories" },
-  tiktok: { aspectRatio: "9:16", label: "TikTok", placement: "In-feed video" },
-  youtube: { aspectRatio: "9:16", label: "YouTube", placement: "Shorts" },
+  facebook: { aspectRatio: "9:16", imageAspectRatio: "square_hd", imagePlacement: "Feed image · 1:1", label: "Facebook", placement: "Feed + Reels" },
+  instagram: { aspectRatio: "9:16", imageAspectRatio: "portrait_4_3", imagePlacement: "Feed image · 3:4", label: "Instagram", placement: "Reels + Stories" },
+  tiktok: { aspectRatio: "9:16", imageAspectRatio: "portrait_16_9", imagePlacement: "Vertical image ad · 9:16", label: "TikTok", placement: "In-feed video" },
+  youtube: { aspectRatio: "9:16", imageAspectRatio: "landscape_16_9", imagePlacement: "Display creative · 16:9", label: "YouTube", placement: "Shorts" },
 };
 
 const sharedRequestShape = {
@@ -123,6 +128,16 @@ export const backgroundRemovalRequestSchema = z
 
 export const performanceCreativeSourceSchema = z.discriminatedUnion("type", [
   z.object({
+    businessDescription: z.string().trim().min(10).max(2000),
+    businessName: z.string().trim().min(2).max(120),
+    location: z.string().trim().max(160).optional(),
+    type: z.literal("business_brief"),
+    website: z.string().trim().max(2048).url().refine(
+      (value) => new URL(value).protocol === "https:",
+      "Business website must use HTTPS.",
+    ).optional(),
+  }).strict(),
+  z.object({
     type: z.literal("product_url"),
     url: z.string().trim().max(2048).url().refine(
       (value) => new URL(value).protocol === "https:",
@@ -143,6 +158,7 @@ export const performanceCreativeRequestSchema = z
     duration: z.enum(["8s", "15s", "30s"]).default("15s"),
     kind: z.literal("performance_creative"),
     name: z.string().trim().min(1).max(120),
+    outputType: performanceCreativeOutputTypeSchema.default("video"),
     platform: performanceCreativePlatformSchema,
     profile: generationRoutingProfileSchema.default("balanced"),
     prompt: z.string().trim().min(3).max(4000),
@@ -239,12 +255,15 @@ export function buildGenerationPrompt(input: GenerationRequest) {
   }
   if (input.kind === "performance_creative") {
     const preset = performanceCreativePlatformPresets[input.platform];
+    const destination = input.outputType === "image" ? preset.imagePlacement : `${preset.placement} in ${preset.aspectRatio}`;
     return [
       input.prompt,
       `Target audience: ${input.audience}.`,
       `Call to action: ${input.callToAction}.`,
-      `Deliver for ${preset.label} ${preset.placement} in ${preset.aspectRatio}.`,
-      "Open with an immediate product or story hook, keep one clear message, preserve brand credibility, and finish with a legible conversion moment.",
+      `Deliver for ${preset.label} ${destination}.`,
+      input.outputType === "image"
+        ? "Create one polished static advertisement with a clear visual hierarchy, brand-safe composition, legible headline, obvious focal point, and conversion-focused CTA. Avoid tiny or crowded text."
+        : "Open with an immediate product or story hook, keep one clear message, preserve brand credibility, and finish with a legible conversion moment.",
       "Do not invent discounts, reviews, guarantees, ingredients, or performance claims not present in the source brief.",
     ].join("\n");
   }

@@ -104,6 +104,49 @@ describe("AI generation domain", () => {
     }).success).toBe(false);
   });
 
+  it("accepts source-aware product image ads", () => {
+    const request = generationRequestSchema.parse({
+      agentId: "nano-banana-2-product-ad",
+      audience: "Home coffee enthusiasts",
+      callToAction: "Shop now",
+      duration: "8s",
+      kind: "performance_creative",
+      name: "Coffee launch image",
+      outputType: "image",
+      platform: "facebook",
+      profile: "quality",
+      prompt: "Create a clean product launch ad with one clear benefit.",
+      source: { type: "product_url", url: "https://shop.example.com/products/coffee-maker" },
+    });
+
+    expect(buildGenerationPrompt(request)).toMatch(/static advertisement/i);
+    expect(buildGenerationPrompt(request)).toMatch(/Feed image · 1:1/i);
+  });
+
+  it("accepts image ads for local businesses without a product URL", () => {
+    const request = generationRequestSchema.parse({
+      agentId: "recraft-4-1-static-ad",
+      audience: "Families living near the clinic",
+      callToAction: "Book an appointment",
+      kind: "performance_creative",
+      name: "Local clinic campaign",
+      outputType: "image",
+      platform: "instagram",
+      profile: "quality",
+      prompt: "Create a trustworthy awareness ad with a calm, welcoming visual hierarchy.",
+      source: {
+        businessDescription: "A family dental clinic offering preventive care and routine appointments.",
+        businessName: "Riverside Dental Studio",
+        location: "Lahore",
+        type: "business_brief",
+      },
+    });
+
+    expect(request.kind).toBe("performance_creative");
+    if (request.kind !== "performance_creative") throw new Error("Expected a performance creative request");
+    expect(request.source.type).toBe("business_brief");
+  });
+
   it("accepts an owned-project reference for long-video creative scouting", () => {
     const request = generationRequestSchema.parse({
       agentId: "video-understanding-scout",

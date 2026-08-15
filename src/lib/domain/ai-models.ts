@@ -31,6 +31,11 @@ export const performanceCreativeAgentIds = [
   "veo-3-1-performance",
   "veo-3-1-fast-performance",
   "video-understanding-scout",
+  "nano-banana-2-product-ad",
+  "recraft-4-1-static-ad",
+  "seedream-5-static-ad",
+  "nano-banana-2-static-ad",
+  "flux-2-max-static-ad",
 ] as const;
 
 export const videoDurations = ["4s", "6s", "8s", "10s", "12s", "15s", "16s", "20s", "30s"] as const;
@@ -49,7 +54,8 @@ export type BackgroundAgentId = z.infer<typeof backgroundAgentIdSchema>;
 export type PerformanceCreativeAgentId = z.infer<typeof performanceCreativeAgentIdSchema>;
 export type VideoDuration = (typeof videoDurations)[number];
 export type VideoResolution = (typeof videoResolutions)[number];
-export type PerformanceCreativeSourceType = "long_video" | "product_url";
+export type PerformanceCreativeOutputType = "image" | "video";
+export type PerformanceCreativeSourceType = "business_brief" | "long_video" | "product_url";
 
 export type AiAgent = {
   description: string;
@@ -122,12 +128,20 @@ export const backgroundAgents: readonly AiAgent[] = [
   { id: "rembg-fast", endpointId: "fal-ai/imageutils/rembg", label: "Rembg Fast", tag: "Fast", description: "Quick, economical removal for clean and simple subjects." },
 ];
 
-export const performanceCreativeAgents: readonly (AiAgent & { sources: readonly PerformanceCreativeSourceType[] })[] = [
-  { id: "auto", endpointId: null, label: "Performance Autopilot", tag: "Recommended", description: "Chooses a premium product-ad director or a conversion-focused clip scout for the source.", sources: ["product_url", "long_video"] },
-  { id: "seedance-2-5-performance", endpointId: "bytedance/seedance-2.5/image-to-video", label: "Seedance 2.5 Ad Director", tag: "Latest", description: "Product-led motion with native audio and strong identity consistency.", sources: ["product_url"] },
-  { id: "veo-3-1-performance", endpointId: "fal-ai/veo3.1/image-to-video", label: "Veo 3.1 Ad Director", tag: "Premium product ads", description: "Campaign-grade product motion, native audio, strong visual consistency, and premium pacing.", sources: ["product_url"] },
-  { id: "veo-3-1-fast-performance", endpointId: "fal-ai/veo3.1/fast/image-to-video", label: "Veo 3.1 Growth Lab", tag: "Fast testing", description: "Faster product-ad variants for testing hooks and social creative directions.", sources: ["product_url"] },
-  { id: "video-understanding-scout", endpointId: "fal-ai/video-understanding", label: "Video Understanding Scout", tag: "Long-video clips", description: "Finds the strongest self-contained hook in long footage before a platform-native render.", sources: ["long_video"] },
+export const performanceCreativeAgents: readonly (AiAgent & {
+  outputTypes: readonly PerformanceCreativeOutputType[];
+  sources: readonly PerformanceCreativeSourceType[];
+})[] = [
+  { id: "auto", endpointId: null, label: "Ad Creative Autopilot", tag: "Recommended", description: "Chooses the strongest compatible image designer, product compositor, video director, or clip scout for the brief.", outputTypes: ["image", "video"], sources: ["business_brief", "product_url", "long_video"] },
+  { id: "seedance-2-5-performance", endpointId: "bytedance/seedance-2.5/image-to-video", label: "Seedance 2.5 Ad Director", tag: "Latest", description: "Product-led motion with native audio and strong identity consistency.", outputTypes: ["video"], sources: ["product_url"] },
+  { id: "veo-3-1-performance", endpointId: "fal-ai/veo3.1/image-to-video", label: "Veo 3.1 Ad Director", tag: "Premium product ads", description: "Campaign-grade product motion, native audio, strong visual consistency, and premium pacing.", outputTypes: ["video"], sources: ["product_url"] },
+  { id: "veo-3-1-fast-performance", endpointId: "fal-ai/veo3.1/fast/image-to-video", label: "Veo 3.1 Growth Lab", tag: "Fast testing", description: "Faster product-ad variants for testing hooks and social creative directions.", outputTypes: ["video"], sources: ["product_url"] },
+  { id: "video-understanding-scout", endpointId: "fal-ai/video-understanding", label: "Video Understanding Scout", tag: "Long-video clips", description: "Finds the strongest self-contained hook in long footage before a platform-native render.", outputTypes: ["video"], sources: ["long_video"] },
+  { id: "nano-banana-2-product-ad", endpointId: "fal-ai/nano-banana-2/edit", label: "Nano Banana 2 Product Composer", tag: "Product fidelity", description: "Uses the product-page image as a visual reference while composing a platform-ready static advertisement.", outputTypes: ["image"], sources: ["product_url"] },
+  { id: "recraft-4-1-static-ad", endpointId: "fal-ai/recraft/v4.1/pro/text-to-image", label: "Recraft V4.1 Brand Designer", tag: "Graphic design", description: "Creates polished brand-led layouts for services, stores, restaurants, events, and local campaigns.", outputTypes: ["image"], sources: ["business_brief"] },
+  { id: "seedream-5-static-ad", endpointId: "bytedance/seedream/v5/pro/text-to-image", label: "Seedream 5 Campaign Designer", tag: "Premium typography", description: "Builds premium campaign compositions with strong layout and text understanding.", outputTypes: ["image"], sources: ["business_brief"] },
+  { id: "nano-banana-2-static-ad", endpointId: "fal-ai/nano-banana-2", label: "Nano Banana 2 Ad Designer", tag: "Prompt fidelity", description: "Follows detailed business, audience, offer, and placement instructions for focused static ads.", outputTypes: ["image"], sources: ["business_brief"] },
+  { id: "flux-2-max-static-ad", endpointId: "fal-ai/flux-2-max", label: "FLUX.2 Max Photo Director", tag: "Photoreal", description: "Creates premium photoreal campaign imagery for local services and product-led promotions.", outputTypes: ["image"], sources: ["business_brief"] },
 ];
 
 export function videoAgentById(agentId: string) {
@@ -149,16 +163,35 @@ export function endpointForEditorAgent(agentId: string) {
   return editorAgents.find((agent) => agent.id === agentId)?.endpointId ?? null;
 }
 
-export function performanceCreativeAgentsForSource(sourceType: PerformanceCreativeSourceType) {
-  return performanceCreativeAgents.filter((agent) => agent.sources.includes(sourceType));
+export function performanceCreativeAgentsForSource(
+  sourceType: PerformanceCreativeSourceType,
+  outputType: PerformanceCreativeOutputType,
+) {
+  return performanceCreativeAgents.filter(
+    (agent) => agent.sources.includes(sourceType) && agent.outputTypes.includes(outputType),
+  );
 }
 
-export function performanceCreativeAgentSupportsSource(agentId: string, sourceType: PerformanceCreativeSourceType) {
-  return performanceCreativeAgents.some((agent) => agent.id === agentId && agent.sources.includes(sourceType));
+export function performanceCreativeAgentSupportsSource(
+  agentId: string,
+  sourceType: PerformanceCreativeSourceType,
+  outputType: PerformanceCreativeOutputType,
+) {
+  return performanceCreativeAgents.some(
+    (agent) => agent.id === agentId && agent.sources.includes(sourceType) && agent.outputTypes.includes(outputType),
+  );
 }
 
-export function endpointForPerformanceCreativeAgent(agentId: string, sourceType: PerformanceCreativeSourceType) {
-  return performanceCreativeAgents.find((candidate) => candidate.id === agentId && candidate.sources.includes(sourceType))?.endpointId ?? null;
+export function endpointForPerformanceCreativeAgent(
+  agentId: string,
+  sourceType: PerformanceCreativeSourceType,
+  outputType: PerformanceCreativeOutputType,
+) {
+  return performanceCreativeAgents.find(
+    (candidate) => candidate.id === agentId
+      && candidate.sources.includes(sourceType)
+      && candidate.outputTypes.includes(outputType),
+  )?.endpointId ?? null;
 }
 
 export function agentsForKind(kind: "image" | "video" | "background_removal") {

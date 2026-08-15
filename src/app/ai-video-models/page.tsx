@@ -71,7 +71,7 @@ export default function AiVideoModelsPage() {
           ))}
         </div>
         <Card className="mt-6 border-primary/15 bg-primary/[0.045]"><CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-xl font-semibold">Let Autopilot handle compatibility.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Choose quality, balance, speed, or cost. Editing App routes only among models that support the requested duration and resolution, then stores the routing reason with the result.</p></div><Button asChild className="shrink-0"><Link href="/login?mode=signup">Start a video <ArrowRight className="size-4" /></Link></Button></CardContent></Card>
-        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-primary"><Link href="/features/ai-video-generator">Explore multi-model video generation <ArrowRight className="ml-1 inline size-3.5" /></Link><Link href={"/pricing" as Route}>Compare plans and credits <ArrowRight className="ml-1 inline size-3.5" /></Link><Link href={"/compare" as Route}>Compare AI video platforms <ArrowRight className="ml-1 inline size-3.5" /></Link></div>
+        <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-primary"><Link href="/generate/video">Open multi-model video generation <ArrowRight className="ml-1 inline size-3.5" /></Link><Link href={"/pricing" as Route}>Compare plans and credits <ArrowRight className="ml-1 inline size-3.5" /></Link><Link href={"/compare" as Route}>Compare AI video platforms <ArrowRight className="ml-1 inline size-3.5" /></Link></div>
       </section>
       <MarketingFooter />
     </main>

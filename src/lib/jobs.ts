@@ -257,13 +257,19 @@ export async function enqueueGenerationJob({
 
   let sourceDurationSeconds: number | null = null;
   if (effectiveInput.kind === "performance_creative") {
-    if (!performanceCreativeAgentSupportsSource(effectiveInput.agentId, effectiveInput.source.type)) {
-      throw new HttpError(400, "That creative agent does not support the selected source.", "AGENT_SOURCE_MISMATCH");
+    if (!performanceCreativeAgentSupportsSource(effectiveInput.agentId, effectiveInput.source.type, effectiveInput.outputType)) {
+      throw new HttpError(400, "That creative agent does not support the selected source and ad format.", "AGENT_SOURCE_MISMATCH");
     }
-    if (effectiveInput.source.type === "product_url" && effectiveInput.duration !== "8s") {
+    if (effectiveInput.source.type === "business_brief" && effectiveInput.outputType !== "image") {
+      throw new HttpError(400, "Business briefs currently create platform-ready image ads.", "FORMAT_UNSUPPORTED");
+    }
+    if (effectiveInput.source.type === "long_video" && effectiveInput.outputType !== "video") {
+      throw new HttpError(400, "Long-video sources currently create short-form video ads.", "FORMAT_UNSUPPORTED");
+    }
+    if (effectiveInput.outputType === "video" && effectiveInput.source.type === "product_url" && effectiveInput.duration !== "8s") {
       throw new HttpError(400, "Product URL ads currently support the 8-second generated format.", "DURATION_UNSUPPORTED");
     }
-    if (effectiveInput.source.type === "long_video" && effectiveInput.duration === "8s") {
+    if (effectiveInput.outputType === "video" && effectiveInput.source.type === "long_video" && effectiveInput.duration === "8s") {
       throw new HttpError(400, "Long-video creatives support 15- or 30-second cuts.", "DURATION_UNSUPPORTED");
     }
     if (effectiveInput.source.type === "long_video") {
@@ -324,7 +330,9 @@ export async function enqueueGenerationJob({
       stage: effectiveInput.kind === "background_removal"
         ? "Cutout agent is preparing"
         : effectiveInput.kind === "performance_creative"
-          ? "AI ad creative agent is preparing"
+          ? effectiveInput.outputType === "image"
+            ? "AI image ad designer is preparing"
+            : "AI video ad director is preparing"
           : "Model Autopilot is preparing",
       status: "queued",
       user_id: user.id,

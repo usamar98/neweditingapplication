@@ -5,7 +5,10 @@ import { listGenerations } from "@/lib/data/generations";
 import { listProjects } from "@/lib/data/projects";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "AI Ad Creative Generator" };
+export const metadata = {
+  title: "AI Image & Video Ad Generator",
+  description: "Create platform-ready image and video ads from product URLs, local-business briefs, and owned long videos.",
+};
 
 export default async function CreativeStudioPage() {
   const user = await getCurrentUser();

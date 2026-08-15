@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { marketingFeatures } from "@/lib/marketing/features";
 import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
 import { legalDocuments } from "@/lib/legal";
 import { getSiteUrl } from "@/lib/site";
@@ -20,12 +19,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "yearly" as const,
       priority: 0.35,
-    })),
-    ...marketingFeatures.map((feature) => ({
-      url: new URL(`/features/${feature.slug}`, siteUrl).toString(),
-      lastModified,
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
     })),
     ...searchIntentPages.map((page) => ({
       url: new URL(`/tools/${page.slug}`, siteUrl).toString(),

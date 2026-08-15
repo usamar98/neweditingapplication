@@ -22,7 +22,7 @@ import type { Database, Json } from "@/types/database.generated";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolveFalModel } from "../../worker/providers/fal/routing";
 
-export const CREDIT_PRICING_VERSION = "2026-08-11";
+export const CREDIT_PRICING_VERSION = "2026-08-15";
 const CREDIT_MARKUP_BASIS_POINTS = 12_500;
 const MICROS_PER_CENT = 10_000;
 
@@ -103,11 +103,12 @@ function quote(
 
 const imageCostMicros: Record<string, number> = {
   "bytedance/seedream/v5/lite/text-to-image": 40_000,
-  "bytedance/seedream/v5/pro/text-to-image": 100_000,
+  "bytedance/seedream/v5/pro/text-to-image": 135_000,
   "fal-ai/flux-2-max": 100_000,
   "fal-ai/flux-2/turbo": 35_000,
   "fal-ai/nano-banana-2": 80_000,
-  "fal-ai/recraft/v4.1/pro/text-to-image": 100_000,
+  "fal-ai/nano-banana-2/edit": 80_000,
+  "fal-ai/recraft/v4.1/pro/text-to-image": 210_000,
 };
 
 function videoCostPerSecondMicros(endpoint: string, resolution: string, generateAudio: boolean) {
@@ -177,7 +178,7 @@ function performanceCreativeQuote(
   if (input.source.type === "long_video") {
     const routing = resolveFalModel({
       capability: "video-understanding",
-      preferredEndpointId: endpointForPerformanceCreativeAgent(input.agentId, "long_video"),
+      preferredEndpointId: endpointForPerformanceCreativeAgent(input.agentId, "long_video", "video"),
       profile: input.profile,
     });
     const sourceMinutes = Math.max(1, Math.ceil((sourceDurationSeconds ?? 60) / 60));
@@ -192,9 +193,27 @@ function performanceCreativeQuote(
   }
 
   const strategy = resolveFalModel({ capability: "content-analysis", profile: input.profile });
+  if (input.outputType === "image") {
+    const capability = input.source.type === "product_url" ? "image-to-image" : "text-to-image";
+    const image = resolveFalModel({
+      capability,
+      preferredEndpointId: endpointForPerformanceCreativeAgent(input.agentId, input.source.type, "image"),
+      profile: input.profile,
+    });
+    const providerCost = 25_000 + (imageCostMicros[image.endpointId] ?? 120_000);
+    return quote(
+      "generate_performance_creative",
+      `${image.endpointId}+${strategy.endpointId}:${strategy.model ?? "default"}`,
+      image.endpointId,
+      providerCost,
+      { secondaryEndpoint: strategy.endpointId, secondaryModel: strategy.model },
+      6,
+    );
+  }
+
   const video = resolveFalModel({
     capability: "image-to-video",
-    preferredEndpointId: endpointForPerformanceCreativeAgent(input.agentId, "product_url"),
+    preferredEndpointId: endpointForPerformanceCreativeAgent(input.agentId, "product_url", "video"),
     profile: input.profile,
   });
   const providerCost = 25_000 + videoCostPerSecondMicros(video.endpointId, "1080p", true) * 8;

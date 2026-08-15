@@ -36,7 +36,7 @@ export function MarketingFooter() {
               <li><Link href={"/features" as Route} className="hover:text-foreground">All AI features</Link></li>
               {marketingFeatures.map((feature) => (
                 <li key={feature.slug}>
-                  <Link href={`/features/${feature.slug}` as Route} className="hover:text-foreground">
+                  <Link href={feature.href} className="hover:text-foreground">
                     {featureLabels[feature.slug]}
                   </Link>
                 </li>

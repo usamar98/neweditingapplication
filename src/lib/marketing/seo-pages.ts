@@ -16,7 +16,7 @@ export const searchIntentPages = [
     intro: "Paste a product URL, choose the audience and channel, and create a production brief grounded in the page's real images and product details. Editing App blocks unsupported claims before the paid render starts.",
     primaryHref: "/login?mode=signup",
     primaryLabel: "Create a product ad",
-    featureHref: "/features/performance-creative-studio",
+    featureHref: "/creative-studio",
     outcomes: [
       "Source-aware scripts that use product-page facts",
       "Platform-specific framing for paid and organic placements",
@@ -54,7 +54,7 @@ export const searchIntentPages = [
     intro: "Upload a recording once, choose the analysis model, and use scene, transcript, silence, and highlight suggestions to build short-form cuts without surrendering timeline control.",
     primaryHref: "/login?mode=signup",
     primaryLabel: "Upload a long video",
-    featureHref: "/features/ai-video-editor",
+    featureHref: "/dashboard",
     outcomes: [
       "Ranked highlight and hook suggestions",
       "Editable transcripts and word-timed captions",

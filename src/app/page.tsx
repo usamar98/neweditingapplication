@@ -25,6 +25,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
+import aiAdCreativeVisual from "@/assets/media/generated/ai-ad-creative.webp";
 import videoEditorVisual from "@/assets/media/video-editor.webp";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { PricingPreview } from "@/components/pricing-preview";
@@ -97,7 +98,7 @@ export default function Home() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="h-12 border-border bg-card/55 px-6">
-              <Link href="/features/ai-video-generator">Explore the studio</Link>
+              <Link href="/generate/video">Explore the studio</Link>
             </Button>
           </div>
           <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
@@ -179,15 +180,16 @@ export default function Home() {
             <div className="max-w-2xl">
               <p className="mb-3 text-sm font-medium text-primary">The Editing App creative suite</p>
               <h2 className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
-                One idea. Five ways to make it perform.
+                Features that take every idea from brief to finished creative.
               </h2>
             </div>
             <div className="max-w-md"><p className="text-sm leading-6 text-muted-foreground">Each tool is purpose-built, but projects, private storage, background jobs, and model routing live in one workspace.</p><Link href={"/features" as Route} className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore all AI features <ArrowRight className="size-3.5" /></Link></div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <FeatureReveal>
-            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
+            <Link href="/dashboard" aria-label="Open AI video editor" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted p-5">
                   <Image src={videoEditorVisual} alt="A film editor working in a professional post-production suite" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
@@ -203,14 +205,15 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Scissors className="size-4.5" /></span><Badge variant="secondary">Available now</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video editor</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Upload long footage and get scenes, transcript, silence cleanup, highlights, captions, reframing, and a precise editable timeline.</p>
-                  <Link href="/features/ai-video-editor" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore AI video editing <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </Link>
             </FeatureReveal>
 
             <FeatureReveal>
-            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-sky-400/25">
+            <Link href="/generate/video" aria-label="Open AI video generator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-sky-400/25 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
                   <Image src={aiVideoVisual} alt="A cinematic concept car moving through a rain-lit city" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
@@ -225,14 +228,15 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-sky-500/10 text-sky-700"><Film className="size-4.5" /></span><Badge variant="outline" className="border-sky-700/20 bg-sky-500/5 text-sky-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Direct camera motion, mood, format, duration, resolution, and native audio. Autopilot selects the strongest compatible video model for the job.</p>
-                  <Link href="/features/ai-video-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-sky-700">Explore video generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </Link>
             </FeatureReveal>
 
             <FeatureReveal>
-            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25">
+            <Link href="/generate/image" aria-label="Open AI image generator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
                   <Image src={aiImageVisual} alt="A premium smoky-glass perfume bottle in a cinematic product photograph" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
@@ -242,14 +246,15 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-700"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-700/20 bg-fuchsia-500/5 text-fuchsia-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Work from a creative brief, not a mystery prompt box. Shape art direction, canvas, seed, and model intent for repeatable campaign-grade visuals.</p>
-                  <Link href="/features/ai-image-generator" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-fuchsia-700">Explore image generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </Link>
             </FeatureReveal>
 
             <FeatureReveal>
-            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-amber-300/25">
+            <Link href="/remove-background" aria-label="Open AI background remover" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-amber-300/25 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-[linear-gradient(45deg,oklch(0.86_0.01_88)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.86_0.01_88)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.86_0.01_88)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.86_0.01_88)_75%)] bg-[length:22px_22px]">
                   <div className="absolute inset-y-0 left-0 w-1/2 overflow-hidden border-r border-white/25"><Image src={aiImageVisual} alt="A product photograph ready for background removal" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" /></div>
@@ -260,32 +265,33 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-700"><Scissors className="size-4.5" /></span><Badge variant="outline" className="border-amber-700/20 bg-amber-500/5 text-amber-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">Background remover</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Protect fine hair, product edges, and soft foreground detail with precision matting, private inputs, and downloadable transparent PNG results.</p>
-                  <Link href="/features/background-remover" className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-amber-700">Explore background removal <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
                 </div>
               </CardContent>
             </Card>
+            </Link>
             </FeatureReveal>
 
-            <FeatureReveal className="lg:col-span-2">
-            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30">
-              <CardContent className="grid p-0 lg:grid-cols-[0.95fr_1.05fr]">
-                <div data-feature-media className="relative min-h-64 overflow-hidden border-b border-border bg-muted lg:border-b-0 lg:border-r">
-                  <Image src={aiVideoVisual} alt="A campaign video prepared for performance marketing platforms" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 45vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-black/30 to-black/80" />
-                  <div className="absolute inset-x-5 bottom-5 grid grid-cols-4 gap-2">
-                    {["Facebook", "Instagram", "TikTok", "YouTube"].map((platform, index) => <div key={platform} className={cn("rounded-lg border border-white/10 bg-black/40 px-2 py-2 text-center text-[9px] text-white/65 backdrop-blur", index === 1 && "border-primary/35 bg-primary/10 text-primary")}>{platform}</div>)}
+            <FeatureReveal>
+            <Link href="/creative-studio" aria-label="Open AI ad generator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
+              <CardContent className="p-0">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
+                  <Image src={aiAdCreativeVisual} alt="A polished social image advertisement for a premium product" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/15" />
+                  <div className="absolute inset-x-4 bottom-4 grid grid-cols-2 gap-2 text-[9px] text-white/80">
+                    <span className="rounded-lg border border-white/15 bg-black/45 px-3 py-2 text-center backdrop-blur">IMAGE ADS</span>
+                    <span className="rounded-lg border border-primary/30 bg-primary/20 px-3 py-2 text-center backdrop-blur">VIDEO ADS</span>
                   </div>
-                  <div className="absolute left-5 top-5 rounded-full border border-primary/25 bg-black/45 px-3 py-1.5 text-[10px] text-primary backdrop-blur">SOURCE-AWARE AI AGENTS</div>
+                  <div className="absolute left-4 top-4 rounded-full border border-primary/25 bg-black/45 px-3 py-1.5 text-[10px] text-primary backdrop-blur">ONLINE + LOCAL BUSINESS</div>
                 </div>
-                <div data-feature-copy className="flex flex-col justify-center p-6 sm:p-8">
-                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">New flagship tool</Badge></div>
-                  <h3 className="text-2xl font-semibold tracking-[-0.03em]">AI Ad Creative Generator</h3>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">Turn a product URL into a source-aware Seedance or Veo ad, or let Video Understanding find the strongest hook in long footage and render a captioned short for the platform you choose.</p>
-                  <div className="mt-5 flex flex-wrap gap-2 text-[10px] text-muted-foreground"><span className="rounded-full border border-border px-2.5 py-1">Seedance 2.5 Ad Director</span><span className="rounded-full border border-border px-2.5 py-1">Veo 3.1 Ad Director</span><span className="rounded-full border border-border px-2.5 py-1">Video Understanding Scout</span></div>
-                  <Link href="/features/performance-creative-studio" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore AI ad generation <ArrowRight className="size-3.5 transition group-hover:translate-x-0.5" /></Link>
+                <div data-feature-copy className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">Upgraded</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image & video ad generator</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Turn a product URL, local-business brief, or long video into source-aware ads sized for Facebook, Instagram, TikTok, and YouTube.</p>
                 </div>
               </CardContent>
             </Card>
+            </Link>
             </FeatureReveal>
           </div>
         </div>
