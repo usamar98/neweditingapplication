@@ -1,4 +1,5 @@
 import { Check, Sparkles } from "lucide-react";
+import Image from "next/image";
 import {
   videoVisualStylePresets,
   type VideoVisualStyle,
@@ -35,10 +36,15 @@ export function VideoStylePicker({
               className={cn("relative block overflow-hidden", compact ? "h-14" : "h-20")}
               style={{ background: preset.previewBackground }}
             >
-              <span className="absolute -bottom-5 left-[12%] size-14 rounded-full border border-white/20 bg-black/25 shadow-2xl backdrop-blur-sm transition duration-300 group-hover:-translate-y-1" />
-              <span className="absolute right-[12%] top-3 h-8 w-14 rotate-[-12deg] rounded-full border border-white/20 bg-white/20 blur-[1px]" />
-              <span className="absolute inset-0 bg-[linear-gradient(115deg,transparent_25%,rgba(255,255,255,.18)_48%,transparent_68%)] opacity-60" />
-              {selected && <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground"><Check className="size-3.5" /></span>}
+              <Image
+                src={preset.previewImage}
+                alt={`${preset.label} visual style example`}
+                fill
+                sizes={compact ? "(min-width: 640px) 180px, 50vw" : "(min-width: 1024px) 220px, (min-width: 640px) 50vw, 100vw"}
+                className="object-cover transition duration-300 group-hover:scale-[1.03]"
+              />
+              <span className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
+              {selected && <span className="absolute right-2 top-2 z-10 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm"><Check className="size-3.5" /></span>}
             </span>
             <span className={cn("block", compact ? "p-2.5" : "p-3")}>
               <span className="flex items-center gap-1.5 text-sm font-medium">{selected && <Sparkles className="size-3.5 text-primary" />}{preset.label}</span>

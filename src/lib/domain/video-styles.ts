@@ -21,6 +21,7 @@ export type VideoVisualStylePreset = {
   label: string;
   previewBackground: string;
   previewFilter: string;
+  previewImage: string;
 };
 
 export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
@@ -31,6 +32,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Natural",
     previewBackground: "linear-gradient(135deg, #a8c7b8 0%, #e7d6b5 48%, #53685f 100%)",
     previewFilter: "none",
+    previewImage: "/media/visual-styles/natural.webp",
   },
   {
     description: "Film contrast, controlled highlights and premium depth.",
@@ -39,6 +41,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Cinematic",
     previewBackground: "linear-gradient(135deg, #081d2a 0%, #166b66 44%, #ef9a4a 100%)",
     previewFilter: "contrast(1.12) saturate(.9) brightness(.9)",
+    previewImage: "/media/visual-styles/cinematic.webp",
   },
   {
     description: "Bold shapes, vivid color and playful animated energy.",
@@ -47,6 +50,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Cartoon",
     previewBackground: "linear-gradient(135deg, #ffca3a 0%, #ff595e 48%, #6a4c93 100%)",
     previewFilter: "saturate(1.55) contrast(1.12)",
+    previewImage: "/media/visual-styles/cartoon.webp",
   },
   {
     description: "Cel-shaded characters with graphic Japanese animation cues.",
@@ -55,6 +59,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Anime",
     previewBackground: "linear-gradient(135deg, #ff9ec4 0%, #9fd8ff 48%, #514a9d 100%)",
     previewFilter: "saturate(1.35) contrast(1.08) brightness(1.04)",
+    previewImage: "/media/visual-styles/anime.webp",
   },
   {
     description: "Warm analog color, grain and nostalgic texture.",
@@ -63,6 +68,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Vintage Film",
     previewBackground: "linear-gradient(135deg, #4b3025 0%, #c58c5b 48%, #e4cda5 100%)",
     previewFilter: "sepia(.28) saturate(.82) contrast(.96)",
+    previewImage: "/media/visual-styles/vintage-film.webp",
   },
   {
     description: "Electric color, deep shadows and futuristic atmosphere.",
@@ -71,6 +77,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Neon Noir",
     previewBackground: "linear-gradient(135deg, #050510 0%, #5924d6 46%, #00f5d4 100%)",
     previewFilter: "saturate(1.55) contrast(1.2) brightness(.86)",
+    previewImage: "/media/visual-styles/neon-noir.webp",
   },
   {
     description: "Soft bloom, luminous color and surreal transitions.",
@@ -79,6 +86,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Dreamscape",
     previewBackground: "linear-gradient(135deg, #b8c0ff 0%, #ffd6ff 48%, #8ecae6 100%)",
     previewFilter: "saturate(1.12) brightness(1.08) contrast(.92)",
+    previewImage: "/media/visual-styles/dreamscape.webp",
   },
   {
     description: "Bright, polished visuals built for products and brands.",
@@ -87,6 +95,7 @@ export const videoVisualStylePresets: readonly VideoVisualStylePreset[] = [
     label: "Commercial",
     previewBackground: "linear-gradient(135deg, #f7f4ea 0%, #83c5be 48%, #006d77 100%)",
     previewFilter: "saturate(1.1) contrast(1.06) brightness(1.02)",
+    previewImage: "/media/visual-styles/commercial.webp",
   },
 ];
 
