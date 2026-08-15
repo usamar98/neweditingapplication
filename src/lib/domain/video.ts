@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { generationQueueMessageSchema } from "@/lib/domain/generation";
 import { editorAgentIdSchema } from "@/lib/domain/ai-models";
+import { videoVisualStyleSchema } from "@/lib/domain/video-styles";
 
 export const VIDEO_SOURCE_BUCKET = "video-sources";
 export const VIDEO_OUTPUT_BUCKET = "video-outputs";
@@ -58,6 +59,7 @@ export const editSettingsSchema = z
     removeSilences: z.boolean(),
     trimEnd: z.number().positive().nullable(),
     trimStart: z.number().min(0),
+    visualStyle: videoVisualStyleSchema.default("natural"),
   })
   .strict()
   .superRefine((settings, context) => {
@@ -86,6 +88,7 @@ export const defaultEditSettings = editSettingsSchema.parse({
   removeSilences: false,
   trimEnd: null,
   trimStart: 0,
+  visualStyle: "natural",
 });
 
 export const enqueueJobSchema = z.discriminatedUnion("kind", [

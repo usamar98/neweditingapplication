@@ -12,6 +12,12 @@ describe("video domain validation", () => {
     expect(editSettingsSchema.parse(defaultEditSettings)).toEqual(defaultEditSettings);
   });
 
+  it("upgrades legacy editor settings to the natural visual style", () => {
+    const legacySettings: Partial<typeof defaultEditSettings> = { ...defaultEditSettings };
+    delete legacySettings.visualStyle;
+    expect(editSettingsSchema.parse(legacySettings).visualStyle).toBe("natural");
+  });
+
   it("rejects inverted trim ranges", () => {
     expect(() =>
       editSettingsSchema.parse({

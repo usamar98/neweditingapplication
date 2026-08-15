@@ -8,6 +8,10 @@ import {
   videoAgentSupports,
   videoResolutions,
 } from "@/lib/domain/ai-models";
+import {
+  videoVisualStyleById,
+  videoVisualStyleSchema,
+} from "@/lib/domain/video-styles";
 
 export const generationKinds = ["image", "video", "background_removal", "performance_creative"] as const;
 export const generationKindSchema = z.enum(generationKinds);
@@ -101,6 +105,7 @@ export const videoGenerationRequestSchema = z
     mood: z.enum(videoMoods).default("cinematic"),
     resolution: z.enum(videoResolutions).default("1080p"),
     seed: z.number().int().min(0).max(2147483647).optional(),
+    visualStyle: videoVisualStyleSchema.default("cinematic"),
   })
   .strict()
   .superRefine((input, context) => {
@@ -277,6 +282,7 @@ export function buildGenerationPrompt(input: GenerationRequest) {
     input.prompt,
     cameraDirection[input.cameraMotion],
     moodDirection[input.mood],
+    videoVisualStyleById(input.visualStyle).generationDirection,
     input.generateAudio
       ? "Create synchronized production-ready audio that supports the scene; keep dialogue intelligible when present."
       : "Do not generate dialogue or soundtrack; focus entirely on visual storytelling.",

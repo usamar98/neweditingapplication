@@ -32,11 +32,13 @@ describe("AI generation domain", () => {
       profile: "balanced",
       prompt: "A precision watch assembles itself on black glass",
       resolution: "1080p",
+      visualStyle: "cartoon",
     });
 
     expect(buildGenerationPrompt(request)).toMatch(/orbit smoothly/i);
     expect(buildGenerationPrompt(request)).toMatch(/synchronized production-ready audio/i);
     expect(buildGenerationPrompt(request)).toMatch(/temporal consistency/i);
+    expect(buildGenerationPrompt(request)).toMatch(/animated-cartoon/i);
   });
 
   it("accepts Seedance long shots only at its supported resolution", () => {

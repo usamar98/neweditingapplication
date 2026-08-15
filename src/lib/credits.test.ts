@@ -25,6 +25,7 @@ describe("credit quotes", () => {
       profile: "quality",
       prompt: "A premium product launch in a cinematic studio",
       resolution: "1080p",
+      visualStyle: "cinematic",
     });
 
     expect(quote.primaryEndpoint).toBe("fal-ai/veo3.1");
@@ -60,6 +61,7 @@ describe("credit quotes", () => {
       profile: "speed",
       prompt: "A fast social product reveal with synchronized sound",
       resolution: "1080p",
+      visualStyle: "commercial",
     });
 
     expect(quote.primaryEndpoint).toBe("fal-ai/veo3.1/fast");
@@ -105,6 +107,7 @@ describe("credit quotes", () => {
       profile: "speed",
       prompt: "A cinematic product reveal",
       resolution: "1080p",
+      visualStyle: "cinematic",
     }, "welcome")).toThrow("paid subscription");
   });
 });

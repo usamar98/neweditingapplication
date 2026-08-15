@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 import type { EditSettings, Transcript, VideoAnalysis } from "../src/lib/domain/video";
+import type { VideoVisualStyle } from "../src/lib/domain/video-styles";
 import { getWorkerConfig } from "./config";
 import { runProcess } from "./process";
 
@@ -201,6 +202,46 @@ function escapeFilterPath(filePath: string) {
   return filePath.replaceAll("\\", "/").replace(":", "\\:").replaceAll("'", "\\'");
 }
 
+const visualStyleFilters: Record<VideoVisualStyle, string[]> = {
+  anime: [
+    "hqdn3d=1.2:1.2:5:5",
+    "eq=contrast=1.08:saturation=1.32:brightness=0.02",
+    "unsharp=5:5:0.75:5:5:0",
+  ],
+  cartoon: [
+    "hqdn3d=1.6:1.6:6:6",
+    "eq=contrast=1.12:saturation=1.5:brightness=0.01",
+    "lutrgb=r='floor(val/32)*32':g='floor(val/32)*32':b='floor(val/32)*32'",
+    "unsharp=5:5:0.9:5:5:0",
+  ],
+  cinematic: [
+    "eq=contrast=1.09:saturation=0.94:brightness=-0.018",
+    "colorbalance=rs=-0.02:gs=0.01:bs=0.035",
+    "vignette=PI/5",
+  ],
+  commercial: [
+    "eq=contrast=1.06:saturation=1.1:brightness=0.015",
+    "unsharp=5:5:0.55:5:5:0",
+  ],
+  dreamscape: [
+    "gblur=sigma=0.45",
+    "eq=contrast=0.94:saturation=1.14:brightness=0.035:gamma=1.04",
+    "colorbalance=rs=0.025:bs=0.035",
+  ],
+  natural: [],
+  "neon-noir": [
+    "eq=contrast=1.2:saturation=1.42:brightness=-0.035",
+    "colorbalance=rs=0.055:gs=-0.035:bs=0.08",
+    "vignette=PI/4.5",
+  ],
+  "vintage-film": [
+    "curves=preset=vintage",
+    "eq=saturation=0.82:contrast=0.97",
+    "noise=alls=6:allf=t+u",
+    "vignette=PI/5.5",
+  ],
+};
+
 export function buildExportPlan({
   analysis,
   captionsPath,
@@ -222,6 +263,7 @@ export function buildExportPlan({
   const shouldConcat = keeps.length > 1 || keeps[0].start > settings.trimStart + 0.01;
   const includeAudio = hasAudio && !settings.audio.muted;
   const videoFilters = [aspectFilter(settings.aspectRatio)];
+  videoFilters.push(...visualStyleFilters[settings.visualStyle]);
   if (captionsPath && settings.captions.enabled) {
     const alignment = settings.captions.position === "top" ? 8 : settings.captions.position === "middle" ? 5 : 2;
     const style = [

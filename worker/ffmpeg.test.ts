@@ -26,6 +26,20 @@ describe("FFmpeg export planning", () => {
     expect(plan.args).toContain("libx264");
   });
 
+  it("bakes the selected visual style into an export", () => {
+    const plan = buildExportPlan({
+      analysis: emptyAnalysis,
+      captionsPath: null,
+      duration: 8,
+      hasAudio: false,
+      inputPath: "/tmp/source.mp4",
+      outputPath: "/tmp/output.mp4",
+      settings: { ...defaultEditSettings, trimEnd: 8, visualStyle: "cartoon" },
+    });
+    expect(plan.args.join(" ")).toContain("lutrgb");
+    expect(plan.args.join(" ")).toContain("saturation=1.5");
+  });
+
   it("creates valid caption timing blocks", () => {
     expect(
       transcriptToSrt({

@@ -11,6 +11,7 @@ import {
   Film,
   Loader2,
   Maximize2,
+  Palette,
   Pause,
   Play,
   Ratio,
@@ -34,12 +35,14 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VideoStylePicker } from "@/components/video-style-picker";
 import {
   editSettingsSchema,
   type EditSettings,
   type TranscriptSegment,
 } from "@/lib/domain/video";
 import { editorAgents, type EditorAgentId } from "@/lib/domain/ai-models";
+import { videoVisualStyleById } from "@/lib/domain/video-styles";
 import type { ProjectEditorData } from "@/lib/data/projects";
 import { formatDuration } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
@@ -151,6 +154,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
     [jobs],
   );
   const endTime = settings.trimEnd ?? mediaDuration;
+  const activeVisualStyle = videoVisualStyleById(settings.visualStyle);
   const activeCaption = useMemo(
     () => project.transcript.segments.find((segment) => currentTime >= segment.start && currentTime <= segment.end),
     [currentTime, project.transcript.segments],
@@ -322,7 +326,8 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
                     src={project.previewUrl}
                     playsInline
                     preload="metadata"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover transition-[filter] duration-300"
+                    style={{ filter: activeVisualStyle.previewFilter }}
                     onLoadedMetadata={(event) => { const duration = event.currentTarget.duration; if (Number.isFinite(duration)) setMediaDuration(duration); }}
                     onPlay={() => setPlaying(true)}
                     onPause={() => setPlaying(false)}
@@ -366,9 +371,14 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
 
         <aside className="min-w-0">
           <Card className="border-border bg-card/70 xl:sticky xl:top-20">
-            <Tabs defaultValue="captions">
-              <CardHeader className="pb-3"><TabsList className="grid w-full grid-cols-5"><TabsTrigger value="captions" aria-label="Captions"><Type className="size-4" /></TabsTrigger><TabsTrigger value="cleanup" aria-label="Cleanup"><Scissors className="size-4" /></TabsTrigger><TabsTrigger value="format" aria-label="Format"><Ratio className="size-4" /></TabsTrigger><TabsTrigger value="audio" aria-label="Audio"><Volume2 className="size-4" /></TabsTrigger><TabsTrigger value="transcript" aria-label="Transcript"><Captions className="size-4" /></TabsTrigger></TabsList></CardHeader>
+            <Tabs defaultValue="style">
+              <CardHeader className="pb-3"><TabsList className="grid w-full grid-cols-6"><TabsTrigger value="style" aria-label="Visual style"><Palette className="size-4" /></TabsTrigger><TabsTrigger value="captions" aria-label="Captions"><Type className="size-4" /></TabsTrigger><TabsTrigger value="cleanup" aria-label="Cleanup"><Scissors className="size-4" /></TabsTrigger><TabsTrigger value="format" aria-label="Format"><Ratio className="size-4" /></TabsTrigger><TabsTrigger value="audio" aria-label="Audio"><Volume2 className="size-4" /></TabsTrigger><TabsTrigger value="transcript" aria-label="Transcript"><Captions className="size-4" /></TabsTrigger></TabsList></CardHeader>
               <CardContent className="pt-1">
+                <TabsContent value="style" className="mt-0 space-y-5">
+                  <div><p className="text-sm font-medium">Visual style</p><p className="mt-1 text-xs text-muted-foreground">Preview a look instantly and bake it into the exported MP4.</p></div>
+                  <VideoStylePicker compact value={settings.visualStyle} onChange={(visualStyle) => updateSettings("visualStyle", visualStyle)} />
+                  <Alert><Palette className="size-4" /><AlertDescription>{activeVisualStyle.label} is applied non-destructively. Your private source video remains unchanged.</AlertDescription></Alert>
+                </TabsContent>
                 <TabsContent value="captions" className="mt-0 space-y-5">
                   <div className="flex items-center justify-between"><div><p className="text-sm font-medium">Automatic captions</p><p className="mt-1 text-xs text-muted-foreground">Burn styled captions into the export.</p></div><Switch checked={settings.captions.enabled} onCheckedChange={(enabled) => setSettings((current) => ({ ...current, captions: { ...current.captions, enabled } }))} /></div>
                   <Separator />
