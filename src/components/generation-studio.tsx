@@ -25,6 +25,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DismissProcessButton } from "@/components/dismiss-process-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -223,6 +224,19 @@ export function GenerationStudio({
     if (!agent.supportsAudio) setGenerateAudio(false);
   }
 
+  async function refreshCreditSummary() {
+    const response = await fetch("/api/billing/credits", { cache: "no-store" });
+    if (!response.ok) return;
+    const body = (await response.json()) as { credits: CreditSummary };
+    setCredits(body.credits);
+  }
+
+  async function dismissGeneration(generationId: string) {
+    setGenerations((current) => current.filter((generation) => generation.id !== generationId));
+    setSelectedId((current) => current === generationId ? null : current);
+    await refreshCreditSummary();
+  }
+
   useEffect(() => {
     if (!activeIds) return;
     const ids = activeIds.split(",");
@@ -293,11 +307,7 @@ export function GenerationStudio({
       setSelectedId(next.id);
       setPrompt("");
       setName(isImage ? "Untitled image" : "Untitled video");
-      const creditResponse = await fetch("/api/billing/credits", { cache: "no-store" });
-      if (creditResponse.ok) {
-        const body = (await creditResponse.json()) as { credits: CreditSummary };
-        setCredits(body.credits);
-      }
+      await refreshCreditSummary();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to start generation.");
     } finally {
@@ -514,6 +524,15 @@ export function GenerationStudio({
                 <div className="group relative overflow-hidden bg-black/25">
                   <MediaPreview generation={selected} kind={kind} />
                   <div className="absolute left-3 top-3"><GenerationStatus generation={selected} /></div>
+                  {selected.status !== "completed" && (
+                    <DismissProcessButton
+                      endpoint={`/api/generations/${selected.id}`}
+                      label={`${["processing", "queued", "retrying"].includes(selected.status) ? "Cancel and remove" : "Remove"} ${selected.name}`}
+                      onDismiss={() => dismissGeneration(selected.id)}
+                      onError={setError}
+                      className="absolute right-3 top-3"
+                    />
+                  )}
                 </div>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3">
@@ -544,10 +563,21 @@ export function GenerationStudio({
         {generations.length ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {generations.map((generation) => (
-              <button key={generation.id} type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className={cn("group overflow-hidden rounded-xl border bg-card/65 text-left transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-border")}>
-                <div className="relative overflow-hidden"><MediaPreview controls={false} generation={generation} kind={kind} /><div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div>
-                <div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.model_endpoint ?? "Autopilot selecting model"}</p></div>
-              </button>
+              <div key={generation.id} className={cn("group relative overflow-hidden rounded-xl border bg-card/65 transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-border")}>
+                <button type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className="block w-full text-left">
+                  <div className="relative overflow-hidden"><MediaPreview controls={false} generation={generation} kind={kind} /><div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div>
+                  <div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.model_endpoint ?? "Autopilot selecting model"}</p></div>
+                </button>
+                {generation.status !== "completed" && (
+                  <DismissProcessButton
+                    endpoint={`/api/generations/${generation.id}`}
+                    label={`${["processing", "queued", "retrying"].includes(generation.status) ? "Cancel and remove" : "Remove"} ${generation.name}`}
+                    onDismiss={() => dismissGeneration(generation.id)}
+                    onError={setError}
+                    className="absolute right-2.5 top-2.5"
+                  />
+                )}
+              </div>
             ))}
           </div>
         ) : (

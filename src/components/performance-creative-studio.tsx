@@ -28,6 +28,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DismissProcessButton } from "@/components/dismiss-process-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -133,7 +134,7 @@ export function PerformanceCreativeStudio({
   const [callToAction, setCallToAction] = useState("Shop now");
   const [prompt, setPrompt] = useState("Build a credible direct-response ad with a fast visual hook, one clear benefit, and a clean conversion moment.");
   const [generations, setGenerations] = useState(initialGenerations);
-  const [selectedId, setSelectedId] = useState(initialGenerations[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialGenerations[0]?.id ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const agents = performanceCreativeAgentsForSource(sourceType, outputType);
@@ -216,6 +217,19 @@ export function PerformanceCreativeStudio({
     setError(null);
   }
 
+  async function refreshCreditSummary() {
+    const response = await fetch("/api/billing/credits", { cache: "no-store" });
+    if (!response.ok) return;
+    const body = (await response.json()) as { credits: CreditSummary };
+    setCredits(body.credits);
+  }
+
+  async function dismissGeneration(generationId: string) {
+    setGenerations((current) => current.filter((generation) => generation.id !== generationId));
+    setSelectedId((current) => current === generationId ? null : current);
+    await refreshCreditSummary();
+  }
+
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -273,11 +287,7 @@ export function PerformanceCreativeStudio({
       const next: GenerationView = { ...result.generation, job: result.job, outputUrl: null };
       setGenerations((current) => [next, ...current]);
       setSelectedId(next.id);
-      const creditResponse = await fetch("/api/billing/credits", { cache: "no-store" });
-      if (creditResponse.ok) {
-        const body = (await creditResponse.json()) as { credits: CreditSummary };
-        setCredits(body.credits);
-      }
+      await refreshCreditSummary();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to start the performance creative.");
     } finally {
@@ -427,6 +437,15 @@ export function PerformanceCreativeStudio({
                       : <video src={selected.outputUrl} controls playsInline className="size-full object-contain" />
                     : <div className="grid size-full min-h-96 place-items-center"><div className="text-center"><LoaderCircle className="mx-auto size-7 animate-spin text-primary" /><p className="mt-3 text-sm">{selected.job?.stage ?? "Creative agent is preparing"}</p></div></div>}
                   <div className="absolute left-3 top-3"><GenerationStatus generation={selected} /></div>
+                  {selected.status !== "completed" && (
+                    <DismissProcessButton
+                      endpoint={`/api/generations/${selected.id}`}
+                      label={`${["processing", "queued", "retrying"].includes(selected.status) ? "Cancel and remove" : "Remove"} ${selected.name}`}
+                      onDismiss={() => dismissGeneration(selected.id)}
+                      onError={setError}
+                      className="absolute right-3 top-3"
+                    />
+                  )}
                 </div>
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-medium">{selected.name}</p><p className="mt-1 text-xs text-muted-foreground">{selectedPlatform ? `${selectedPlatform.label} · ${selectedOutputType === "image" ? selectedPlatform.imagePlacement : selectedPlatform.placement}` : "AI ad creative"}</p></div>{selected.outputUrl ? <Button size="icon" variant="outline" asChild><a href={selected.outputUrl} target="_blank" rel="noreferrer" aria-label={`Download ${selected.name}`}><ArrowDownToLine className="size-4" /></a></Button> : null}</div>
@@ -446,7 +465,30 @@ export function PerformanceCreativeStudio({
       <section>
         <div className="mb-4 flex items-end justify-between gap-4"><div><h2 className="text-xl font-semibold tracking-[-0.025em]">Recent AI ad creatives</h2><p className="mt-1 text-sm text-muted-foreground">Private outputs with platform and model decisions preserved.</p></div><span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><RefreshCw className={cn("size-3", activeIds && "animate-spin")} /> {activeIds ? "Live updates" : `${generations.length} total`}</span></div>
         {generations.length ? (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{generations.map((generation) => { const itemSettings = settingsOf(generation.settings); const itemPlatform = itemSettings.platform ? performanceCreativePlatformPresets[itemSettings.platform] : null; const itemOutputType = itemSettings.outputType ?? "video"; return <button key={generation.id} type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className={cn("overflow-hidden rounded-xl border bg-card/65 text-left transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-border")}><div className="relative aspect-video bg-black/30">{generation.outputUrl ? itemOutputType === "image" ? <Image src={generation.outputUrl} alt={generation.name} fill unoptimized sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" /> : <video src={generation.outputUrl} muted playsInline preload="metadata" className="size-full object-cover" /> : <div className="grid size-full place-items-center"><LoaderCircle className="size-5 animate-spin text-primary" /></div>}<div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div><div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{itemPlatform?.label ?? "Platform"} · {itemOutputType === "image" ? "Image ad" : "Video ad"} · {generation.model_endpoint ?? "Agent selecting"}</p></div></button>; })}</div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {generations.map((generation) => {
+              const itemSettings = settingsOf(generation.settings);
+              const itemPlatform = itemSettings.platform ? performanceCreativePlatformPresets[itemSettings.platform] : null;
+              const itemOutputType = itemSettings.outputType ?? "video";
+              return (
+                <div key={generation.id} className={cn("relative overflow-hidden rounded-xl border bg-card/65 transition hover:border-primary/25", selected?.id === generation.id ? "border-primary/35" : "border-border")}>
+                  <button type="button" aria-pressed={selected?.id === generation.id} onClick={() => setSelectedId(generation.id)} className="block w-full text-left">
+                    <div className="relative aspect-video bg-black/30">{generation.outputUrl ? itemOutputType === "image" ? <Image src={generation.outputUrl} alt={generation.name} fill unoptimized sizes="(max-width: 640px) 50vw, 25vw" className="object-cover" /> : <video src={generation.outputUrl} muted playsInline preload="metadata" className="size-full object-cover" /> : <div className="grid size-full place-items-center"><LoaderCircle className="size-5 animate-spin text-primary" /></div>}<div className="absolute left-2.5 top-2.5"><GenerationStatus generation={generation} /></div></div>
+                    <div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{itemPlatform?.label ?? "Platform"} · {itemOutputType === "image" ? "Image ad" : "Video ad"} · {generation.model_endpoint ?? "Agent selecting"}</p></div>
+                  </button>
+                  {generation.status !== "completed" && (
+                    <DismissProcessButton
+                      endpoint={`/api/generations/${generation.id}`}
+                      label={`${["processing", "queued", "retrying"].includes(generation.status) ? "Cancel and remove" : "Remove"} ${generation.name}`}
+                      onDismiss={() => dismissGeneration(generation.id)}
+                      onError={setError}
+                      className="absolute right-2.5 top-2.5"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         ) : <Card className="border-dashed bg-card/35"><CardContent className="grid min-h-44 place-items-center p-8 text-center"><div><Megaphone className="mx-auto size-5 text-primary" /><p className="mt-3 text-sm">No AI ad creatives yet.</p></div></CardContent></Card>}
       </section>
     </main>

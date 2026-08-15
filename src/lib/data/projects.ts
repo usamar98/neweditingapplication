@@ -86,6 +86,7 @@ export const getProjectEditorData = cache(
         .from("jobs")
         .select("*")
         .eq("project_id", projectId)
+        .is("dismissed_at", null)
         .order("created_at", { ascending: false })
         .limit(20),
     ]);

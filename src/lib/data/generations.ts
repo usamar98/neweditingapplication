@@ -36,12 +36,14 @@ export const listGenerations = cache(async (kind: GenerationKind): Promise<Gener
       .from("generations")
       .select("*")
       .eq("kind", kind)
+      .is("dismissed_at", null)
       .order("created_at", { ascending: false })
       .limit(24),
     supabase
       .from("jobs")
       .select("*")
       .not("generation_id", "is", null)
+      .is("dismissed_at", null)
       .order("created_at", { ascending: false })
       .limit(100),
   ]);
@@ -67,11 +69,12 @@ export const listGenerations = cache(async (kind: GenerationKind): Promise<Gener
 export async function getGeneration(generationId: string): Promise<GenerationView | null> {
   const supabase = await createClient();
   const [{ data: generation, error }, { data: job, error: jobError }] = await Promise.all([
-    supabase.from("generations").select("*").eq("id", generationId).maybeSingle(),
+    supabase.from("generations").select("*").eq("id", generationId).is("dismissed_at", null).maybeSingle(),
     supabase
       .from("jobs")
       .select("*")
       .eq("generation_id", generationId)
+      .is("dismissed_at", null)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),

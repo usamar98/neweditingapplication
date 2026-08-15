@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { DismissProcessButton } from "@/components/dismiss-process-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -50,7 +51,7 @@ export function BackgroundRemover({
   const hasPaidSubscription = credits?.active === true;
   const [name, setName] = useState("Background-free image");
   const [generations, setGenerations] = useState(initialGenerations);
-  const [selectedId, setSelectedId] = useState(initialGenerations[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialGenerations[0]?.id ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,6 +120,19 @@ export function BackgroundRemover({
     }
   }
 
+  async function refreshCreditSummary() {
+    const response = await fetch("/api/billing/credits", { cache: "no-store" });
+    if (!response.ok) return;
+    const body = (await response.json()) as { credits: CreditSummary };
+    setCredits(body.credits);
+  }
+
+  async function dismissGeneration(generationId: string) {
+    setGenerations((current) => current.filter((generation) => generation.id !== generationId));
+    setSelectedId((current) => current === generationId ? null : current);
+    await refreshCreditSummary();
+  }
+
   async function submit() {
     if (!file || !name.trim()) return;
     if (!isAuthenticated || !userId) {
@@ -165,11 +179,7 @@ export function BackgroundRemover({
       setSelectedId(next.id);
       chooseFile(null);
       if (fileInput.current) fileInput.current.value = "";
-      const creditResponse = await fetch("/api/billing/credits", { cache: "no-store" });
-      if (creditResponse.ok) {
-        const body = (await creditResponse.json()) as { credits: CreditSummary };
-        setCredits(body.credits);
-      }
+      await refreshCreditSummary();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Unable to start background removal.");
     } finally {
@@ -237,13 +247,22 @@ export function BackgroundRemover({
         </Card>
 
         <Card className="overflow-hidden border-border bg-card/70">
-          <div className="grid min-h-[420px] place-items-center bg-[linear-gradient(45deg,oklch(0.22_0.01_265)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.22_0.01_265)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.22_0.01_265)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.22_0.01_265)_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0px]">
+          <div className="relative grid min-h-[420px] place-items-center bg-[linear-gradient(45deg,oklch(0.22_0.01_265)_25%,transparent_25%),linear-gradient(-45deg,oklch(0.22_0.01_265)_25%,transparent_25%),linear-gradient(45deg,transparent_75%,oklch(0.22_0.01_265)_75%),linear-gradient(-45deg,transparent_75%,oklch(0.22_0.01_265)_75%)] bg-[length:24px_24px] bg-[position:0_0,0_12px,12px_-12px,-12px_0px]">
             {selected?.outputUrl ? (
               <img src={selected.outputUrl} alt={selected.name} className="max-h-[560px] w-full object-contain" />
             ) : selected ? (
               <div className="px-8 text-center"><LoaderCircle className="mx-auto size-7 animate-spin text-primary" /><p className="mt-4 text-sm font-medium">{selected.job?.stage ?? "Preparing cutout"}</p><Progress value={selected.job?.progress ?? 0} className="mx-auto mt-4 w-44" />{selected.last_error && <p className="mt-4 max-w-sm text-xs text-red-300">{selected.last_error}</p>}</div>
             ) : (
               <div className="px-8 text-center"><Scissors className="mx-auto size-8 text-primary" /><p className="mt-4 font-medium">Your transparent result appears here</p><p className="mt-2 max-w-xs text-xs leading-5 text-muted-foreground">The checkerboard makes transparency easy to inspect before downloading.</p></div>
+            )}
+            {selected && selected.status !== "completed" && (
+              <DismissProcessButton
+                endpoint={`/api/generations/${selected.id}`}
+                label={`${["processing", "queued", "retrying"].includes(selected.status) ? "Cancel and remove" : "Remove"} ${selected.name}`}
+                onDismiss={() => dismissGeneration(selected.id)}
+                onError={setError}
+                className="absolute right-3 top-3"
+              />
             )}
           </div>
           {selected && <CardContent className="flex items-center justify-between gap-3 p-4"><div className="min-w-0"><p className="truncate text-sm font-medium">{selected.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{selected.model_endpoint ?? "Cutout agent selecting a model"}</p></div>{selected.outputUrl && <Button asChild variant="outline"><a href={selected.outputUrl} download><ArrowDownToLine className="size-4" /> Download PNG</a></Button>}</CardContent>}
@@ -252,7 +271,27 @@ export function BackgroundRemover({
 
       <section>
         <div className="mb-4 flex items-end justify-between"><div><h2 className="text-xl font-semibold">Recent cutouts</h2><p className="mt-1 text-sm text-muted-foreground">Private source processing and transparent results.</p></div><span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><RefreshCw className={cn("size-3", activeIds && "animate-spin")} />{activeIds ? "Live updates" : `${generations.length} total`}</span></div>
-        {generations.length > 0 && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{generations.map((generation) => <button key={generation.id} type="button" onClick={() => setSelectedId(generation.id)} className={cn("overflow-hidden rounded-xl border bg-card/65 text-left", selected?.id === generation.id ? "border-primary/35" : "border-border")}><div className="grid aspect-[4/3] place-items-center bg-muted/60">{generation.outputUrl ? <img src={generation.outputUrl} alt={generation.name} className="h-full w-full object-contain" /> : <LoaderCircle className="size-5 animate-spin text-primary" />}</div><div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.status}</p></div></button>)}</div>}
+        {generations.length > 0 && (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {generations.map((generation) => (
+              <div key={generation.id} className={cn("relative overflow-hidden rounded-xl border bg-card/65", selected?.id === generation.id ? "border-primary/35" : "border-border")}>
+                <button type="button" onClick={() => setSelectedId(generation.id)} className="block w-full text-left">
+                  <div className="grid aspect-[4/3] place-items-center bg-muted/60">{generation.outputUrl ? <img src={generation.outputUrl} alt={generation.name} className="h-full w-full object-contain" /> : <LoaderCircle className="size-5 animate-spin text-primary" />}</div>
+                  <div className="p-3"><p className="truncate text-sm font-medium">{generation.name}</p><p className="mt-1 truncate text-[11px] text-muted-foreground">{generation.status}</p></div>
+                </button>
+                {generation.status !== "completed" && (
+                  <DismissProcessButton
+                    endpoint={`/api/generations/${generation.id}`}
+                    label={`${["processing", "queued", "retrying"].includes(generation.status) ? "Cancel and remove" : "Remove"} ${generation.name}`}
+                    onDismiss={() => dismissGeneration(generation.id)}
+                    onError={setError}
+                    className="absolute right-2.5 top-2.5"
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </main>
   );

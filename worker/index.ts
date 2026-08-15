@@ -73,7 +73,11 @@ function createReporter(jobId: string): ProgressReporter {
     lastStage = stage;
     lastWriteAt = now;
     writeChain = writeChain.then(async () => {
-      const { error } = await supabase.from("jobs").update({ progress, stage }).eq("id", jobId);
+      const { error } = await supabase
+        .from("jobs")
+        .update({ progress, stage })
+        .eq("id", jobId)
+        .neq("status", "cancelled");
       if (error) workerLogger.warn({ error: error.message, jobId }, "Unable to publish job progress");
     });
     await writeChain;
@@ -148,6 +152,14 @@ async function markJobComplete(job: Job, result: Json) {
     generate_performance_creative: "Performance creative ready",
     generate_video: "Video ready",
   };
+  const { data: currentJob, error: currentJobError } = await supabase
+    .from("jobs")
+    .select("status")
+    .eq("id", job.id)
+    .maybeSingle();
+  if (currentJobError) throw new Error(`Unable to verify job completion state: ${currentJobError.message}`);
+  if (!currentJob || currentJob.status === "cancelled") return false;
+
   const { error } = await supabase.rpc("complete_job_with_credits", {
     p_actual_provider_cost_micros: undefined,
     p_job_id: job.id,
@@ -155,6 +167,7 @@ async function markJobComplete(job: Job, result: Json) {
     p_stage: completionStage[job.kind],
   });
   if (error) throw new Error(`Unable to complete and settle job: ${error.message}`);
+  return true;
 }
 
 async function markJobFailed(job: Job, target: WorkTarget, attempt: number, error: unknown) {
@@ -272,12 +285,22 @@ async function processQueueRow(row: QueueRow) {
           supabase,
           tempDir,
         });
-    await markJobComplete(job, result);
+    const completed = await markJobComplete(job, result);
     await archiveMessage(row.msg_id);
-    log.info({ attempt, kind: job.kind }, "Media job completed");
+    log.info({ attempt, kind: job.kind }, completed ? "Media job completed" : "Cancelled media job stopped before settlement");
   } catch (error) {
     if (!job || !target) {
       log.error({ err: error }, "Queue message could not be matched to a job; archiving poison message");
+      await archiveMessage(row.msg_id);
+      return;
+    }
+    const { data: currentJob, error: currentJobError } = await supabase
+      .from("jobs")
+      .select("status")
+      .eq("id", job.id)
+      .maybeSingle();
+    if (!currentJobError && currentJob?.status === "cancelled") {
+      log.info({ attempt, kind: job.kind }, "Archiving job cancelled by the user");
       await archiveMessage(row.msg_id);
       return;
     }

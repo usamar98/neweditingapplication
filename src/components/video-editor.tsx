@@ -26,6 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DismissProcessButton } from "@/components/dismiss-process-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -86,7 +87,7 @@ async function readApiError(response: Response) {
   return body?.error?.message ?? "The request failed. Please try again.";
 }
 
-function JobProgress({ job }: { job: Job }) {
+function JobProgress({ job, onDismiss, onError }: { job: Job; onDismiss: () => void; onError: (message: string) => void }) {
   const failed = job.status === "failed";
   return (
     <div className={cn("rounded-xl border border-primary/15 bg-primary/[0.045] p-4", failed && "border-destructive/20 bg-destructive/[0.045]")}> 
@@ -97,7 +98,15 @@ function JobProgress({ job }: { job: Job }) {
           </span>
           <div><p className="text-sm font-medium">{job.kind === "analyze" ? "AI video analysis" : "MP4 export"}</p><p className="mt-1 text-xs text-muted-foreground">{failed ? job.error_message ?? "Processing failed" : job.stage}</p></div>
         </div>
-        <span className="font-mono text-xs text-muted-foreground">{job.progress}%</span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-muted-foreground">{job.progress}%</span>
+          <DismissProcessButton
+            endpoint={`/api/jobs/${job.id}`}
+            label={`${["queued", "processing", "retrying"].includes(job.status) ? "Cancel and remove" : "Remove"} ${job.kind === "analyze" ? "video analysis" : "video export"}`}
+            onDismiss={onDismiss}
+            onError={onError}
+          />
+        </div>
       </div>
       <Progress className={cn("mt-3 h-1.5", failed && "[&_[data-slot=progress-indicator]]:bg-destructive")} value={job.progress} />
     </div>
@@ -150,7 +159,8 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
   const [realtimeState, setRealtimeState] = useState<"connecting" | "live" | "degraded">("connecting");
 
   const activeJob = useMemo(
-    () => jobs.find((job) => ["queued", "processing", "retrying"].includes(job.status)) ?? jobs[0],
+    () => jobs.find((job) => !job.dismissed_at && ["queued", "processing", "retrying"].includes(job.status))
+      ?? jobs.find((job) => !job.dismissed_at && job.status === "failed"),
     [jobs],
   );
   const endTime = settings.trimEnd ?? mediaDuration;
@@ -178,6 +188,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
           const nextJob = payload.new as Job;
           if (!nextJob?.id) return;
           setJobs((current) => {
+            if (nextJob.dismissed_at) return current.filter((job) => job.id !== nextJob.id);
             const exists = current.some((job) => job.id === nextJob.id);
             return exists ? current.map((job) => (job.id === nextJob.id ? nextJob : job)) : [nextJob, ...current];
           });
@@ -195,6 +206,11 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
   function updateSettings<K extends keyof EditSettings>(key: K, value: EditSettings[K]) {
     setSettings((current) => ({ ...current, [key]: value }));
     setNotice(null);
+  }
+
+  function dismissJob(jobId: string) {
+    setJobs((current) => current.filter((job) => job.id !== jobId));
+    setNotice("Process removed.");
   }
 
   function seek(seconds: number) {
@@ -313,7 +329,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
       </div>
 
       {error && <Alert variant="destructive" className="mb-4"><CircleAlert className="size-4" /><AlertDescription>{error}</AlertDescription></Alert>}
-      {activeJob && !["completed", "cancelled"].includes(activeJob.status) && <div className="mb-4"><JobProgress job={activeJob} /></div>}
+      {activeJob && <div className="mb-4"><JobProgress job={activeJob} onDismiss={() => dismissJob(activeJob.id)} onError={setError} /></div>}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.55fr)]">
         <section className="min-w-0 space-y-4">

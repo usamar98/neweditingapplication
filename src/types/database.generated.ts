@@ -123,7 +123,15 @@ export type Database = {
           stripe_invoice_id?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "billing_revenue_events_plan_key_fkey"
+            columns: ["plan_key"]
+            isOneToOne: false
+            referencedRelation: "billing_plan_entitlements"
+            referencedColumns: ["plan_key"]
+          },
+        ]
       }
       credit_accounts: {
         Row: {
@@ -162,7 +170,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "credit_accounts_plan_key_fkey"
+            columns: ["plan_key"]
+            isOneToOne: false
+            referencedRelation: "billing_plan_entitlements"
+            referencedColumns: ["plan_key"]
+          },
+        ]
       }
       credit_ledger: {
         Row: {
@@ -204,7 +220,22 @@ export type Database = {
           reservation_id?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "credit_ledger_account_owner_fkey"
+            columns: ["credit_account_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "credit_accounts"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "credit_ledger_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "credit_reservations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       credit_reservations: {
         Row: {
@@ -267,35 +298,27 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
-      }
-      user_activity: {
-        Row: {
-          country_code: string | null
-          created_at: string
-          last_seen_at: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          country_code?: string | null
-          created_at?: string
-          last_seen_at?: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          country_code?: string | null
-          created_at?: string
-          last_seen_at?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "credit_reservations_account_owner_fkey"
+            columns: ["credit_account_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "credit_accounts"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "credit_reservations_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: true
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       generations: {
         Row: {
           created_at: string
+          dismissed_at: string | null
           duration_seconds: number | null
           height: number | null
           id: string
@@ -318,6 +341,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dismissed_at?: string | null
           duration_seconds?: number | null
           height?: number | null
           id?: string
@@ -340,6 +364,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dismissed_at?: string | null
           duration_seconds?: number | null
           height?: number | null
           id?: string
@@ -366,6 +391,7 @@ export type Database = {
         Row: {
           attempt: number
           created_at: string
+          dismissed_at: string | null
           error_code: string | null
           error_message: string | null
           finished_at: string | null
@@ -387,6 +413,7 @@ export type Database = {
         Insert: {
           attempt?: number
           created_at?: string
+          dismissed_at?: string | null
           error_code?: string | null
           error_message?: string | null
           finished_at?: string | null
@@ -408,6 +435,7 @@ export type Database = {
         Update: {
           attempt?: number
           created_at?: string
+          dismissed_at?: string | null
           error_code?: string | null
           error_message?: string | null
           finished_at?: string | null
@@ -630,16 +658,37 @@ export type Database = {
           },
         ]
       }
+      user_activity: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          last_seen_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          last_seen_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       archive_video_job: { Args: { message_id: number }; Returns: boolean }
-      claim_welcome_credits: {
-        Args: { p_user_id: string }
-        Returns: Json
-      }
+      claim_welcome_credits: { Args: { p_user_id: string }; Returns: Json }
       complete_job_with_credits: {
         Args: {
           p_actual_provider_cost_micros?: number
@@ -666,6 +715,14 @@ export type Database = {
           read_ct: number
           vt: string
         }[]
+      }
+      dismiss_generation_admin: {
+        Args: { p_generation_id: string; p_user_id: string }
+        Returns: Json
+      }
+      dismiss_job_admin: {
+        Args: { p_job_id: string; p_user_id: string }
+        Returns: Json
       }
       fail_job_with_credits: {
         Args: {
