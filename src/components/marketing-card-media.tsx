@@ -9,7 +9,8 @@ type MarketingMediaSlug =
   | "ai-clipper"
   | "ai-video-generator"
   | "ai-image-generator"
-  | "performance-creative-studio"
+  | "ai-image-ad-creator"
+  | "ai-video-ad-creator"
   | "background-remover"
   | "product-url-to-video"
   | "long-video-to-shorts";
@@ -40,9 +41,9 @@ const videoMedia: Partial<Record<MarketingMediaSlug, VideoMedia>> = {
     poster: aiVideoVisual,
     src: "/media/previews/ai-video-generator.mp4",
   },
-  "performance-creative-studio": {
-    alt: "An ecommerce product and mobile campaign storyboard prepared for social video ads",
-    label: "Product URL to video ad",
+  "ai-video-ad-creator": {
+    alt: "An ecommerce product and mobile campaign storyboard prepared for a social video ad",
+    label: "AI video ad campaign",
     poster: aiAdCreativeVisual,
     src: "/media/previews/ai-ad-creative-generator.mp4",
   },
@@ -96,6 +97,28 @@ export function MarketingCardMedia({
           <span className="flex items-center gap-1.5 rounded-full border border-white/15 bg-black/35 px-2.5 py-1.5 backdrop-blur">
             <span className="marketing-media-live-dot size-1.5 rounded-full bg-emerald-300" /> Preview
           </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (slug === "ai-image-ad-creator") {
+    return (
+      <div className={cn("relative aspect-video overflow-hidden border-b border-border bg-muted", className)}>
+        <Image
+          src={aiAdCreativeVisual}
+          alt="A polished source-aware image advertisement prepared for social media"
+          fill
+          placeholder="blur"
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="marketing-media-image object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/10" />
+        <div className="absolute left-4 top-4 rounded-full border border-white/15 bg-black/40 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.12em] text-white/85 backdrop-blur">Image ad creator</div>
+        <div className="absolute inset-x-4 bottom-4 grid grid-cols-3 gap-2 text-center text-[9px] font-medium uppercase tracking-[0.08em] text-white/80">
+          <span className="rounded-lg border border-white/15 bg-black/40 px-2 py-2 backdrop-blur">Offer</span>
+          <span className="rounded-lg border border-primary/30 bg-primary/20 px-2 py-2 backdrop-blur">Visual</span>
+          <span className="rounded-lg border border-white/15 bg-black/40 px-2 py-2 backdrop-blur">CTA</span>
         </div>
       </div>
     );

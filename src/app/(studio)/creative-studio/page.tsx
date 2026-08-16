@@ -1,31 +1,5 @@
-import { PerformanceCreativeStudio } from "@/components/performance-creative-studio";
-import { getCurrentUser } from "@/lib/auth";
-import { getCreditSummary } from "@/lib/credits";
-import { listGenerations } from "@/lib/data/generations";
-import { listProjects } from "@/lib/data/projects";
-import { createClient } from "@/lib/supabase/server";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = {
-  title: "AI Image & Video Ad Generator",
-  description: "Create platform-ready image and video ads from product URLs, local-business briefs, and owned long videos.",
-};
-
-export default async function CreativeStudioPage() {
-  const user = await getCurrentUser();
-  const [generations, projects, credits] = user
-    ? await Promise.all([
-        listGenerations("performance_creative"),
-        listProjects(),
-        createClient().then(getCreditSummary),
-      ])
-    : [[], [], null];
-
-  return (
-    <PerformanceCreativeStudio
-      initialCredits={credits}
-      initialGenerations={generations}
-      isAuthenticated={Boolean(user)}
-      projects={projects}
-    />
-  );
+export default function CreativeStudioPage() {
+  permanentRedirect("/creative-studio/video");
 }

@@ -8,7 +8,8 @@ const featureLabels: Record<(typeof marketingFeatures)[number]["slug"], string> 
   "ai-clipper": "AI Clipper",
   "ai-video-generator": "AI video generator",
   "ai-image-generator": "AI image generator",
-  "performance-creative-studio": "AI ad creative generator",
+  "ai-image-ad-creator": "AI image ad creator",
+  "ai-video-ad-creator": "AI video ad creator",
   "background-remover": "AI background remover",
 };
 

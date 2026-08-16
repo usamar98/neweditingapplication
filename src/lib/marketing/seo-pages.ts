@@ -16,7 +16,7 @@ export const searchIntentPages = [
     intro: "Paste a product URL, choose the audience and channel, and create a production brief grounded in the page's real images and product details. Editing App blocks unsupported claims before the paid render starts.",
     primaryHref: "/login?mode=signup",
     primaryLabel: "Create a product ad",
-    featureHref: "/creative-studio",
+    featureHref: "/creative-studio/video",
     outcomes: [
       "Source-aware scripts that use product-page facts",
       "Platform-specific framing for paid and organic placements",

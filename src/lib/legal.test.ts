@@ -22,7 +22,7 @@ describe("legal document catalog", () => {
   });
 
   it("ships substantial, navigable, versioned documents", () => {
-    expect(legalVersion).toBe("2026-08-10");
+    expect(legalVersion).toBe("2026-08-16");
     expect(legalEffectiveDate).toContain("2026");
     for (const document of legalDocuments) {
       expect(document.description.length).toBeGreaterThan(80);

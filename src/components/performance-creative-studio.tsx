@@ -15,7 +15,6 @@ import {
   ImageIcon,
   Link2,
   LoaderCircle,
-  Megaphone,
   MessageSquare,
   Music2,
   Play,
@@ -102,11 +101,13 @@ function GenerationStatus({ generation }: { generation: GenerationView }) {
 export function PerformanceCreativeStudio({
   initialCredits,
   initialGenerations,
+  initialOutputType,
   isAuthenticated,
   projects,
 }: {
   initialCredits: CreditSummary | null;
   initialGenerations: GenerationView[];
+  initialOutputType: PerformanceCreativeOutputType;
   isAuthenticated: boolean;
   projects: ProjectListItem[];
 }) {
@@ -118,7 +119,7 @@ export function PerformanceCreativeStudio({
     [projects],
   );
   const [sourceType, setSourceType] = useState<PerformanceCreativeSourceType>("product_url");
-  const [outputType, setOutputType] = useState<PerformanceCreativeOutputType>("video");
+  const outputType = initialOutputType;
   const [productUrl, setProductUrl] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [businessDescription, setBusinessDescription] = useState("");
@@ -128,12 +129,17 @@ export function PerformanceCreativeStudio({
   const [platform, setPlatform] = useState<PerformanceCreativePlatform>("instagram");
   const [duration, setDuration] = useState("8s");
   const [agentId, setAgentId] = useState("auto");
-  const [name, setName] = useState("AI ad creative");
+  const [name, setName] = useState(initialOutputType === "image" ? "AI image ad" : "AI video ad");
   const [audience, setAudience] = useState("Online shoppers who want a clear reason to act now");
   const [callToAction, setCallToAction] = useState("Shop now");
-  const [prompt, setPrompt] = useState("Build a credible direct-response ad with a fast visual hook, one clear benefit, and a clean conversion moment.");
-  const [generations, setGenerations] = useState(initialGenerations);
-  const [selectedId, setSelectedId] = useState<string | null>(initialGenerations[0]?.id ?? null);
+  const [prompt, setPrompt] = useState(initialOutputType === "image"
+    ? "Create a credible campaign image with one clear benefit, strong visual hierarchy, readable composition, and a clean conversion message."
+    : "Build a credible direct-response video ad with a fast visual hook, one clear benefit, and a clean conversion moment.");
+  const [generations, setGenerations] = useState(() => initialGenerations.filter((generation) => {
+    const settings = settingsOf(generation.settings);
+    return (settings.outputType ?? "video") === initialOutputType;
+  }));
+  const [selectedId, setSelectedId] = useState<string | null>(generations[0]?.id ?? null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const agents = performanceCreativeAgentsForSource(sourceType, outputType);
@@ -199,23 +205,6 @@ export function PerformanceCreativeStudio({
     setError(null);
   }
 
-  function chooseOutputType(nextOutputType: string) {
-    const normalized = nextOutputType as PerformanceCreativeOutputType;
-    setOutputType(normalized);
-    setAgentId("auto");
-    const moveToProduct = (normalized === "image" && sourceType === "long_video")
-      || (normalized === "video" && sourceType === "business_brief");
-    if (moveToProduct) {
-      setSourceType("product_url");
-      setAudience("Online shoppers who want a clear reason to act now");
-      setCallToAction("Shop now");
-      setPrompt("Build a credible direct-response ad with a fast visual hook, one clear benefit, and a clean conversion moment.");
-    }
-    setDuration("8s");
-    setName(normalized === "image" ? "AI image ad" : "AI video ad");
-    setError(null);
-  }
-
   async function refreshCreditSummary() {
     const response = await fetch("/api/billing/credits", { cache: "no-store" });
     if (!response.ok) return;
@@ -233,7 +222,7 @@ export function PerformanceCreativeStudio({
     event.preventDefault();
     setError(null);
     if (!isAuthenticated) {
-      router.push(`/login?next=${encodeURIComponent("/creative-studio")}`);
+      router.push(`/login?next=${encodeURIComponent(`/creative-studio/${outputType}`)}`);
       return;
     }
     if (!hasPaidSubscription) {
@@ -300,14 +289,14 @@ export function PerformanceCreativeStudio({
         <div className="surface-grid pointer-events-none absolute inset-0 opacity-35" />
         <div className="relative grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
           <div className="max-w-3xl">
-            <Badge variant="outline" className="mb-4 border-primary/25 bg-primary/5 text-primary"><Megaphone className="size-3.5" /> AI ad creative generator</Badge>
-            <h1 className="text-balance text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">Create image and video ads for any kind of business.</h1>
-            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">Paste an online product page, describe a local business, or reuse long footage. A source-aware agent builds the hook, message, CTA, format, and private platform-ready creative.</p>
+            <Badge variant="outline" className="mb-4 border-primary/25 bg-primary/5 text-primary">{outputType === "image" ? <ImageIcon className="size-3.5" /> : <Clapperboard className="size-3.5" />} {outputType === "image" ? "AI image ad creator" : "AI video ad creator"}</Badge>
+            <h1 className="text-balance text-3xl font-semibold tracking-[-0.045em] sm:text-5xl">{outputType === "image" ? "Create campaign-ready image ads for online and local businesses." : "Create source-aware video ads built for social performance."}</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">{outputType === "image" ? "Start from a product page or a real local-business brief. The image-ad agent builds the hierarchy, message, CTA, placement, and private campaign creative." : "Start from a product page or analyzed long video. The video-ad agent builds the hook, pacing, CTA, platform format, and private motion creative."}</p>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {platformOptions.map((item) => {
               const preset = performanceCreativePlatformPresets[item.id];
-              return <div key={item.id} className="rounded-xl border border-border bg-muted/55 p-3"><item.icon className={cn("size-4", item.accent)} /><p className="mt-3 text-xs font-medium">{preset.label}</p><p className="mt-1 text-[10px] text-muted-foreground">Image + video</p></div>;
+              return <div key={item.id} className="rounded-xl border border-border bg-muted/55 p-3"><item.icon className={cn("size-4", item.accent)} /><p className="mt-3 text-xs font-medium">{preset.label}</p><p className="mt-1 text-[10px] text-muted-foreground">{outputType === "image" ? "Image ads" : "Video ads"}</p></div>;
             })}
           </div>
         </div>
@@ -315,25 +304,11 @@ export function PerformanceCreativeStudio({
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
         <Card className="border-border bg-card/70">
-          <CardHeader><CardTitle className="text-lg">Build an AI ad creative</CardTitle></CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-4"><CardTitle className="text-lg">Build an AI {outputType} ad</CardTitle><Button asChild size="sm" variant="outline"><Link href={(outputType === "image" ? "/creative-studio/video" : "/creative-studio/image") as Route}>Open {outputType === "image" ? "video" : "image"} ad creator</Link></Button></CardHeader>
           <CardContent>
             <form onSubmit={submit} className="space-y-6">
               <div className="space-y-3">
-                <Label>1. Choose the ad format</Label>
-                <Tabs value={outputType} onValueChange={chooseOutputType}>
-                  <TabsList className="grid h-12 w-full grid-cols-2">
-                    <TabsTrigger value="image"><ImageIcon className="size-4" /> Image ad</TabsTrigger>
-                    <TabsTrigger value="video"><Clapperboard className="size-4" /> Video ad</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <div className={cn("rounded-xl border p-3", outputType === "image" ? "border-primary/30 bg-primary/[0.06]" : "border-border bg-muted/45")}><p className="text-sm font-medium">Static campaign creative</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">Fast platform-ready ads for feeds, display placements, offers, services, and product launches.</p></div>
-                  <div className={cn("rounded-xl border p-3", outputType === "video" ? "border-primary/30 bg-primary/[0.06]" : "border-border bg-muted/45")}><p className="text-sm font-medium">Motion performance creative</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">Short product videos or conversion-ready clips shaped for social platforms.</p></div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Label>2. Tell us what you are advertising</Label>
+                <Label>1. Tell us what you are advertising</Label>
                 <Tabs value={sourceType} onValueChange={chooseSource}>
                   <TabsList className="grid h-11 w-full grid-cols-2">
                     <TabsTrigger value="product_url"><Link2 className="size-4" /> Product URL</TabsTrigger>
@@ -375,7 +350,7 @@ export function PerformanceCreativeStudio({
               </div>
 
               <div className="space-y-3">
-                <Label>3. Choose the destination</Label>
+                <Label>2. Choose the destination</Label>
                 <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                   {platformOptions.map((item) => {
                     const preset = performanceCreativePlatformPresets[item.id];
@@ -397,7 +372,7 @@ export function PerformanceCreativeStudio({
               </div>
 
               <div className="space-y-2">
-                <div className="flex items-center justify-between"><Label htmlFor="performance-brief">4. Creative brief</Label><span className="text-[11px] text-muted-foreground">{prompt.length}/4000</span></div>
+                <div className="flex items-center justify-between"><Label htmlFor="performance-brief">3. Creative brief</Label><span className="text-[11px] text-muted-foreground">{prompt.length}/4000</span></div>
                 <div className="overflow-hidden rounded-xl border border-input bg-input/15 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/20">
                   <Textarea id="performance-brief" value={prompt} onChange={(event) => setPrompt(event.target.value)} minLength={3} maxLength={4000} required className="min-h-32 resize-y rounded-none border-0 bg-transparent px-4 py-3 leading-6 shadow-none focus-visible:ring-0" />
                   <div className="flex items-center justify-between border-t border-border p-2">
@@ -450,7 +425,7 @@ export function PerformanceCreativeStudio({
                 </CardContent>
               </>
             ) : (
-              <div className="grid min-h-[520px] place-items-center p-8 text-center"><div className="max-w-xs"><Megaphone className="mx-auto size-8 text-primary" /><p className="mt-4 text-sm font-medium">Your first AI ad creative starts here.</p><p className="mt-2 text-xs leading-5 text-muted-foreground">Choose a source, platform, audience, and model agent.</p></div></div>
+              <div className="grid min-h-[520px] place-items-center p-8 text-center"><div className="max-w-xs">{outputType === "image" ? <ImageIcon className="mx-auto size-8 text-primary" /> : <Clapperboard className="mx-auto size-8 text-primary" />}<p className="mt-4 text-sm font-medium">Your first AI {outputType} ad starts here.</p><p className="mt-2 text-xs leading-5 text-muted-foreground">Choose a source, platform, audience, and model agent.</p></div></div>
             )}
           </Card>
           {selectedPlan ? (
@@ -460,7 +435,7 @@ export function PerformanceCreativeStudio({
       </section>
 
       <section>
-        <div className="mb-4 flex items-end justify-between gap-4"><div><h2 className="text-xl font-semibold tracking-[-0.025em]">Recent AI ad creatives</h2><p className="mt-1 text-sm text-muted-foreground">Private outputs with platform and model decisions preserved.</p></div><span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><RefreshCw className={cn("size-3", activeIds && "animate-spin")} /> {activeIds ? "Live updates" : `${generations.length} total`}</span></div>
+        <div className="mb-4 flex items-end justify-between gap-4"><div><h2 className="text-xl font-semibold tracking-[-0.025em]">Recent AI {outputType} ads</h2><p className="mt-1 text-sm text-muted-foreground">Private {outputType} outputs with platform and model decisions preserved.</p></div><span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><RefreshCw className={cn("size-3", activeIds && "animate-spin")} /> {activeIds ? "Live updates" : `${generations.length} total`}</span></div>
         {generations.length ? (
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {generations.map((generation) => {
@@ -486,7 +461,7 @@ export function PerformanceCreativeStudio({
               );
             })}
           </div>
-        ) : <Card className="border-dashed bg-card/35"><CardContent className="grid min-h-44 place-items-center p-8 text-center"><div><Megaphone className="mx-auto size-5 text-primary" /><p className="mt-3 text-sm">No AI ad creatives yet.</p></div></CardContent></Card>}
+        ) : <Card className="border-dashed bg-card/35"><CardContent className="grid min-h-44 place-items-center p-8 text-center"><div>{outputType === "image" ? <ImageIcon className="mx-auto size-5 text-primary" /> : <Clapperboard className="mx-auto size-5 text-primary" />}<p className="mt-3 text-sm">No AI {outputType} ads yet.</p></div></CardContent></Card>}
       </section>
     </main>
   );

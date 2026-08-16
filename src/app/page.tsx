@@ -267,22 +267,44 @@ export default function Home() {
             </FeatureReveal>
 
             <FeatureReveal>
-            <Link href="/creative-studio" aria-label="Open AI ad generator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Link href="/creative-studio/image" aria-label="Open AI image ad creator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
                   <Image src={aiAdCreativeVisual} alt="A polished social image advertisement for a premium product" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/15" />
-                  <div className="absolute inset-x-4 bottom-4 grid grid-cols-2 gap-2 text-[9px] text-white/80">
-                    <span className="rounded-lg border border-white/15 bg-black/45 px-3 py-2 text-center backdrop-blur">IMAGE ADS</span>
-                    <span className="rounded-lg border border-primary/30 bg-primary/20 px-3 py-2 text-center backdrop-blur">VIDEO ADS</span>
+                  <div className="absolute inset-x-4 bottom-4 grid grid-cols-3 gap-2 text-[9px] text-white/80">
+                    <span className="rounded-lg border border-white/15 bg-black/45 px-2 py-2 text-center backdrop-blur">OFFER</span>
+                    <span className="rounded-lg border border-primary/30 bg-primary/20 px-2 py-2 text-center backdrop-blur">VISUAL</span>
+                    <span className="rounded-lg border border-white/15 bg-black/45 px-2 py-2 text-center backdrop-blur">CTA</span>
                   </div>
                   <div className="absolute left-4 top-4 rounded-full border border-primary/25 bg-black/45 px-3 py-1.5 text-[10px] text-primary backdrop-blur">ONLINE + LOCAL BUSINESS</div>
                 </div>
                 <div data-feature-copy className="p-6">
-                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">Upgraded</Badge></div>
-                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image & video ad generator</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Turn a product URL, local-business brief, or long video into source-aware ads sized for Facebook, Instagram, TikTok, and YouTube.</p>
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><ImageIcon className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">Separate studio</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image ad creator</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Turn a product URL or real local-business brief into source-aware image ads sized for Facebook, Instagram, TikTok, and YouTube.</p>
+                </div>
+              </CardContent>
+            </Card>
+            </Link>
+            </FeatureReveal>
+
+            <FeatureReveal>
+            <Link href="/creative-studio/video" aria-label="Open AI video ad creator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
+              <CardContent className="p-0">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
+                  <Image src={aiAdCreativeVisual} alt="A platform-ready ecommerce video advertisement storyboard" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <video aria-hidden="true" autoPlay loop muted playsInline preload="metadata" poster={aiAdCreativeVisual.src} className="absolute inset-0 hidden size-full object-cover md:block motion-reduce:hidden"><source src="/media/previews/ai-ad-creative-generator.mp4" type="video/mp4" media="(min-width: 768px) and (prefers-reduced-motion: no-preference)" /></video>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/15" />
+                  <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-2 text-[9px] text-white/80"><span className="rounded-lg border border-white/15 bg-black/45 px-3 py-2 backdrop-blur">PRODUCT URL</span><span className="rounded-lg border border-primary/30 bg-primary/20 px-3 py-2 backdrop-blur">MOTION AD</span><span className="rounded-lg border border-white/15 bg-black/45 px-3 py-2 backdrop-blur">NATIVE AUDIO</span></div>
+                  <div className="absolute left-4 top-4 rounded-full border border-primary/25 bg-black/45 px-3 py-1.5 text-[10px] text-primary backdrop-blur">SOCIAL VIDEO PERFORMANCE</div>
+                </div>
+                <div data-feature-copy className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Megaphone className="size-4.5" /></span><Badge className="bg-primary/15 text-primary">Separate studio</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video ad creator</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Turn a product URL or analyzed long video into source-aware motion ads with platform pacing, premium models, and private delivery.</p>
                 </div>
               </CardContent>
             </Card>
