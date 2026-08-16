@@ -27,6 +27,14 @@ import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
 import aiAdCreativeVisual from "@/assets/media/generated/ai-ad-creative.webp";
 import aiClipperVisual from "@/assets/media/ai-clipper.webp";
+import automotiveCampaign from "@/assets/showcase/automotive-campaign.jpg";
+import brandPortrait from "@/assets/showcase/brand-portrait.jpg";
+import creativeWorkspace from "@/assets/showcase/creative-workspace.jpg";
+import digitalFalcon from "@/assets/showcase/digital-falcon.jpg";
+import fantasyWorld from "@/assets/showcase/fantasy-world.jpg";
+import fashionEditorial from "@/assets/showcase/fashion-editorial.jpg";
+import foodCampaign from "@/assets/showcase/food-campaign.jpg";
+import productPhotography from "@/assets/showcase/product-photography.jpg";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { PricingPreview } from "@/components/pricing-preview";
 import { FeatureReveal } from "@/components/feature-reveal";
@@ -48,6 +56,17 @@ const capabilities = [
   "TikTok, Instagram, and YouTube formats",
   "Realtime background processing",
 ];
+
+const showcaseImages = [
+  { src: digitalFalcon, label: "Digital art", alt: "A futuristic blue falcon dissolving into luminous digital particles" },
+  { src: brandPortrait, label: "Brand portrait", alt: "A stylized gold portrait wearing an ornate red and gold jacket" },
+  { src: creativeWorkspace, label: "Creator workflow", alt: "A creator working with floating video editing and social analytics screens" },
+  { src: foodCampaign, label: "Food campaign", alt: "A cinematic burger advertisement with ingredients and fries suspended in motion" },
+  { src: fashionEditorial, label: "Fashion editorial", alt: "A fashion model in a metallic jacket standing on a neon-lit city street" },
+  { src: fantasyWorld, label: "World building", alt: "A cinematic floating city with waterfalls, aircraft, and dramatic clouds" },
+  { src: productPhotography, label: "Product photography", alt: "A luxury amber perfume bottle photographed with mist and dramatic lighting" },
+  { src: automotiveCampaign, label: "Automotive campaign", alt: "A black sports car driving along a coastal road at sunset" },
+] as const;
 
 const siteUrl = getSiteUrl().toString();
 const homeJsonLd = {
@@ -166,6 +185,62 @@ export default function Home() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      <section className="showcase-section relative border-y border-border bg-card/35 py-16 sm:py-20" aria-labelledby="creative-showcase-title">
+        <div className="mx-auto mb-9 flex max-w-7xl flex-col gap-5 px-5 sm:px-8 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="mb-3 text-sm font-medium text-primary">Creative examples</p>
+            <h2 id="creative-showcase-title" className="text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
+              Explore what your next idea could look like.
+            </h2>
+            <p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+              From product campaigns and fashion concepts to cinematic worlds, shape a clear brief and choose the visual direction that fits it.
+            </p>
+          </div>
+          <label className="w-fit cursor-pointer select-none">
+            <input type="checkbox" className="showcase-pause peer sr-only" aria-label="Pause or resume the automatic creative showcase" />
+            <span className="inline-flex rounded-full border border-border bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur transition hover:border-primary/25 hover:text-foreground peer-checked:hidden peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
+              Pause motion
+            </span>
+            <span className="hidden rounded-full border border-primary/25 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary shadow-sm peer-checked:inline-flex peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2">
+              Resume motion
+            </span>
+          </label>
+        </div>
+
+        <div className="showcase-viewport overflow-hidden" aria-label="AI-generated creative examples">
+          <div className="showcase-track flex w-max gap-4 py-2">
+            {[...showcaseImages, ...showcaseImages].map((visual, index) => {
+              const duplicate = index >= showcaseImages.length;
+              return (
+                <figure
+                  key={`${visual.label}-${index}`}
+                  aria-hidden={duplicate || undefined}
+                  className={cn(
+                    "group relative w-[86vw] shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-muted shadow-xl shadow-black/10 sm:w-[58vw] lg:w-[42vw] xl:w-[34rem]",
+                    duplicate && "showcase-duplicate",
+                  )}
+                >
+                  <div className="relative aspect-[25/12] overflow-hidden">
+                    <Image
+                      src={visual.src}
+                      alt={duplicate ? "" : visual.alt}
+                      placeholder="blur"
+                      sizes="(max-width: 640px) 86vw, (max-width: 1024px) 58vw, (max-width: 1280px) 42vw, 34rem"
+                      className="object-cover transition duration-700 group-hover:scale-[1.025]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/10" />
+                  </div>
+                  <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-4 text-white sm:p-5">
+                    <span className="text-sm font-medium sm:text-base">{visual.label}</span>
+                    <span className="rounded-full border border-white/15 bg-black/30 px-2.5 py-1 text-[9px] uppercase tracking-[0.12em] text-white/75 backdrop-blur sm:text-[10px]">AI-generated example</span>
+                  </figcaption>
+                </figure>
+              );
+            })}
+          </div>
         </div>
       </section>
 
