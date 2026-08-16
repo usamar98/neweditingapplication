@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Editing App">
+  <rect width="64" height="64" rx="18" fill="#52e0a1"/>
+  <g fill="none" stroke="#12372b" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+    <path d="M16 27h32v23H16z"/>
+    <path d="m16 27 4-12 30 7-3 8"/>
+    <path d="m23 16 5 10M35 19l5 10"/>
+    <path d="M24 37h16"/>
+  </g>
+  <path d="m49 10 1.7 4.3L55 16l-4.3 1.7L49 22l-1.7-4.3L43 16l4.3-1.7z" fill="#f2fff9"/>
+</svg>

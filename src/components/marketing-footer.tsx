@@ -1,6 +1,7 @@
 import type { Route } from "next";
 import Link from "next/link";
 import { Brand } from "@/components/brand";
+import { blogPosts } from "@/lib/blog";
 import { marketingFeatures } from "@/lib/marketing/features";
 import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
 
@@ -48,6 +49,7 @@ export function MarketingFooter() {
             <h2 className="text-sm font-semibold">Popular workflows</h2>
             <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
               <li><Link href={"/tools" as Route} className="hover:text-foreground">All AI workflows</Link></li>
+              <li><Link href={"/blog" as Route} className="hover:text-foreground">Creative guides</Link></li>
               {searchIntentPages.map((page) => (
                 <li key={page.slug}>
                   <Link href={`/tools/${page.slug}` as Route} className="hover:text-foreground">
@@ -56,6 +58,9 @@ export function MarketingFooter() {
                 </li>
               ))}
               <li><Link href="/ai-video-models" className="hover:text-foreground">AI video model guide</Link></li>
+              {blogPosts.slice(0, 2).map((post) => (
+                <li key={post.slug}><Link href={`/blog/${post.slug}` as Route} className="hover:text-foreground">{post.seoTitle}</Link></li>
+              ))}
             </ul>
           </div>
           <div>

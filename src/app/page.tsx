@@ -39,6 +39,7 @@ import { MarketingFooter } from "@/components/marketing-footer";
 import { PricingPreview } from "@/components/pricing-preview";
 import { FeatureReveal } from "@/components/feature-reveal";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
+import { blogPosts, formatBlogDate } from "@/lib/blog";
 import { getSiteUrl, siteDescription } from "@/lib/site";
 
 const workflow = [
@@ -72,8 +73,21 @@ const siteUrl = getSiteUrl().toString();
 const homeJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
-    { "@type": "Organization", "@id": `${siteUrl}#organization`, name: "Editing App", url: siteUrl, logo: new URL("/icon.svg", siteUrl).toString() },
-    { "@type": "WebSite", "@id": `${siteUrl}#website`, name: "Editing App", url: siteUrl, description: siteDescription, publisher: { "@id": `${siteUrl}#organization` }, inLanguage: "en" },
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}#organization`,
+      name: "Editing App",
+      alternateName: ["EditingApp", "editingapp.live"],
+      url: siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: new URL("/apple-icon.png", siteUrl).toString(),
+        contentUrl: new URL("/apple-icon.png", siteUrl).toString(),
+        width: 180,
+        height: 180,
+      },
+    },
+    { "@type": "WebSite", "@id": `${siteUrl}#website`, name: "Editing App", alternateName: ["EditingApp", "editingapp.live"], url: siteUrl, description: siteDescription, publisher: { "@id": `${siteUrl}#organization` }, inLanguage: "en" },
     {
       "@type": "SoftwareApplication",
       "@id": `${siteUrl}#software`,
@@ -459,6 +473,25 @@ export default function Home() {
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
             {searchIntentPages.map((page) => <Card key={page.slug} className="border-border bg-card/60"><CardContent className="p-6 sm:p-8"><p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">{page.eyebrow}</p><h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{page.title}</h3><p className="mt-4 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore the workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28" aria-labelledby="latest-creative-guides">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-3xl"><p className="text-sm font-medium text-primary">From the field guide</p><h2 id="latest-creative-guides" className="mt-3 text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Make better creative decisions before spending a credit.</h2><p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Human-reviewed guides for cleaner product images, stronger short-form edits, and more controllable AI generations.</p></div>
+          <Link href={"/blog" as Route} className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-primary">View all guides <ArrowRight className="size-3.5" /></Link>
+        </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {blogPosts.slice(0, 3).map((post) => (
+            <article key={post.slug}>
+              <Link href={`/blog/${post.slug}` as Route} className="group block h-full rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <Card className="h-full overflow-hidden border-border bg-card/60 transition group-hover:-translate-y-1 group-hover:border-primary/25 group-hover:shadow-lg">
+                  <div className="relative aspect-video overflow-hidden bg-muted"><Image src={post.cover} alt={post.coverAlt} fill placeholder="blur" sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.025]" /><div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" /><Badge className="absolute bottom-3 left-3 border-white/15 bg-black/45 text-white backdrop-blur">{post.category}</Badge></div>
+                  <CardContent className="p-5 sm:p-6"><p className="text-xs text-muted-foreground"><time dateTime={post.publishedAt}>{formatBlogDate(post.publishedAt)}</time><span className="mx-2">·</span>{post.readingTime}</p><h3 className="mt-3 text-xl font-semibold tracking-[-0.025em] group-hover:text-primary">{post.title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{post.excerpt}</p><span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Read guide <ArrowRight className="size-3.5" /></span></CardContent>
+                </Card>
+              </Link>
+            </article>
+          ))}
         </div>
       </section>
 

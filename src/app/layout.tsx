@@ -37,6 +37,15 @@ export const metadata: Metadata = {
   creator: siteName,
   publisher: siteName,
   category: "technology",
+  icons: {
+    icon: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
+    ],
+    shortcut: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  manifest: "/manifest.webmanifest",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -77,6 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       }
     : null;
   const siteUrl = getSiteUrl();
+  const logoUrl = new URL("/apple-icon.png", siteUrl).toString();
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -84,8 +94,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         "@type": "Organization",
         "@id": new URL("/#organization", siteUrl).toString(),
         name: siteName,
+        alternateName: ["EditingApp", "editingapp.live"],
         url: siteUrl.toString(),
-        logo: new URL("/icon.svg", siteUrl).toString(),
+        logo: {
+          "@type": "ImageObject",
+          url: logoUrl,
+          contentUrl: logoUrl,
+          width: 180,
+          height: 180,
+        },
         knowsAbout: [
           "AI video clipping",
           "AI video generation",
@@ -99,6 +116,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         "@type": "WebSite",
         "@id": new URL("/#website", siteUrl).toString(),
         name: siteName,
+        alternateName: ["EditingApp", "editingapp.live"],
         url: siteUrl.toString(),
         description: siteDescription,
         publisher: { "@id": new URL("/#organization", siteUrl).toString() },

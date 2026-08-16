@@ -69,6 +69,7 @@ export function SiteHeader({ account }: { account: HeaderAccount }) {
         <nav aria-label="Primary navigation" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-border bg-card/70 p-1 text-sm text-muted-foreground shadow-sm md:flex">
           <Link href={"/features" as Route} className="rounded-full px-4 py-2 transition hover:bg-muted hover:text-foreground">Features</Link>
           <Link href={"/tools" as Route} className="rounded-full px-4 py-2 transition hover:bg-muted hover:text-foreground">AI tools</Link>
+          <Link href={"/blog" as Route} className="rounded-full px-4 py-2 transition hover:bg-muted hover:text-foreground">Guides</Link>
           <Link href={"/pricing" as Route} className="rounded-full px-4 py-2 transition hover:bg-muted hover:text-foreground">Pricing</Link>
         </nav>
 

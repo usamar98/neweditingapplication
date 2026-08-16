@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
+import manifest from "./manifest";
 import robots from "./robots";
 import sitemap from "./sitemap";
 
@@ -19,6 +20,8 @@ describe("crawler metadata", () => {
     expect(new Set(urls).size).toBe(urls.length);
     expect(urls).toContain("https://www.editingapp.live/features");
     expect(urls).toContain("https://www.editingapp.live/tools");
+    expect(urls).toContain("https://www.editingapp.live/blog");
+    expect(urls).toContain("https://www.editingapp.live/blog/remove-background-from-product-photo");
     expect(urls).toContain("https://www.editingapp.live/compare");
     expect(urls).toContain("https://www.editingapp.live/pricing");
     expect(urls).toContain("https://www.editingapp.live/legal");
@@ -42,6 +45,16 @@ describe("crawler metadata", () => {
     expect(rules.flatMap((rule) => rule.disallow ?? [])).toContain("/api/");
     expect(rules.flatMap((rule) => rule.disallow ?? [])).toContain("/dashboard");
     expect(rules.flatMap((rule) => rule.allow ?? [])).toContain("/pricing");
+    expect(rules.flatMap((rule) => rule.allow ?? [])).toContain("/blog");
     expect(rules.flatMap((rule) => rule.allow ?? [])).toContain("/legal");
+  });
+
+  it("publishes stable crawlable brand icon URLs", () => {
+    const metadata = manifest();
+    const icons = metadata.icons ?? [];
+
+    expect(icons).toContainEqual(expect.objectContaining({ src: "/apple-icon.png", sizes: "180x180", type: "image/png" }));
+    expect(icons).toContainEqual(expect.objectContaining({ src: "/favicon.svg", sizes: "any", type: "image/svg+xml" }));
+    expect(icons.every((icon) => !icon.src.includes("?"))).toBe(true);
   });
 });
