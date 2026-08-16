@@ -11,11 +11,6 @@ import type {
   BillingJobMetadata,
   GenerationRequest,
 } from "@/lib/domain/generation";
-import {
-  WELCOME_IMAGE_AGENT_ID,
-  WELCOME_IMAGE_CREDIT_COST,
-  WELCOME_IMAGE_PROFILE,
-} from "@/lib/domain/credits";
 import { HttpError } from "@/lib/http";
 import { getPlanForStripeSubscription, getStripe } from "@/lib/stripe";
 import type { Database, Json } from "@/types/database.generated";
@@ -43,11 +38,10 @@ export function billingMetadataForQuote(value: CreditQuote): BillingJobMetadata 
 }
 
 export type CreditSummary = {
-  accessMode: "none" | "paid" | "welcome";
+  accessMode: "none" | "paid";
   active: boolean;
   activeGenerations: number;
   allocatedCredits: number;
-  canClaimWelcomeCredits: boolean;
   concurrencyLimit: number;
   consumedCredits: number;
   hourlyGenerationLimit: number;
@@ -57,13 +51,10 @@ export type CreditSummary = {
   remainingCredits: number;
   reservedCredits: number;
   status: string | null;
-  welcomeClaimed: boolean;
-  welcomeImagesRemaining: number;
-  welcomeRemainingCredits: number;
 };
 
 type ReservationResult = {
-  accessMode?: "paid" | "welcome";
+  accessMode?: "paid";
   concurrencyLimit?: number;
   creditsReserved: number;
   idempotent: boolean;
@@ -279,12 +270,6 @@ export function quoteProjectCredits({
 
 function creditError(error: { message?: string } | null) {
   const message = error?.message ?? "";
-  if (message.includes("WELCOME_CREDITS_NOT_CLAIMED")) {
-    return new HttpError(402, "Claim your 20 free image credits or choose a paid plan.", "WELCOME_CREDITS_NOT_CLAIMED");
-  }
-  if (message.includes("WELCOME_MODEL_RESTRICTED")) {
-    return new HttpError(403, "Welcome credits can only use the default FLUX.2 Turbo image model.", "WELCOME_MODEL_RESTRICTED");
-  }
   if (message.includes("SUBSCRIPTION_REQUIRED")) {
     return new HttpError(402, "An active paid subscription is required to start this operation.", "SUBSCRIPTION_REQUIRED");
   }
@@ -366,53 +351,17 @@ async function hasCurrentEntitlement(
   );
 }
 
-export type GenerationAccessMode = "paid" | "welcome";
-
-export function generationRequestForAccess(
-  input: GenerationRequest,
-  accessMode: GenerationAccessMode,
-): GenerationRequest {
-  if (accessMode === "paid") return input;
-  if (input.kind !== "image") {
-    throw new HttpError(402, "A paid subscription is required for this feature.", "SUBSCRIPTION_REQUIRED");
-  }
-  return {
-    ...input,
-    agentId: WELCOME_IMAGE_AGENT_ID,
-    profile: WELCOME_IMAGE_PROFILE,
-  };
-}
+export type GenerationAccessMode = "paid";
 
 export async function requireGenerationAccess(
   admin: SupabaseClient<Database>,
   userId: string,
-  kind: GenerationRequest["kind"],
 ): Promise<GenerationAccessMode> {
   if (await hasCurrentEntitlement(admin, userId)) return "paid";
   const refreshed = await refreshStripeEntitlement(admin, userId).catch(() => false);
   if (refreshed && await hasCurrentEntitlement(admin, userId)) return "paid";
 
-  if (kind !== "image") {
-    throw new HttpError(402, "An active paid subscription is required to use this feature.", "SUBSCRIPTION_REQUIRED");
-  }
-
-  const { data, error } = await admin
-    .from("credit_accounts")
-    .select("allocated_credits,consumed_credits,reserved_credits")
-    .eq("user_id", userId)
-    .eq("plan_key", "welcome")
-    .maybeSingle();
-  if (error) {
-    throw new HttpError(503, "The welcome credit service is temporarily unavailable.", "CREDIT_SERVICE_UNAVAILABLE");
-  }
-  if (!data) {
-    throw new HttpError(402, "Claim your 20 free image credits or choose a paid plan.", "WELCOME_CREDITS_NOT_CLAIMED");
-  }
-  const remaining = data.allocated_credits - data.reserved_credits - data.consumed_credits;
-  if (remaining < WELCOME_IMAGE_CREDIT_COST) {
-    throw new HttpError(402, "Your free image credits are used. Choose a plan to keep creating.", "INSUFFICIENT_CREDITS");
-  }
-  return "welcome";
+  throw new HttpError(402, "An active paid subscription is required to use this feature.", "SUBSCRIPTION_REQUIRED");
 }
 
 export async function requireActiveSubscription(
@@ -455,17 +404,6 @@ export async function reserveCredits(
   return data as unknown as ReservationResult;
 }
 
-export async function claimWelcomeCredits(
-  admin: SupabaseClient<Database>,
-  userId: string,
-) {
-  const { data, error } = await admin.rpc("claim_welcome_credits", { p_user_id: userId });
-  if (error || !data) {
-    throw new HttpError(503, "Unable to claim welcome credits right now.", "WELCOME_CLAIM_FAILED");
-  }
-  return data;
-}
-
 export async function failUnstartedJob(
   admin: SupabaseClient<Database>,
   jobId: string,
@@ -489,7 +427,6 @@ const creditSummaryDefaults: CreditSummary = {
   active: false,
   activeGenerations: 0,
   allocatedCredits: 0,
-  canClaimWelcomeCredits: true,
   concurrencyLimit: 0,
   consumedCredits: 0,
   hourlyGenerationLimit: 0,
@@ -499,13 +436,12 @@ const creditSummaryDefaults: CreditSummary = {
   remainingCredits: 0,
   reservedCredits: 0,
   status: null,
-  welcomeClaimed: false,
-  welcomeImagesRemaining: 0,
-  welcomeRemainingCredits: 0,
 };
 
 export async function getCreditSummary(supabase: SupabaseClient<Database>): Promise<CreditSummary> {
   const { data, error } = await supabase.rpc("get_my_credit_summary");
   if (error || !data || typeof data !== "object" || Array.isArray(data)) return creditSummaryDefaults;
-  return { ...creditSummaryDefaults, ...(data as Json as Partial<CreditSummary>) };
+  const summary = { ...creditSummaryDefaults, ...(data as Json as Partial<CreditSummary>) };
+  if (!summary.active) return { ...creditSummaryDefaults, status: summary.status };
+  return { ...summary, accessMode: "paid" };
 }

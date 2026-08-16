@@ -115,11 +115,11 @@ export const videoAgents: readonly VideoAgent[] = [
 ];
 
 export const editorAgents: readonly AiAgent[] = [
-  { id: "auto", endpointId: null, label: "Editor Autopilot", tag: "Recommended", description: "Chooses the best available analysis model for the editing workflow." },
-  { id: "gpt-5-mini-editor", endpointId: "openai/gpt-5-mini", label: "GPT-5 mini Editor", tag: "Deep analysis", description: "Detailed highlight, filler, and story-structure analysis." },
+  { id: "auto", endpointId: null, label: "Clipper Autopilot", tag: "Recommended", description: "Chooses the best available model for moment detection and clip ranking." },
+  { id: "gpt-5-mini-editor", endpointId: "openai/gpt-5-mini", label: "GPT-5 mini Clip Ranker", tag: "Deep analysis", description: "Detailed hook, highlight, pacing, and story-structure analysis." },
   { id: "gemini-2-5-flash-editor", endpointId: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash", tag: "Balanced", description: "Fast, reliable transcript and scene analysis." },
   { id: "gemini-2-5-flash-lite-editor", endpointId: "google/gemini-2.5-flash-lite", label: "Gemini 2.5 Flash Lite", tag: "Economical", description: "Quick analysis for drafts and shorter workflows." },
-  { id: "local-editor", endpointId: "local", label: "Local Editor", tag: "Private fallback", description: "Deterministic local analysis without a paid language-model call." },
+  { id: "local-editor", endpointId: "local", label: "Local Clip Analyzer", tag: "Private fallback", description: "Deterministic local moment analysis without a paid language-model call." },
 ];
 
 export const backgroundAgents: readonly AiAgent[] = [

@@ -18,12 +18,12 @@ const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 export const metadata: Metadata = {
   applicationName: siteName,
   title: {
-    default: "AI Video Editor & Generator | Editing App",
+    default: "AI Clipper, Video & Image Generator | Editing App",
     template: "%s | Editing App",
   },
   description: siteDescription,
   keywords: [
-    "AI video editor",
+    "AI clipper",
     "AI video generator",
     "AI image generator",
     "AI ad creative generator",
@@ -40,13 +40,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName,
-    title: "AI Video Editor & Generator | Editing App",
+    title: "AI Clipper, Video & Image Generator | Editing App",
     description: siteDescription,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Video Editor & Generator | Editing App",
+    title: "AI Clipper, Video & Image Generator | Editing App",
     description: siteDescription,
   },
   robots: {
@@ -86,7 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         url: siteUrl.toString(),
         logo: new URL("/icon.svg", siteUrl).toString(),
         knowsAbout: [
-          "AI video editing",
+          "AI video clipping",
           "AI video generation",
           "AI image generation",
           "Ecommerce video ads",

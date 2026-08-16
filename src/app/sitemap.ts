@@ -5,7 +5,7 @@ import { getSiteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = getSiteUrl();
-  const lastModified = new Date("2026-08-10T00:00:00.000Z");
+  const lastModified = new Date("2026-08-16T00:00:00.000Z");
   return [
     { url: siteUrl.toString(), lastModified, changeFrequency: "weekly", priority: 1 },
     { url: new URL("/features", siteUrl).toString(), lastModified, changeFrequency: "weekly", priority: 0.95 },

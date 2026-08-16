@@ -71,7 +71,7 @@ export async function reactivateAccount() {
   const admin = createAdminClient();
   const { error } = await admin.from("profiles").update({ account_status: "active", deactivated_at: null }).eq("id", auth.user.id);
   if (error) redirect("/reactivate?error=1" as Route);
-  redirect("/dashboard");
+  redirect("/clipper");
 }
 
 async function removeUserObjects(bucket: string, userId: string) {

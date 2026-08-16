@@ -4,11 +4,11 @@ import {
   CircleUserRound,
   CreditCard,
   ImageIcon,
-  LayoutDashboard,
   LogOut,
   Menu,
   Scissors,
   ShieldCheck,
+  Sparkles,
   Video,
 } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
@@ -24,7 +24,7 @@ type HeaderAccount = {
 } | null;
 
 const appLinks = [
-  { href: "/dashboard" as const, icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/clipper" as const, icon: Sparkles, label: "AI Clipper" },
   { href: "/generate/video" as const, icon: Video, label: "AI video" },
   { href: "/generate/image" as const, icon: ImageIcon, label: "AI image" },
   { href: "/remove-background" as const, icon: Scissors, label: "Background remover" },
@@ -74,7 +74,7 @@ export function SiteHeader({ account }: { account: HeaderAccount }) {
 
         {account ? (
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex"><Link href="/dashboard">Workspace</Link></Button>
+            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex"><Link href="/clipper">Workspace</Link></Button>
             <details className="group/account relative">
               <summary className="flex h-10 cursor-pointer list-none items-center gap-2 rounded-lg px-2 text-sm hover:bg-muted [&::-webkit-details-marker]:hidden" aria-label="Open account menu">
                 <AccountAvatar account={account} initials={initials} />

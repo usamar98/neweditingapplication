@@ -6,13 +6,13 @@ import type { GenerationRequest } from "@/lib/domain/generation";
 import {
   billingMetadataForQuote,
   failUnstartedJob,
-  generationRequestForAccess,
   quoteGenerationCredits,
   quoteProjectCredits,
   requireActiveSubscription,
   requireGenerationAccess,
   reserveCredits,
 } from "@/lib/credits";
+import { clipSourceUrlSchema, MAX_CLIP_SOURCE_SECONDS } from "@/lib/domain/video";
 import { HttpError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -54,6 +54,7 @@ export async function enqueueProjectJob({
   kind,
   projectId,
   requestId,
+  sourceUrl,
   supabase,
   user,
 }: {
@@ -61,10 +62,12 @@ export async function enqueueProjectJob({
   kind: "analyze" | "export";
   projectId: string;
   requestId: string;
+  sourceUrl?: string;
   supabase: SupabaseClient<Database>;
   user: User;
 }) {
   const selectedEditorAgent = kind === "analyze" ? editorAgentIdSchema.parse(agentId ?? "auto") : undefined;
+  const validatedSourceUrl = sourceUrl ? clipSourceUrlSchema.parse(sourceUrl) : undefined;
   await requireActiveAccount(supabase, user.id);
   await consumeRateLimit(supabase, `job:${kind}`, kind === "export" ? 8 : 12, 60);
   const admin = createAdminClient();
@@ -96,7 +99,7 @@ export async function enqueueProjectJob({
     throw new HttpError(409, "Analyze the video before exporting it.", "PROJECT_NOT_READY");
   }
 
-  if (kind === "analyze" && project.status === "uploading") {
+  if (kind === "analyze" && project.status === "uploading" && !validatedSourceUrl) {
     const pathParts = project.source_path.split("/");
     const fileName = pathParts.at(-1)!;
     const folder = pathParts.slice(0, -1).join("/");
@@ -127,13 +130,16 @@ export async function enqueueProjectJob({
 
   const creditQuote = quoteProjectCredits({
     agentId: selectedEditorAgent,
-    durationSeconds: Number(project.duration_seconds ?? 60),
+    durationSeconds: validatedSourceUrl
+      ? MAX_CLIP_SOURCE_SECONDS
+      : Number(project.duration_seconds ?? 60),
     kind,
   });
   const payload: Json = {
     billing: billingMetadataForQuote(creditQuote),
     requestId,
     ...(selectedEditorAgent ? { agentId: selectedEditorAgent } : {}),
+    ...(validatedSourceUrl ? { sourceUrl: validatedSourceUrl } : {}),
   };
   const { data: job, error: insertError } = await admin
     .from("jobs")
@@ -237,8 +243,8 @@ export async function enqueueGenerationJob({
     60,
   );
   const admin = createAdminClient();
-  const accessMode = await requireGenerationAccess(admin, user.id, input.kind);
-  const effectiveInput = generationRequestForAccess(input, accessMode);
+  const accessMode = await requireGenerationAccess(admin, user.id);
+  const effectiveInput = input;
 
   if (effectiveInput.kind === "background_removal") {
     if (!effectiveInput.sourcePath.startsWith(`${user.id}/`)) {

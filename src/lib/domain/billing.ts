@@ -10,7 +10,7 @@ export const billingPlans = [
     credits: "1,500",
     description: "For individual creators building a consistent weekly content engine.",
     features: [
-      "AI video editor, image generator, and background remover",
+      "AI Clipper, separate video and image generators, and background remover",
       "720p and 1080p video where the selected model supports it",
       "All efficient models plus premium model access",
       "Indicative capacity: ~3 min efficient video or ~30 sec premium video",

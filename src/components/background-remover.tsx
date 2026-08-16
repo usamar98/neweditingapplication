@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
 import type { CreditSummary } from "@/lib/credits";
 import type { GenerationView } from "@/lib/data/generations";
 import { backgroundAgents } from "@/lib/domain/ai-models";
@@ -140,7 +139,7 @@ export function BackgroundRemover({
       return;
     }
     if (!hasPaidSubscription) {
-      setError("Background removal requires an active paid subscription. Your welcome credits can still create four default-model images.");
+      setError("Background removal requires an active paid subscription. Choose a plan to continue.");
       return;
     }
     setSubmitting(true);
@@ -202,8 +201,6 @@ export function BackgroundRemover({
           </div>
         </div>
       </section>
-
-      <WelcomeCreditsCard credits={credits} isAuthenticated={isAuthenticated} onCreditsChange={setCredits} />
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <Card className="border-border bg-card/70">

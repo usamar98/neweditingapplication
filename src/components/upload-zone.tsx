@@ -2,10 +2,11 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CircleAlert, FileVideo, Loader2, Pause, Play, Upload, X } from "lucide-react";
+import { CircleAlert, FileVideo, Link2, Loader2, Pause, Play, Upload, X } from "lucide-react";
 import { Upload as TusUpload } from "tus-js-client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -79,6 +80,10 @@ export function UploadZone({
   const uploadRef = useRef<TusUpload | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
+  const [linkName, setLinkName] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [rightsConfirmed, setRightsConfirmed] = useState(false);
+  const [importingLink, setImportingLink] = useState(false);
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<"idle" | "authorizing" | "uploading" | "paused" | "processing">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -105,11 +110,11 @@ export function UploadZone({
     if (!file || !name.trim()) return;
     setError(null);
     if (!isAuthenticated) {
-      router.push(`/login?next=${encodeURIComponent("/dashboard#new-project")}`);
+      router.push(`/login?next=${encodeURIComponent("/clipper#new-project")}`);
       return;
     }
     if (!hasPaidSubscription) {
-      setError("AI video editing and analysis require an active paid subscription. Choose a plan before uploading footage.");
+      setError("AI Clipper requires an active paid subscription. Choose a plan before adding footage.");
       return;
     }
     setPhase("authorizing");
@@ -200,6 +205,35 @@ export function UploadZone({
     }
   }
 
+  async function importLink() {
+    if (!linkUrl.trim() || !linkName.trim() || !rightsConfirmed) return;
+    setError(null);
+    if (!isAuthenticated) {
+      router.push(`/login?next=${encodeURIComponent("/clipper#new-project")}`);
+      return;
+    }
+    if (!hasPaidSubscription) {
+      setError("AI Clipper requires an active paid subscription. Choose a plan before importing a link.");
+      return;
+    }
+
+    setImportingLink(true);
+    try {
+      const response = await fetch("/api/projects/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmRights: true, name: linkName.trim(), sourceUrl: linkUrl.trim() }),
+      });
+      if (!response.ok) throw new Error(await readApiError(response));
+      const body = (await response.json()) as { project: { id: string } };
+      router.push(`/projects/${body.project.id}`);
+      router.refresh();
+    } catch (importError) {
+      setError(importError instanceof Error ? importError.message : "Unable to import this video link.");
+      setImportingLink(false);
+    }
+  }
+
   async function pauseUpload() {
     await uploadRef.current?.abort(false);
     setPhase("paused");
@@ -226,23 +260,40 @@ export function UploadZone({
       />
 
       {!file ? (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => { event.preventDefault(); chooseFile(event.dataTransfer.files[0]); }}
-          className={cn(
-            "group flex min-h-56 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/55 px-6 text-center transition",
-            "hover:border-primary/35 hover:bg-primary/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-        >
-          <span className="mb-4 grid size-12 place-items-center rounded-2xl border border-border bg-card text-muted-foreground shadow-sm transition group-hover:border-primary/20 group-hover:text-primary">
-            <Upload className="size-5" />
-          </span>
-          <span className="font-medium">Drop a video here, or browse</span>
-          <span className="mt-2 text-sm text-muted-foreground">MP4, MOV, WebM, or MKV · up to 2 GB</span>
-          <span className="mt-4 rounded-full bg-white/[0.035] px-3 py-1 text-[11px] text-muted-foreground">Uploads resume automatically</span>
-        </button>
+        <div className="grid gap-4 xl:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => { event.preventDefault(); chooseFile(event.dataTransfer.files[0]); }}
+            className={cn(
+              "group flex min-h-64 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-muted/55 px-6 text-center transition",
+              "hover:border-primary/35 hover:bg-primary/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+          >
+            <span className="mb-4 grid size-12 place-items-center rounded-2xl border border-border bg-card text-muted-foreground shadow-sm transition group-hover:border-primary/20 group-hover:text-primary">
+              <Upload className="size-5" />
+            </span>
+            <span className="font-medium">Upload a video</span>
+            <span className="mt-2 text-sm text-muted-foreground">MP4, MOV, WebM, or MKV · up to 2 GB</span>
+            <span className="mt-4 rounded-full bg-card px-3 py-1 text-[11px] text-muted-foreground">Resumable and private</span>
+          </button>
+
+          <div className="min-h-64 rounded-2xl border border-border bg-muted/55 p-5 sm:p-6">
+            <span className="grid size-11 place-items-center rounded-2xl border border-border bg-card text-primary shadow-sm"><Link2 className="size-5" /></span>
+            <h3 className="mt-4 font-medium">Import from a video link</h3>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">Public YouTube, Vimeo, TikTok, Instagram, Facebook, or X videos · up to 60 minutes.</p>
+            <div className="mt-4 grid gap-3">
+              <div className="space-y-1.5"><Label htmlFor="clip-link">Video link</Label><Input id="clip-link" type="url" inputMode="url" placeholder="https://youtube.com/watch?v=…" value={linkUrl} onChange={(event) => setLinkUrl(event.target.value)} disabled={importingLink} /></div>
+              <div className="space-y-1.5"><Label htmlFor="clip-name">Project name</Label><Input id="clip-name" placeholder="Podcast highlights" maxLength={120} value={linkName} onChange={(event) => setLinkName(event.target.value)} disabled={importingLink} /></div>
+              <label className="flex cursor-pointer items-start gap-2.5 text-xs leading-5 text-muted-foreground"><Checkbox checked={rightsConfirmed} onCheckedChange={(value) => setRightsConfirmed(value === true)} disabled={importingLink} className="mt-0.5" /><span>I own this video or have permission to download, edit, and republish it.</span></label>
+              <Button onClick={() => void importLink()} disabled={importingLink || !linkUrl.trim() || !linkName.trim() || !rightsConfirmed}>
+                {importingLink ? <Loader2 className="size-4 animate-spin" /> : <Link2 className="size-4" />}
+                {importingLink ? "Importing securely" : !isAuthenticated ? "Sign in to import" : !hasPaidSubscription ? "Choose a plan to import" : "Find best moments"}
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="rounded-2xl border border-border bg-muted/55 p-5 sm:p-6">
           <div className="flex items-start gap-4">

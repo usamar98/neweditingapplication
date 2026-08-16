@@ -3,10 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { generationJobPayloadSchema } from "./domain/generation";
-import { WELCOME_CREDIT_ALLOCATION, WELCOME_IMAGE_LIMIT } from "./domain/credits";
 import {
   billingMetadataForQuote,
-  generationRequestForAccess,
   quoteGenerationCredits,
   quoteProjectCredits,
 } from "./credits";
@@ -76,38 +74,4 @@ describe("credit quotes", () => {
     expect(quote.credits).toBe(10);
   });
 
-  it("prices each locked welcome image at five credits", () => {
-    const input = generationRequestForAccess({
-      agentId: "seedream-5-pro",
-      aspectRatio: "square_hd",
-      kind: "image",
-      name: "Welcome image",
-      profile: "quality",
-      prompt: "A clean ecommerce product image on a warm studio background",
-      style: "product",
-    }, "welcome");
-    const quote = quoteGenerationCredits(input);
-
-    expect(input).toMatchObject({ agentId: "flux-2-turbo", profile: "cost" });
-    expect(quote.primaryEndpoint).toBe("fal-ai/flux-2/turbo");
-    expect(quote.credits).toBe(5);
-    expect(WELCOME_CREDIT_ALLOCATION / quote.credits).toBe(WELCOME_IMAGE_LIMIT);
-  });
-
-  it("rejects welcome-credit access for non-image operations", () => {
-    expect(() => generationRequestForAccess({
-      agentId: "veo-3-1-fast",
-      aspectRatio: "16:9",
-      cameraMotion: "auto",
-      duration: "8s",
-      generateAudio: true,
-      kind: "video",
-      mood: "cinematic",
-      name: "Blocked welcome video",
-      profile: "speed",
-      prompt: "A cinematic product reveal",
-      resolution: "1080p",
-      visualStyle: "cinematic",
-    }, "welcome")).toThrow("paid subscription");
-  });
 });

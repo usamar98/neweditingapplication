@@ -35,7 +35,6 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
 import type { CreditSummary } from "@/lib/credits";
 import type { GenerationView } from "@/lib/data/generations";
 import type { ProjectListItem } from "@/lib/data/projects";
@@ -238,7 +237,7 @@ export function PerformanceCreativeStudio({
       return;
     }
     if (!hasPaidSubscription) {
-      setError("AI ad creative generation requires an active paid subscription. Your welcome credits remain available for four default-model images.");
+      setError("AI ad creative generation requires an active paid subscription. Choose a plan to continue.");
       return;
     }
     if (sourceType === "product_url" && !productUrl.trim()) {
@@ -314,8 +313,6 @@ export function PerformanceCreativeStudio({
         </div>
       </section>
 
-      <WelcomeCreditsCard credits={credits} isAuthenticated={isAuthenticated} onCreditsChange={setCredits} />
-
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,.85fr)]">
         <Card className="border-border bg-card/70">
           <CardHeader><CardTitle className="text-lg">Build an AI ad creative</CardTitle></CardHeader>
@@ -362,7 +359,7 @@ export function PerformanceCreativeStudio({
                     ) : (
                       <div className="rounded-xl border border-dashed border-border bg-muted/55 p-5 text-center">
                         <Upload className="mx-auto size-5 text-primary" /><p className="mt-3 text-sm">Upload and analyze a long video first.</p>
-                        <Button asChild variant="outline" size="sm" className="mt-4"><Link href={"/dashboard#new-project" as Route}>Upload long video</Link></Button>
+                        <Button asChild variant="outline" size="sm" className="mt-4"><Link href={"/clipper#new-project" as Route}>Add long video</Link></Button>
                       </div>
                     )}
                   </div>

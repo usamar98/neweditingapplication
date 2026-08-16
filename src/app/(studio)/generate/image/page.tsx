@@ -6,13 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "AI Image Generator" };
 
-export default async function ImageGeneratorPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ claim?: string | string[] }>;
-}) {
+export default async function ImageGeneratorPage() {
   const user = await getCurrentUser();
-  const query = await searchParams;
   const [generations, credits] = user
     ? await Promise.all([
         listGenerations("image"),
@@ -22,7 +17,6 @@ export default async function ImageGeneratorPage({
 
   return (
     <GenerationStudio
-      autoClaimWelcome={query.claim === "welcome"}
       initialCredits={credits}
       initialGenerations={generations}
       isAuthenticated={Boolean(user)}

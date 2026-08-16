@@ -1,12 +1,12 @@
 import Image, { type StaticImageData } from "next/image";
 import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
-import videoEditorVisual from "@/assets/media/video-editor.webp";
+import aiClipperVisual from "@/assets/media/ai-clipper.webp";
 import aiAdCreativeVisual from "@/assets/media/generated/ai-ad-creative.webp";
 import { cn } from "@/lib/utils";
 
 type MarketingMediaSlug =
-  | "ai-video-editor"
+  | "ai-clipper"
   | "ai-video-generator"
   | "ai-image-generator"
   | "performance-creative-studio"
@@ -22,17 +22,17 @@ type VideoMedia = {
 };
 
 const videoMedia: Partial<Record<MarketingMediaSlug, VideoMedia>> = {
-  "ai-video-editor": {
-    alt: "A professional editor reviewing a long-form interview on a precise video timeline",
-    label: "Editable long-video workflow",
-    poster: videoEditorVisual,
-    src: "/media/previews/ai-video-editor.mp4",
+  "ai-clipper": {
+    alt: "AI Clipper finding high-retention moments inside a long-form interview",
+    label: "Best moments to social clips",
+    poster: aiClipperVisual,
+    src: "/media/previews/ai-clipper.mp4",
   },
   "long-video-to-shorts": {
     alt: "A professional editor finding short-form highlights in a long interview",
     label: "Long video to short clips",
-    poster: videoEditorVisual,
-    src: "/media/previews/ai-video-editor.mp4",
+    poster: aiClipperVisual,
+    src: "/media/previews/ai-clipper.mp4",
   },
   "ai-video-generator": {
     alt: "A cinematic concept car shot representing premium AI video generation",

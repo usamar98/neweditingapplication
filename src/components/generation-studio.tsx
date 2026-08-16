@@ -32,7 +32,6 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
 import { VideoStylePicker } from "@/components/video-style-picker";
 import type { CreditSummary } from "@/lib/credits";
 import type { GenerationView } from "@/lib/data/generations";
@@ -45,11 +44,6 @@ import {
 } from "@/lib/domain/ai-models";
 import type { GenerationRoutingProfile } from "@/lib/domain/generation";
 import type { VideoVisualStyle } from "@/lib/domain/video-styles";
-import {
-  WELCOME_IMAGE_AGENT_ID,
-  WELCOME_IMAGE_MODEL_LABEL,
-  WELCOME_IMAGE_PROFILE,
-} from "@/lib/domain/credits";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.generated";
 import aiImageVisual from "@/assets/media/ai-image.webp";
@@ -161,13 +155,11 @@ function MediaPreview({ controls = true, generation, kind }: { controls?: boolea
 }
 
 export function GenerationStudio({
-  autoClaimWelcome = false,
   initialCredits,
   initialGenerations,
   isAuthenticated,
   kind,
 }: {
-  autoClaimWelcome?: boolean;
   initialCredits: CreditSummary | null;
   initialGenerations: GenerationView[];
   isAuthenticated: boolean;
@@ -178,11 +170,11 @@ export function GenerationStudio({
   const agents = agentsForKind(kind);
   const [credits, setCredits] = useState(initialCredits);
   const hasPaidSubscription = credits?.active === true;
-  const [agentId, setAgentId] = useState(isImage && !initialCredits?.active ? WELCOME_IMAGE_AGENT_ID : "auto");
+  const [agentId, setAgentId] = useState("auto");
   const [generations, setGenerations] = useState(initialGenerations);
   const [name, setName] = useState(isImage ? "Untitled image" : "Untitled video");
   const [prompt, setPrompt] = useState("");
-  const [profile, setProfile] = useState<GenerationRoutingProfile>(isImage && !initialCredits?.active ? WELCOME_IMAGE_PROFILE : "balanced");
+  const [profile, setProfile] = useState<GenerationRoutingProfile>("balanced");
   const [aspectRatio, setAspectRatio] = useState(isImage ? "landscape_16_9" : "16:9");
   const [style, setStyle] = useState("cinematic");
   const [cameraMotion, setCameraMotion] = useState("auto");
@@ -274,16 +266,8 @@ export function GenerationStudio({
       router.push(`/login?next=${encodeURIComponent(`/generate/${kind}`)}`);
       return;
     }
-    if (!hasPaidSubscription && !isImage) {
-      setError("AI video generation requires an active paid subscription. Choose a plan to unlock every video model.");
-      return;
-    }
-    if (!hasPaidSubscription && !credits?.welcomeClaimed) {
-      setError("Claim your 20 welcome credits before creating your first image.");
-      return;
-    }
-    if (!hasPaidSubscription && (credits?.welcomeImagesRemaining ?? 0) < 1) {
-      setError("Your four welcome images are used. Choose a plan to keep creating and unlock every model.");
+    if (!hasPaidSubscription) {
+      setError(`AI ${kind} generation requires an active paid subscription. Choose a plan to unlock every model.`);
       return;
     }
 
@@ -345,13 +329,6 @@ export function GenerationStudio({
         </div>
       </section>
 
-      <WelcomeCreditsCard
-        autoClaim={autoClaimWelcome && isImage}
-        credits={credits}
-        isAuthenticated={isAuthenticated}
-        onCreditsChange={setCredits}
-      />
-
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,0.65fr)]">
         <Card className="border-border bg-card/70">
           <CardContent className="p-5 sm:p-7">
@@ -399,7 +376,7 @@ export function GenerationStudio({
                       </SelectContent>
                     </Select>
                     <span className="pr-2 text-[10px] text-muted-foreground">
-                      {hasPaidSubscription ? "Approved model agent" : isImage ? `${WELCOME_IMAGE_MODEL_LABEL} · free default` : "Models unlock with a plan"}
+                      {hasPaidSubscription ? "Approved model agent" : "Models unlock with a plan"}
                     </span>
                   </div>
                 </div>
@@ -489,9 +466,7 @@ export function GenerationStudio({
 
               <div className="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="max-w-md text-xs leading-5 text-muted-foreground">
-                  {!hasPaidSubscription && isImage
-                    ? `Welcome images always use ${WELCOME_IMAGE_MODEL_LABEL} at 5 credits each. Subscribe to choose another model or routing intent.`
-                    : !hasPaidSubscription
+                  {!hasPaidSubscription
                       ? "Sign in and choose a paid plan to unlock model selection and generation."
                       : agentId === "auto"
                         ? "Autopilot makes a fresh routing decision for every brief and preserves the reason with your result."
@@ -503,13 +478,9 @@ export function GenerationStudio({
                     ? "Queuing…"
                     : !isAuthenticated
                       ? `Sign in to generate ${kind}`
-                      : !hasPaidSubscription && !isImage
-                        ? "Choose a plan to generate video"
-                        : !hasPaidSubscription && !credits?.welcomeClaimed
-                          ? "Claim free credits above"
-                          : !hasPaidSubscription && (credits?.welcomeImagesRemaining ?? 0) < 1
-                            ? "Choose a plan to continue"
-                            : `Generate ${kind}`}
+                      : !hasPaidSubscription
+                        ? `Choose a plan to generate ${kind}`
+                        : `Generate ${kind}`}
                 </Button>
               </div>
             </form>

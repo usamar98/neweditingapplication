@@ -44,7 +44,7 @@ export async function PATCH(request: Request, context: ProjectRouteContext) {
       .update({ edit_settings: settings })
       .eq("id", id);
     if (error) {
-      throw new HttpError(500, "Unable to save editor settings.", "PROJECT_UPDATE_FAILED");
+      throw new HttpError(500, "Unable to save clip settings.", "PROJECT_UPDATE_FAILED");
     }
 
     return Response.json({ saved: true });

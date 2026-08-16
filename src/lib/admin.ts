@@ -28,6 +28,6 @@ export function isAdminIdentity(user: Pick<User, "app_metadata" | "email" | "id"
 export async function requireAdmin() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Feditingappadmin");
-  if (!isAdminIdentity(user)) redirect("/dashboard");
+  if (!isAdminIdentity(user)) redirect("/clipper");
   return user;
 }

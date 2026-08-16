@@ -9,7 +9,7 @@ import { getSiteUrl, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "AI Video Tool Comparisons",
-  description: "Compare Editing App with VEED, Creatify, and OpusClip across AI video editing, generation, product ads, long-video repurposing, and model choice.",
+  description: "Compare Editing App with VEED, Creatify, and OpusClip across AI clipping, video generation, product ads, long-video repurposing, and model choice.",
   alternates: { canonical: "/compare" },
   openGraph: { title: "AI Video Tool Comparisons", description: "Balanced comparisons for AI video creation, product ads, and short-form repurposing.", type: "website", url: "/compare" },
   twitter: { card: "summary_large_image", title: "AI Video Tool Comparisons", description: "Compare Editing App with VEED, Creatify, and OpusClip." },

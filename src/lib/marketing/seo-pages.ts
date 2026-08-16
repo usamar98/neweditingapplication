@@ -40,8 +40,8 @@ export const searchIntentPages = [
   {
     slug: "long-video-to-shorts",
     eyebrow: "Long video to shorts",
-    seoTitle: "Long Video to Shorts AI Editor",
-    title: "Turn long videos into short clips with AI-assisted editing",
+    seoTitle: "Long Video to Shorts AI Clipper",
+    title: "Turn long videos into short clips with AI Clipper",
     description: "Analyze long footage, find strong hooks, build captions, and prepare editable vertical clips for TikTok, Instagram Reels, YouTube Shorts, and Facebook.",
     keywords: ["long video to shorts", "AI clip maker", "podcast clip generator", "YouTube to Shorts", "video highlight generator"],
     answer: {
@@ -54,7 +54,7 @@ export const searchIntentPages = [
     intro: "Upload a recording once, choose the analysis model, and use scene, transcript, silence, and highlight suggestions to build short-form cuts without surrendering timeline control.",
     primaryHref: "/login?mode=signup",
     primaryLabel: "Upload a long video",
-    featureHref: "/dashboard",
+    featureHref: "/clipper",
     outcomes: [
       "Ranked highlight and hook suggestions",
       "Editable transcripts and word-timed captions",
@@ -63,7 +63,7 @@ export const searchIntentPages = [
     ],
     steps: [
       "Upload a podcast, interview, webinar, tutorial, or campaign recording.",
-      "Choose Editor Autopilot, GPT-5 mini, Gemini, or the local analysis option.",
+      "Choose Clipper Autopilot, GPT-5 mini, Gemini, or the local analysis option.",
       "Review suggested highlights, silence, fillers, captions, and reframing.",
       "Keep full editorial control, then export a channel-ready MP4 master.",
     ],
@@ -72,7 +72,7 @@ export const searchIntentPages = [
       { question: "Does Editing App automatically publish the clips?", answer: "No. The current workflow prepares private, editable exports so you can approve every cut before publishing." },
       { question: "Does AI permanently cut the original video?", answer: "No. Analysis produces suggestions. Your source remains private and your trim, caption, crop, and audio decisions stay editable." },
       { question: "Which short-form formats are supported?", answer: "Projects can be prepared for vertical 9:16, square 1:1, and landscape 16:9 outputs used across TikTok, Reels, Shorts, Facebook, and YouTube." },
-      { question: "Can I choose the analysis model?", answer: "Yes. Use Editor Autopilot or an approved GPT, Gemini, or local analysis option before running analysis." },
+      { question: "Can I choose the analysis model?", answer: "Yes. Use Clipper Autopilot or an approved GPT, Gemini, or local analysis option before running analysis." },
     ],
   },
 ] as const;
@@ -90,7 +90,7 @@ export const comparisonPages = [
     competitorBestFor: "Teams that prioritize a mature browser editor, collaboration, avatars, translation, stock media, and broad publishing features.",
     rows: [
       { criterion: "AI video models", editingApp: "Selectable Seedance, LTX, Veo, and Kling routes plus compatibility-aware Autopilot", competitor: "Multiple leading AI models inside a broad video suite" },
-      { criterion: "Long-video editing", editingApp: "Selectable analysis models with editable scene, transcript, silence, and highlight suggestions", competitor: "Text-based editing, Auto Edits, captions, cleanup, and B-roll tools" },
+      { criterion: "AI clipping", editingApp: "Selectable analysis models with ranked moments, transcript, captions, and editable clip ranges", competitor: "Text-based editing, Auto Edits, captions, cleanup, and B-roll tools" },
       { criterion: "Product URL ads", editingApp: "Source-aware workflow with claim guardrails and platform controls", competitor: "General AI generation and marketing-video workflows" },
       { criterion: "Delivery architecture", editingApp: "Durable background jobs, private storage, and paid-render delivery checkpoints", competitor: "Cloud editor and team workspace" },
       { criterion: "Best-known strength", editingApp: "Transparent model choice and specialized creative routing", competitor: "Breadth, collaboration, translation, avatars, and publishing" },
@@ -102,15 +102,15 @@ export const comparisonPages = [
     competitorUrl: "https://creatify.ai/features",
     seoTitle: "Editing App vs Creatify: AI Ad Tools",
     title: "Editing App vs Creatify: product URL video ads compared",
-    description: "Compare Editing App and Creatify for product URL ads, ecommerce creative, AI avatars, model choice, long-video editing, and source-aware generation.",
-    summary: "Creatify specializes in scalable performance ads, avatars, voices, and creative intelligence. Editing App combines product-URL creative with long-video editing, multi-model video and image generation, private processing, and explicit provider controls.",
+    description: "Compare Editing App and Creatify for product URL ads, ecommerce creative, AI avatars, model choice, AI clipping, and source-aware generation.",
+    summary: "Creatify specializes in scalable performance ads, avatars, voices, and creative intelligence. Editing App combines product-URL creative with AI clipping, multi-model video and image generation, private processing, and explicit provider controls.",
     editingAppBestFor: "Small brands and agencies that want product ads plus hands-on editing, model selection, image generation, background removal, and private media jobs in one workspace.",
     competitorBestFor: "Advertisers that prioritize high-volume avatar-led UGC workflows, voice libraries, batch production, and competitor-ad intelligence.",
     rows: [
       { criterion: "Product URL workflow", editingApp: "Extracts source context and blocks unsupported product claims", competitor: "Flagship URL-to-video workflow for marketing ads" },
       { criterion: "Video model control", editingApp: "Named Seedance and Veo ad directors with visible capability limits", competitor: "Outcome-led generation workflow with less emphasis on provider selection" },
       { criterion: "AI avatars and voices", editingApp: "Not a current core feature", competitor: "Custom avatars, AI influencers, AI humans, and a large voice library" },
-      { criterion: "Long-video editing", editingApp: "Scene, transcript, silence, highlight, caption, crop, and audio workflow", competitor: "Primarily performance-ad production and editing" },
+      { criterion: "AI clipping", editingApp: "Video-link or upload input with ranked moments, transcript, captions, crops, and private exports", competitor: "Primarily performance-ad production and editing" },
       { criterion: "Private processing", editingApp: "Private storage, signed delivery URLs, and durable jobs", competitor: "Cloud performance-creative platform" },
     ],
   },

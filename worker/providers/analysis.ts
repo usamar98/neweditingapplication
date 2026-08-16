@@ -219,7 +219,7 @@ export function createContentAnalysisProvider(
   if (selected === "local") return new LocalContentAnalysisProvider();
   if (selected) {
     if (!config.FAL_KEY) {
-      throw new Error("The selected editor model requires FAL_KEY in the worker environment.");
+      throw new Error("The selected clip analysis model requires FAL_KEY in the worker environment.");
     }
     return new FalContentAnalysisProvider(config, markProviderBillingStarted, selected);
   }

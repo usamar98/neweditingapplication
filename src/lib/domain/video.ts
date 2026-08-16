@@ -7,7 +7,44 @@ export const VIDEO_SOURCE_BUCKET = "video-sources";
 export const VIDEO_OUTPUT_BUCKET = "video-outputs";
 export const VIDEO_ASSET_BUCKET = "video-assets";
 export const MAX_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024;
+export const MAX_CLIP_SOURCE_SECONDS = 60 * 60;
 export const TUS_CHUNK_SIZE = 6 * 1024 * 1024;
+
+export const supportedClipLinkHosts = [
+  "youtube.com",
+  "youtu.be",
+  "vimeo.com",
+  "tiktok.com",
+  "instagram.com",
+  "facebook.com",
+  "fb.watch",
+  "x.com",
+  "twitter.com",
+] as const;
+
+function matchesSupportedClipHost(hostname: string) {
+  const normalized = hostname.toLowerCase().replace(/\.$/, "");
+  return supportedClipLinkHosts.some((host) => normalized === host || normalized.endsWith(`.${host}`));
+}
+
+export const clipSourceUrlSchema = z.string().trim().url().max(2048).superRefine((value, context) => {
+  const url = new URL(value);
+  if (url.protocol !== "https:" || url.username || url.password || (url.port && url.port !== "443")) {
+    context.addIssue({ code: "custom", message: "Use a public HTTPS video link without credentials or a custom port." });
+  }
+  if (!matchesSupportedClipHost(url.hostname)) {
+    context.addIssue({
+      code: "custom",
+      message: "Use a public YouTube, Vimeo, TikTok, Instagram, Facebook, or X video link.",
+    });
+  }
+});
+
+export const importClipProjectSchema = z.object({
+  confirmRights: z.literal(true),
+  name: z.string().trim().min(1).max(120),
+  sourceUrl: clipSourceUrlSchema,
+}).strict();
 
 export const supportedVideoMimeTypes = [
   "video/mp4",

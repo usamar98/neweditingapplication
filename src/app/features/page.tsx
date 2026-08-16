@@ -11,12 +11,12 @@ import { getSiteUrl, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "AI Creative Tools for Video, Images & Ads",
-  description: "Explore Editing App's AI video editor, multi-model generators, image and video ad studio for online and local businesses, and precision background remover.",
-  keywords: ["AI creative tools", "AI video editor", "AI video generator", "AI image generator", "AI ad generator", "local business ad generator", "AI background remover"],
+  description: "Explore Editing App's AI Clipper, separate AI video and image generators, image and video ad studio, and precision background remover.",
+  keywords: ["AI creative tools", "AI clipper", "AI video generator", "AI image generator", "AI ad generator", "local business ad generator", "AI background remover"],
   alternates: { canonical: "/features" },
   openGraph: {
     title: "AI Creative Tools for Video, Images & Ads",
-    description: "One private workspace for AI video editing, generation, image and video ads, local-business campaigns, and background removal.",
+    description: "One private workspace for AI clipping, separate video and image generation, business ads, and background removal.",
     type: "website",
     url: "/features",
   },
@@ -72,9 +72,9 @@ export default function FeaturesPage() {
           AI creative tools for every stage from first brief to final export.
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">
-          Edit long footage, generate premium video and images, build source-aware image and video ads for online or local businesses, and remove backgrounds in one private workspace.
+          Find the best moments in long videos, generate premium videos and images in separate focused studios, build source-aware ads, and remove backgrounds in one private workspace.
         </p>
-        <Button size="lg" asChild className="mt-8"><Link href="/generate/image?claim=welcome">Open the image studio <ArrowRight className="size-4" /></Link></Button>
+        <Button size="lg" asChild className="mt-8"><Link href="/clipper">Open AI Clipper <ArrowRight className="size-4" /></Link></Button>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">

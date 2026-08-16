@@ -141,7 +141,7 @@ function TranscriptList({
   );
 }
 
-export function VideoEditor({ project }: { project: ProjectEditorData }) {
+export function AIClipper({ project }: { project: ProjectEditorData }) {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const completionRefreshRef = useRef<string | null>(null);
@@ -220,6 +220,18 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
     setCurrentTime(video.currentTime);
   }
 
+  function selectHighlight(highlight: { end: number; start: number }) {
+    const trimStart = Math.max(0, Math.min(highlight.start, mediaDuration - 0.1));
+    const trimEnd = Math.max(trimStart + 0.1, Math.min(highlight.end, mediaDuration));
+    setSettings((current) => ({ ...current, trimEnd, trimStart }));
+    if (videoRef.current) {
+      videoRef.current.currentTime = trimStart;
+      setCurrentTime(trimStart);
+    }
+    setNotice(`Moment selected · ${formatDuration(trimStart)}–${formatDuration(trimEnd)}`);
+    document.getElementById("clip-preview")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function togglePlayback() {
     const video = videoRef.current;
     if (!video) return;
@@ -266,7 +278,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
       if (!response.ok) throw new Error(await readApiError(response));
       const data = (await response.json()) as { job: Job };
       setJobs((current) => [data.job, ...current]);
-      setNotice("Export queued. You can keep editing while it runs.");
+      setNotice("Clip export queued. You can keep refining it while it runs.");
     } catch (exportError) {
       setError(exportError instanceof Error ? exportError.message : "Unable to start the export.");
     } finally {
@@ -287,7 +299,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
       if (!response.ok) throw new Error(await readApiError(response));
       const data = (await response.json()) as { job: Job };
       setJobs((current) => [data.job, ...current]);
-      setNotice("AI analysis queued with your selected editor model.");
+      setNotice("AI moment detection queued with your selected analysis model.");
     } catch (analysisError) {
       setError(analysisError instanceof Error ? analysisError.message : "Unable to start AI analysis.");
     } finally {
@@ -299,14 +311,14 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
     <main className="mx-auto max-w-[1680px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
       <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div className="min-w-0">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground"><Film className="size-3.5" /> Video project <span>·</span><span className={cn("inline-flex items-center gap-1.5", realtimeState === "live" && "text-primary")}><span className={cn("size-1.5 rounded-full bg-muted-foreground", realtimeState === "live" && "bg-primary", realtimeState === "connecting" && "animate-pulse")} /> {realtimeState === "live" ? "Live" : realtimeState === "degraded" ? "Reconnecting" : "Connecting"}</span></div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground"><Film className="size-3.5" /> AI Clipper project <span>·</span><span className={cn("inline-flex items-center gap-1.5", realtimeState === "live" && "text-primary")}><span className={cn("size-1.5 rounded-full bg-muted-foreground", realtimeState === "live" && "bg-primary", realtimeState === "connecting" && "animate-pulse")} /> {realtimeState === "live" ? "Live" : realtimeState === "degraded" ? "Reconnecting" : "Connecting"}</span></div>
           <h1 className="mt-1 truncate text-2xl font-semibold tracking-[-0.035em]">{project.name}</h1>
           <p className="mt-1 truncate text-xs text-muted-foreground">{project.sourceFilename} · {formatDuration(mediaDuration)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {notice && <span className="mr-2 text-xs text-primary">{notice}</span>}
           <Select value={editorAgentId} onValueChange={(value) => setEditorAgentId(value as EditorAgentId)}>
-            <SelectTrigger aria-label="Select AI editor model" className="h-9 w-[210px] bg-card/60 text-xs">
+            <SelectTrigger aria-label="Select AI clip analysis model" className="h-9 w-[210px] bg-card/60 text-xs">
               <Bot className="size-3.5 text-primary" />
               <SelectValue />
             </SelectTrigger>
@@ -320,36 +332,46 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={requestAnalysis} disabled={analyzing || Boolean(activeJob && ["queued", "processing", "retrying"].includes(activeJob.status))}>
-            {analyzing ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />} {analyzing ? "Queueing" : "Analyze"}
+            {analyzing ? <Loader2 className="size-4 animate-spin" /> : <WandSparkles className="size-4" />} {analyzing ? "Queueing" : "Find moments"}
           </Button>
           <Button variant="outline" onClick={() => void saveSettings()} disabled={saving || exporting}><Save className="size-4" /> {saving ? "Saving" : "Save"}</Button>
-          {project.exportUrl && <Button variant="outline" asChild><a href={project.exportUrl} target="_blank" rel="noreferrer"><Download className="size-4" /> Download latest</a></Button>}
-          <Button onClick={requestExport} disabled={exporting || saving || project.duration <= 0}><Download className="size-4" /> {exporting ? "Queueing" : "Export MP4"}</Button>
+          {project.exportUrl && <Button variant="outline" asChild><a href={project.exportUrl} target="_blank" rel="noreferrer"><Download className="size-4" /> Download latest clip</a></Button>}
+          <Button onClick={requestExport} disabled={exporting || saving || project.duration <= 0}><Download className="size-4" /> {exporting ? "Queueing" : "Export clip"}</Button>
         </div>
       </div>
 
       {error && <Alert variant="destructive" className="mb-4"><CircleAlert className="size-4" /><AlertDescription>{error}</AlertDescription></Alert>}
       {activeJob && <div className="mb-4"><JobProgress job={activeJob} onDismiss={() => dismissJob(activeJob.id)} onError={setError} /></div>}
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.55fr)]">
+      <div id="clip-preview" className="scroll-mt-24 grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.55fr)]">
         <section className="min-w-0 space-y-4">
           <Card className="overflow-hidden border-border bg-card/70">
             <CardContent className="p-0">
               <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden bg-black p-3 sm:p-5">
                 <div className={cn("relative w-full max-w-full overflow-hidden rounded-lg bg-black shadow-2xl shadow-black/60", playerRatios[settings.aspectRatio])}>
-                  <video
-                    ref={videoRef}
-                    src={project.previewUrl}
-                    playsInline
-                    preload="metadata"
-                    className="h-full w-full object-cover transition-[filter] duration-300"
-                    style={{ filter: activeVisualStyle.previewFilter }}
-                    onLoadedMetadata={(event) => { const duration = event.currentTarget.duration; if (Number.isFinite(duration)) setMediaDuration(duration); }}
-                    onPlay={() => setPlaying(true)}
-                    onPause={() => setPlaying(false)}
-                    onTimeUpdate={(event) => { const time = event.currentTarget.currentTime; setCurrentTime(time); if (time >= endTime) { event.currentTarget.pause(); event.currentTarget.currentTime = settings.trimStart; } }}
-                  />
-                  {settings.captions.enabled && activeCaption && (
+                  {project.previewUrl ? (
+                    <video
+                      ref={videoRef}
+                      src={project.previewUrl}
+                      playsInline
+                      preload="metadata"
+                      className="h-full w-full object-cover transition-[filter] duration-300"
+                      style={{ filter: activeVisualStyle.previewFilter }}
+                      onLoadedMetadata={(event) => { const duration = event.currentTarget.duration; if (Number.isFinite(duration)) setMediaDuration(duration); }}
+                      onPlay={() => setPlaying(true)}
+                      onPause={() => setPlaying(false)}
+                      onTimeUpdate={(event) => { const time = event.currentTarget.currentTime; setCurrentTime(time); if (time >= endTime) { event.currentTarget.pause(); event.currentTarget.currentTime = settings.trimStart; } }}
+                    />
+                  ) : (
+                    <div className="grid min-h-[300px] place-items-center px-6 text-center">
+                      <div>
+                        <Loader2 className="mx-auto size-6 animate-spin text-primary" />
+                        <p className="mt-4 text-sm font-medium text-white">Securing your video source</p>
+                        <p className="mt-1 text-xs text-white/60">The preview will appear after the linked video is safely imported.</p>
+                      </div>
+                    </div>
+                  )}
+                  {project.previewUrl && settings.captions.enabled && activeCaption && (
                     <div className={cn("pointer-events-none absolute inset-x-4 flex justify-center", captionPositions[settings.captions.position])}>
                       <span className="max-w-[88%] rounded px-2.5 py-1.5 text-center font-semibold leading-snug shadow-xl" style={{ backgroundColor: hexToRgba(settings.captions.backgroundColor, settings.captions.backgroundOpacity), color: settings.captions.textColor, fontFamily: settings.captions.font, fontSize: Math.max(13, settings.captions.fontSize * 0.45) }}>{activeCaption.text}</span>
                     </div>
@@ -373,7 +395,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
           </Card>
 
           <Card className="border-border bg-card/70">
-            <CardHeader className="pb-4"><div className="flex items-center justify-between"><CardTitle className="text-sm">Trim & scene timeline</CardTitle><span className="font-mono text-xs text-muted-foreground">{formatDuration(settings.trimStart)} — {formatDuration(endTime)}</span></div></CardHeader>
+            <CardHeader className="pb-4"><div className="flex items-center justify-between"><CardTitle className="text-sm">Selected clip range</CardTitle><span className="font-mono text-xs text-muted-foreground">{formatDuration(settings.trimStart)} — {formatDuration(endTime)}</span></div></CardHeader>
             <CardContent className="space-y-5">
               <Slider value={[settings.trimStart, endTime]} min={0} max={mediaDuration} step={0.1} minStepsBetweenThumbs={1} onValueChange={(value) => setSettings((current) => ({ ...current, trimStart: value[0], trimEnd: value[1] }))} />
               <div className="grid gap-3 sm:grid-cols-2">
@@ -436,7 +458,7 @@ export function VideoEditor({ project }: { project: ProjectEditorData }) {
       </div>
 
       {project.analysis.highlights.length > 0 && (
-        <Card className="mt-4 border-border bg-card/70"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Sparkles className="size-4 text-primary" /> AI highlight picks</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{project.analysis.highlights.map((highlight, index) => <button key={`${highlight.start}-${index}`} type="button" onClick={() => seek(highlight.start)} className="rounded-xl border border-border bg-muted/55 p-4 text-left transition hover:border-primary/20 hover:bg-primary/[0.035]"><div className="flex items-center justify-between"><span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><WandSparkles className="size-4" /></span><span className="font-mono text-[10px] text-muted-foreground">{formatDuration(highlight.start)}–{formatDuration(highlight.end)}</span></div><p className="mt-4 text-sm font-medium">Highlight {index + 1}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{highlight.reason}</p></button>)}</CardContent></Card>
+        <Card className="mt-4 border-border bg-card/70"><CardHeader><CardTitle className="flex items-center gap-2 text-sm"><Sparkles className="size-4 text-primary" /> Best moments selected by AI</CardTitle></CardHeader><CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">{project.analysis.highlights.map((highlight, index) => <button key={`${highlight.start}-${index}`} type="button" onClick={() => selectHighlight(highlight)} className="rounded-xl border border-border bg-muted/55 p-4 text-left transition hover:border-primary/20 hover:bg-primary/[0.035]"><div className="flex items-center justify-between"><span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary"><WandSparkles className="size-4" /></span><span className="font-mono text-[10px] text-muted-foreground">{formatDuration(highlight.start)}–{formatDuration(highlight.end)}</span></div><p className="mt-4 text-sm font-medium">Moment {index + 1}</p><p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{highlight.reason}</p><span className="mt-4 inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-primary">Use this moment</span></button>)}</CardContent></Card>
       )}
     </main>
   );

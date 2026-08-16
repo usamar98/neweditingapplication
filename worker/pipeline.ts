@@ -1,11 +1,14 @@
 import { stat, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve, sep } from "node:path";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import {
   editSettingsSchema,
   emptyAnalysis,
   emptyTranscript,
+  clipSourceUrlSchema,
+  MAX_CLIP_SOURCE_SECONDS,
+  MAX_UPLOAD_BYTES,
   VIDEO_ASSET_BUCKET,
   VIDEO_OUTPUT_BUCKET,
   VIDEO_SOURCE_BUCKET,
@@ -35,6 +38,7 @@ import {
   uploadLargeObjectResumably,
   uploadSmallObject,
 } from "./storage";
+import { runProcess } from "./process";
 
 type Job = Tables<"jobs">;
 type Project = Tables<"projects">;
@@ -81,6 +85,91 @@ async function recordUsage(
   if (error) throw new Error(`Unable to record usage: ${error.message}`);
 }
 
+async function sourceObjectExists(context: PipelineContext) {
+  const parts = context.project.source_path.split("/");
+  const fileName = parts.pop();
+  if (!fileName) return false;
+  const { data, error } = await context.supabase.storage
+    .from(VIDEO_SOURCE_BUCKET)
+    .list(parts.join("/"), { limit: 5, search: fileName });
+  return !error && data?.some((file) => file.name === fileName) === true;
+}
+
+async function prepareAnalysisSource(context: PipelineContext, sourcePath: string) {
+  const payload = z.object({ sourceUrl: clipSourceUrlSchema.optional() }).passthrough().parse(context.job.payload);
+  if (!payload.sourceUrl || await sourceObjectExists(context)) {
+    await context.report("Downloading private source video", 5);
+    await downloadStorageObject({
+      bucket: VIDEO_SOURCE_BUCKET,
+      destination: sourcePath,
+      objectPath: context.project.source_path,
+      supabase: context.supabase,
+    });
+    return;
+  }
+
+  await context.report("Importing linked video", 4);
+  const outputTemplate = join(context.tempDir, "linked-source.%(ext)s");
+  const { stdout } = await runProcess({
+    command: "yt-dlp",
+    timeoutMs: 45 * 60 * 1000,
+    args: [
+      "--ignore-config",
+      "--no-playlist",
+      "--max-downloads", "1",
+      "--match-filter", `duration <=? ${MAX_CLIP_SOURCE_SECONDS} & !is_live`,
+      "--max-filesize", String(MAX_UPLOAD_BYTES),
+      "--format", "bv*[height<=1080]+ba/b[height<=1080]/b",
+      "--merge-output-format", "mp4",
+      "--remux-video", "mp4",
+      "--socket-timeout", "30",
+      "--retries", "3",
+      "--fragment-retries", "3",
+      "--output", outputTemplate,
+      "--print", "after_move:filepath",
+      "--", payload.sourceUrl,
+    ],
+  });
+  const downloadedPath = stdout.trim().split(/\r?\n/).filter(Boolean).at(-1);
+  if (!downloadedPath) throw new Error("The video platform did not return a downloadable file.");
+  const resolvedDownload = resolve(downloadedPath);
+  const resolvedRoot = resolve(context.tempDir);
+  if (!resolvedDownload.startsWith(`${resolvedRoot}${sep}`)) {
+    throw new Error("The imported video resolved outside the isolated job workspace.");
+  }
+  const imported = await stat(resolvedDownload);
+  if (!imported.isFile() || imported.size < 1 || imported.size > MAX_UPLOAD_BYTES) {
+    throw new Error("The linked video is empty or exceeds the 2 GB import limit.");
+  }
+  const importedProbe = await probeMedia(resolvedDownload);
+  if (importedProbe.duration > MAX_CLIP_SOURCE_SECONDS) {
+    throw new Error("AI Clipper accepts linked videos up to 60 minutes.");
+  }
+
+  await context.report("Securing imported video", 8);
+  await uploadLargeObjectResumably({
+    bucket: VIDEO_SOURCE_BUCKET,
+    config: context.config,
+    contentType: "video/mp4",
+    filePath: resolvedDownload,
+    objectPath: context.project.source_path,
+    onProgress: (fraction) => { void context.report("Securing imported video", 8 + fraction * 4); },
+  });
+  await updateProject(context.supabase, context.project.id, {
+    duration_seconds: importedProbe.duration,
+    source_mime: "video/mp4",
+    source_size_bytes: imported.size,
+  });
+  await recordUsage(context, "upload_bytes", imported.size, asJson({ source: "video_link" }));
+
+  await downloadStorageObject({
+    bucket: VIDEO_SOURCE_BUCKET,
+    destination: sourcePath,
+    objectPath: context.project.source_path,
+    supabase: context.supabase,
+  });
+}
+
 async function analyzeVideo(context: PipelineContext) {
   const sourcePath = join(context.tempDir, "source-video");
   const audioPath = join(context.tempDir, "speech.mp3");
@@ -88,13 +177,7 @@ async function analyzeVideo(context: PipelineContext) {
   const transcriptPath = join(context.tempDir, "transcript.json");
   const captionsPath = join(context.tempDir, "captions.vtt");
 
-  await context.report("Downloading source video", 5);
-  await downloadStorageObject({
-    bucket: VIDEO_SOURCE_BUCKET,
-    destination: sourcePath,
-    objectPath: context.project.source_path,
-    supabase: context.supabase,
-  });
+  await prepareAnalysisSource(context, sourcePath);
 
   await context.report("Inspecting media streams", 14);
   const probe = await probeMedia(sourcePath);

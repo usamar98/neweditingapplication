@@ -5,7 +5,7 @@ import { marketingFeatures } from "@/lib/marketing/features";
 import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
 
 const featureLabels: Record<(typeof marketingFeatures)[number]["slug"], string> = {
-  "ai-video-editor": "AI video editor",
+  "ai-clipper": "AI Clipper",
   "ai-video-generator": "AI video generator",
   "ai-image-generator": "AI image generator",
   "performance-creative-studio": "AI ad creative generator",
@@ -25,8 +25,8 @@ export function MarketingFooter() {
         <div className="max-w-sm">
           <Brand />
           <p className="mt-4 text-sm leading-6 text-muted-foreground">
-            A private, multi-model workspace for AI video editing, generation, campaign images,
-            product ads, short-form clips, and precise background removal.
+            A private, multi-model workspace for AI clipping, video generation, campaign images,
+            product ads, short-form content, and precise background removal.
           </p>
         </div>
         <nav aria-label="Footer navigation" className="grid gap-8 sm:grid-cols-2 xl:grid-cols-4">

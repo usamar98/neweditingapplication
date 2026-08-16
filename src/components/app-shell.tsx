@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { CircleUserRound, Clapperboard, ImageIcon, LayoutDashboard, LogOut, Megaphone, Plus, Scissors } from "lucide-react";
+import { CircleUserRound, Clapperboard, ImageIcon, LogOut, Megaphone, Plus, Scissors, Sparkles } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 
 function Navigation({ pathname }: { pathname: string }) {
   const links = [
-    { href: "/dashboard" as const, icon: LayoutDashboard, label: "Dashboard" },
+    { href: "/clipper" as const, icon: Sparkles, label: "AI Clipper" },
     { href: "/generate/video" as const, icon: Clapperboard, label: "AI video generator" },
     { href: "/generate/image" as const, icon: ImageIcon, label: "AI image generator" },
     { href: "/remove-background" as const, icon: Scissors, label: "Background remover" },
@@ -33,12 +33,12 @@ function Navigation({ pathname }: { pathname: string }) {
           <item.icon className="size-4" /> {item.label}
         </Link>
       ))}
-      <div className="px-3 pb-1 pt-4 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">Video editor</div>
+      <div className="px-3 pb-1 pt-4 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">Clip projects</div>
       <Link
-        href="/dashboard#new-project"
+        href="/clipper#new-project"
         className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
       >
-        <Plus className="size-4" /> New project
+        <Plus className="size-4" /> New clip project
       </Link>
       <div className="px-3 pb-1 pt-4 text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">Account</div>
       <Link href={"/account" as Route} className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm text-muted-foreground transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"><CircleUserRound className="size-4" /> Settings & billing</Link>

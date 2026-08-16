@@ -1,5 +1,5 @@
-export const legalEffectiveDate = "10 August 2026";
-export const legalVersion = "2026-08-10";
+export const legalEffectiveDate = "16 August 2026";
+export const legalVersion = "2026-08-16";
 export const legalContactEmail = process.env.LEGAL_CONTACT_EMAIL?.trim() || "legal@editingapp.live";
 
 export type LegalSection = {
@@ -50,7 +50,7 @@ export const legalDocuments: LegalDocument[] = [
         id: "service",
         title: "3. The Service",
         paragraphs: [
-          "Editing App provides tools for video editing, image and video generation, background removal, performance-creative production, transcription, analysis, and related workflows. Features, model availability, output formats, processing time, and limits may change as the Service and third-party providers evolve.",
+          "Editing App provides tools for AI clipping, image and video generation, background removal, performance-creative production, transcription, analysis, and related workflows. Features, model availability, output formats, processing time, and limits may change as the Service and third-party providers evolve.",
           "The Service may present automatic model selection, recommendations, transcripts, edit decisions, or generated media. These are tools for your creative process, not professional, legal, medical, financial, safety, or compliance advice. You must review outputs before relying on, publishing, or distributing them.",
         ],
       },
@@ -60,6 +60,7 @@ export const legalDocuments: LegalDocument[] = [
         paragraphs: [
           "You retain your rights in videos, images, audio, prompts, product-page material, brand assets, and other content you submit (“Customer Content”). You grant Editing App a worldwide, non-exclusive, limited licence to host, copy, transmit, transform, and process Customer Content only as reasonably necessary to operate, secure, support, and improve the Service, fulfil your requests, and comply with law.",
           "You confirm that you have all rights, licences, notices, and consents needed to submit Customer Content and instruct us to process it. This includes permission from people whose image, voice, likeness, personal information, trademarks, music, or other protected material appears in the content.",
+          "If you submit a third-party platform link to AI Clipper, the linked video must be public and you must own it or have permission to download, edit, and republish it. You remain responsible for the source platform’s terms, and link imports may become unavailable when a platform changes or restricts access.",
           "Editing App does not claim ownership of Customer Content. We do not use Customer Content to train models owned by Editing App. External AI providers may process submitted content under their commercial service terms and applicable settings, as described in the Privacy Policy and Subprocessor List.",
         ],
       },
@@ -154,7 +155,7 @@ export const legalDocuments: LegalDocument[] = [
         id: "scope",
         title: "1. Scope and our role",
         paragraphs: [
-          "This Privacy Policy explains how Editing App handles personal information when you visit the website, create or use an account, upload or generate media, submit a product URL, buy a subscription, contact us, or otherwise use the Service.",
+          "This Privacy Policy explains how Editing App handles personal information when you visit the website, create or use an account, upload or generate media, submit a product or public video URL, buy a subscription, contact us, or otherwise use the Service.",
           "Editing App acts as the controller of account, billing relationship, service activity, and support information. When a business customer submits personal information within Customer Content, that customer may be the controller and Editing App may process the content on its behalf to provide the requested service.",
         ],
       },
@@ -163,7 +164,7 @@ export const legalDocuments: LegalDocument[] = [
         title: "2. Information we collect",
         bullets: [
           "Account and profile information: email address, display name, username, password-protected account records, profile picture, account status, policy-acceptance version, creation time, and sign-in time.",
-          "Customer Content: uploaded video, images, audio, filenames, project names, prompts, product URLs, source-page material, transcripts, edit settings, generated outputs, and associated technical media details.",
+          "Customer Content: uploaded video, public video links, images, audio, filenames, project names, prompts, product URLs, source-page material, transcripts, clip settings, generated outputs, and associated technical media details.",
           "AI workflow information: selected model or automatic-routing preference, requested style, audience, platform, duration, resolution, and processing status or error information.",
           "Billing information: plan, subscription status, billing-customer and subscription references, invoices, payment state, and cancellation status. Full payment-card details are entered on and handled by the payment provider, not stored by Editing App.",
           "Service activity: last-seen time, sign-in activity, feature and usage events, credit-related usage, request counts, and coarse country code derived from network information supplied by the hosting layer. Editing App does not store the full network address in the account-activity record, although infrastructure providers may process it in operational logs.",
@@ -294,7 +295,6 @@ export const legalDocuments: LegalDocument[] = [
           "Credits are Service units used to measure eligible AI generation and media processing; they are not money, stored value, or a cryptocurrency.",
           "Credit cost can vary by feature, selected model, duration, resolution, audio, output count, and other settings. Any cost shown in the product for a request controls over general estimates on a marketing page.",
           "Video-minute and output estimates are planning guides, not fixed quotas. Provider capabilities and cost can change.",
-          "An eligible account may claim a one-time welcome allocation of 20 credits without payment. It is limited to four image requests at five credits each using the fixed welcome image model. Model selection and all other generation or processing features require an active paid subscription. The allocation is limited to one claim per account and does not renew or convert to cash.",
           "Included credits are allocated for the applicable subscription period. Unless a plan expressly says otherwise, unused included credits do not roll over and have no cash or refund value.",
           "Credits may not be sold, transferred between unrelated accounts, redeemed for money, or obtained through abuse, chargeback, or circumvention.",
           "The Service reserves the displayed credits before an operation starts so simultaneous requests cannot overspend the same balance. A reservation is settled when the operation completes.",
@@ -336,7 +336,7 @@ export const legalDocuments: LegalDocument[] = [
         id: "trials-promotions",
         title: "7. Trials and promotions",
         paragraphs: [
-          "If we offer a trial, coupon, or promotion, the specific offer terms control. Unless checkout clearly says otherwise, a trial that requires a payment method converts to the displayed paid subscription when the trial ends and then renews until cancelled. Promotional credits may expire and may be limited to one account, customer, or organisation. The 20-credit welcome image allocation is a one-time, non-renewing offer and does not itself start a paid subscription.",
+          "If we offer a trial, coupon, or promotion, the specific offer terms control. Unless checkout clearly says otherwise, a trial that requires a payment method converts to the displayed paid subscription when the trial ends and then renews until cancelled. Promotional credits may expire and may be limited to one account, customer, or organisation.",
         ],
       },
       {

@@ -26,18 +26,17 @@ import { cn } from "@/lib/utils";
 import aiImageVisual from "@/assets/media/ai-image.webp";
 import aiVideoVisual from "@/assets/media/ai-video.webp";
 import aiAdCreativeVisual from "@/assets/media/generated/ai-ad-creative.webp";
-import videoEditorVisual from "@/assets/media/video-editor.webp";
+import aiClipperVisual from "@/assets/media/ai-clipper.webp";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { PricingPreview } from "@/components/pricing-preview";
 import { FeatureReveal } from "@/components/feature-reveal";
-import { WelcomeCreditsCard } from "@/components/welcome-credits-card";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteDescription } from "@/lib/site";
 
 const workflow = [
   { icon: Upload, label: "Resumable upload", detail: "Large files continue where they left off." },
   { icon: WandSparkles, label: "AI-assisted analysis", detail: "Scenes, speech, silence, and highlights." },
-  { icon: Scissors, label: "Edit with intent", detail: "Trim, reframe, caption, and clean audio." },
+  { icon: Scissors, label: "Shape the clip", detail: "Select, trim, reframe, caption, and clean audio." },
   { icon: Download, label: "Export MP4", detail: "H.264, fast-start, ready for every channel." },
 ];
 
@@ -81,20 +80,20 @@ export default function Home() {
       <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
         <div className="max-w-3xl">
           <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
-            <Sparkles className="mr-1 size-3.5" /> AI video editor + multi-model creative studio
+            <Sparkles className="mr-1 size-3.5" /> AI Clipper + multi-model creative studio
           </Badge>
           <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            Edit. Generate.
+            Clip. Generate.
             <span className="block text-primary">Launch creative that performs.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl">
-            Edit long footage, generate premium video and images, and turn product pages into ready-to-run ads.
+            Find the best moments in long videos, generate premium video and images, and turn product pages into ready-to-run ads.
             Choose Seedance, LTX, Veo, Kling, Seedream, and more—or let Model Autopilot route the brief.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Button size="lg" asChild className="h-12 px-6 shadow-xl shadow-primary/10">
-              <Link href="/generate/image?claim=welcome">
-                Start creating free <ArrowRight className="size-4" />
+              <Link href="/features">
+                Explore all features <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="h-12 border-border bg-card/55 px-6">
@@ -123,8 +122,8 @@ export default function Home() {
             <CardContent className="p-4 sm:p-5">
               <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
                 <Image
-                  src={videoEditorVisual}
-                  alt="A professional editor refining an interview in a post-production studio"
+                  src={aiClipperVisual}
+                  alt="AI Clipper identifying high-retention moments in a long-form interview"
                   fill
                   placeholder="blur"
                   sizes="(max-width: 1024px) 92vw, 44vw"
@@ -139,7 +138,7 @@ export default function Home() {
                 <div className="absolute inset-x-8 bottom-5 rounded-md bg-black/65 px-3 py-2 text-center text-sm font-semibold shadow-lg">
                   Turn one recording into a week of content.
                 </div>
-                <div className="absolute left-4 top-4 rounded-lg border border-primary/25 bg-black/60 px-3 py-2 text-[10px] text-primary backdrop-blur">GPT-5 mini Editor · selected</div>
+                <div className="absolute left-4 top-4 rounded-lg border border-primary/25 bg-black/60 px-3 py-2 text-[10px] text-primary backdrop-blur">GPT-5 mini Clip Ranker · selected</div>
               </div>
               <div className="mt-5 space-y-3">
                 <div className="flex items-center justify-between text-xs">
@@ -170,10 +169,6 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative mx-auto max-w-7xl px-5 pb-20 sm:px-8 lg:pb-24">
-        <WelcomeCreditsCard credits={null} isAuthenticated={false} />
-      </section>
-
       <section id="features" className="scroll-mt-20 border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
           <div className="mb-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -188,11 +183,11 @@ export default function Home() {
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <FeatureReveal>
-            <Link href="/dashboard" aria-label="Open AI video editor" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Link href="/clipper" aria-label="Open AI Clipper" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             <Card className="group h-full overflow-hidden border-primary/15 bg-card/65 transition hover:-translate-y-1 hover:border-primary/30 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted p-5">
-                  <Image src={videoEditorVisual} alt="A film editor working in a professional post-production suite" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <Image src={aiClipperVisual} alt="AI Clipper reviewing ranked moments from a long-form video" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/10" />
                   <div className="absolute inset-x-5 bottom-5 rounded-xl border border-white/10 bg-black/35 p-3 backdrop-blur">
                     <div className="mb-3 flex items-center justify-between text-[10px] text-white/60"><span>campaign-interview.mp4</span><span className="text-primary">6 highlights found</span></div>
@@ -203,8 +198,8 @@ export default function Home() {
                 </div>
                 <div data-feature-copy className="p-6">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary"><Scissors className="size-4.5" /></span><Badge variant="secondary">Available now</Badge></div>
-                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI video editor</h3>
-                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Upload long footage and get scenes, transcript, silence cleanup, highlights, captions, reframing, and a precise editable timeline.</p>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI Clipper</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Paste a supported video link or upload footage, find high-retention moments, select a clip, add captions, and export for Shorts, Reels, or TikTok.</p>
                 </div>
               </CardContent>
             </Card>
@@ -305,8 +300,8 @@ export default function Home() {
               Heavy processing stays out of your way.
             </h2>
             <p className="mt-4 leading-7 text-muted-foreground">
-              Upload once. A dedicated worker handles media analysis and encoding while the editor
-              stays fast and reports every step in realtime.
+              Add a link or upload once. A dedicated worker handles media analysis and encoding while AI Clipper
+              stays responsive and reports every step in realtime.
             </p>
           </div>
           <div className="grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
@@ -326,7 +321,7 @@ export default function Home() {
 
       <section className="mx-auto grid max-w-7xl gap-12 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:items-center lg:py-32">
         <div>
-          <Badge variant="secondary" className="mb-5">Built for real edits</Badge>
+          <Badge variant="secondary" className="mb-5">Built for precise clips</Badge>
           <h2 className="text-balance text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">
             Assistance where it helps. Control where it matters.
           </h2>
@@ -363,7 +358,7 @@ export default function Home() {
 
       <section className="border-y border-border bg-foreground/[0.025]">
         <div className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:py-28">
-          <div className="max-w-3xl"><p className="text-sm font-medium text-primary">Focused creative workflows</p><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Start with the outcome, then choose the model.</h2><p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Build a product ad from a real page or turn one long recording into channel-ready clips. Every workflow stays connected to the editor and private project storage.</p></div>
+          <div className="max-w-3xl"><p className="text-sm font-medium text-primary">Focused creative workflows</p><h2 className="mt-3 text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">Start with the outcome, then choose the model.</h2><p className="mt-4 max-w-2xl leading-7 text-muted-foreground">Build a product ad from a real page or turn one long recording into channel-ready clips. Every workflow stays connected to AI Clipper and private project storage.</p></div>
           <div className="mt-10 grid gap-4 lg:grid-cols-2">
             {searchIntentPages.map((page) => <Card key={page.slug} className="border-border bg-card/60"><CardContent className="p-6 sm:p-8"><p className="text-xs font-medium uppercase tracking-[0.14em] text-primary">{page.eyebrow}</p><h3 className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{page.title}</h3><p className="mt-4 text-sm leading-6 text-muted-foreground">{page.description}</p><Link href={`/tools/${page.slug}` as Route} className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary">Explore the workflow <ArrowRight className="size-3.5" /></Link></CardContent></Card>)}
           </div>

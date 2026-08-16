@@ -8,8 +8,8 @@ describe("getSafeRedirectPath", () => {
   });
 
   it("rejects external and malformed redirect targets", () => {
-    expect(getSafeRedirectPath("https://example.com")).toBe("/dashboard");
-    expect(getSafeRedirectPath("//example.com")).toBe("/dashboard");
-    expect(getSafeRedirectPath("/\\example.com")).toBe("/dashboard");
+    expect(getSafeRedirectPath("https://example.com")).toBe("/clipper");
+    expect(getSafeRedirectPath("//example.com")).toBe("/clipper");
+    expect(getSafeRedirectPath("/\\example.com")).toBe("/clipper");
   });
 });

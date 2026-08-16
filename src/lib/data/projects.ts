@@ -110,10 +110,6 @@ export const getProjectEditorData = cache(
     ] as const;
     const [sourceSigned, exportSigned, thumbnailSigned] = await Promise.all(signedRequests);
 
-    if (sourceSigned.error || !sourceSigned.data) {
-      throw new Error(`Unable to sign source video: ${sourceSigned.error?.message ?? "unknown error"}`);
-    }
-
     return {
       analysis: asAnalysis(project.analysis),
       createdAt: project.created_at,
@@ -123,7 +119,7 @@ export const getProjectEditorData = cache(
       id: project.id,
       jobs: jobs ?? [],
       name: project.name,
-      previewUrl: sourceSigned.data.signedUrl,
+      previewUrl: sourceSigned.data?.signedUrl ?? "",
       sourceFilename: project.source_filename,
       status: project.status,
       thumbnailUrl: thumbnailSigned.data?.signedUrl ?? null,

@@ -1,5 +1,5 @@
 export const siteName = "Editing App";
-export const siteDescription = "AI video editor and multi-model creative studio for premium video, images, product URL ads, long-video clips, and private background removal.";
+export const siteDescription = "AI Clipper and multi-model creative studio for short-form clips, premium AI video, AI images, product ads, and private background removal.";
 export const productionSiteUrl = "https://www.editingapp.live";
 
 export function getSiteUrl() {

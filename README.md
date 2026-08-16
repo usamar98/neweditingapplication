@@ -1,15 +1,15 @@
 # Editing App
 
-Editing App is a production-oriented creative suite built with Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui, Supabase, FFmpeg, and a separate containerized Node.js 22 worker. It combines long-form video editing with model-routed AI image and video generation in one private workspace.
+Editing App is a production-oriented creative suite built with Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui, Supabase, FFmpeg, and a separate containerized Node.js 22 worker. It combines AI clipping for long videos with separate model-routed AI image and video generators in one private workspace.
 
-The application is not a client-side mock. Source videos are uploaded directly to private Supabase Storage with resumable TUS uploads, jobs are persisted in Supabase Queues, FFmpeg runs in the worker container, and job progress reaches the editor through Supabase Realtime.
+The application is not a client-side mock. Source videos are imported from supported links or uploaded directly to private Supabase Storage with resumable TUS uploads, jobs are persisted in Supabase Queues, FFmpeg runs in the worker container, and AI Clipper progress updates through Supabase Realtime.
 
 ## What works
 
 - Supabase email/password authentication with SSR cookie refresh
 - Private, resumable video uploads with a fixed 6 MiB TUS chunk size
 - File-size, MIME-type, ownership, and upload-completion validation
-- Project dashboard, history, signed previews, deletion, and export downloads
+- AI Clipper workspace, clip history, signed previews, deletion, and export downloads
 - FFprobe media inspection and FFmpeg scene and silence detection
 - Automatic fal.ai routing plus pluggable timestamped transcription and content-analysis providers
 - Transcript, automatic captions, filler-word suggestions, and highlight suggestions
@@ -165,7 +165,7 @@ npm run db:test
 ## Repository map
 
 - `src/app` — App Router pages, authentication callback, and narrow route handlers
-- `src/components/video-editor.tsx` — responsive editor and Realtime job state
+- `src/components/ai-clipper.tsx` — responsive AI Clipper controls and Realtime job state
 - `src/lib/supabase` — browser, server, admin, and proxy clients
 - `src/lib/domain/video.ts` — shared limits, schemas, settings, and queue contract
 - `worker` — queue runner, AI adapters, FFmpeg pipeline, Storage streaming, and cleanup
