@@ -67,31 +67,63 @@ class LocalContentAnalysisProvider implements ContentAnalysisProvider {
   }
 }
 
-const remoteAnalysisSchema = z.object({
-  fillers: z
-    .array(z.object({ end: z.number(), start: z.number(), text: z.string() }))
-    .default([]),
-  highlights: z
-    .array(
-      z.object({
-        end: z.number(),
-        reason: z.string().max(240),
-        score: z.number().min(0).max(1).optional(),
-        start: z.number(),
-      }),
-    )
-    .default([]),
-});
+const remoteAnalysisEnvelopeSchema = z.object({
+  fillers: z.array(z.unknown()).catch([]),
+  highlights: z.array(z.unknown()).catch([]),
+}).passthrough();
 
-function parseAnalysisResult(content: string, duration: number) {
+const remoteFillerSchema = z.object({
+  end: z.coerce.number().finite(),
+  start: z.coerce.number().finite(),
+  text: z.string().optional(),
+}).passthrough();
+
+const remoteHighlightSchema = z.object({
+  end: z.coerce.number().finite(),
+  reason: z.string().optional(),
+  score: z.coerce.number().finite().optional(),
+  start: z.coerce.number().finite(),
+}).passthrough();
+
+export function parseAnalysisResult(content: string, duration: number) {
   const normalized = content.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  const parsed = remoteAnalysisSchema.parse(JSON.parse(normalized));
+  const parsed = remoteAnalysisEnvelopeSchema.parse(JSON.parse(normalized));
+  const fillers = parsed.fillers.flatMap((candidate) => {
+    const item = remoteFillerSchema.safeParse(candidate);
+    if (!item.success || item.data.start < 0 || item.data.end <= item.data.start || item.data.end > duration) return [];
+    return [{
+      end: item.data.end,
+      start: item.data.start,
+      text: item.data.text?.trim().slice(0, 120) || "Filler word",
+    }];
+  });
+  const highlights = parsed.highlights.flatMap((candidate) => {
+    const item = remoteHighlightSchema.safeParse(candidate);
+    if (!item.success || item.data.start < 0 || item.data.end <= item.data.start || item.data.end > duration) return [];
+    return [{
+      end: item.data.end,
+      reason: item.data.reason?.trim().slice(0, 240) || "Strong self-contained moment detected by AI.",
+      score: item.data.score === undefined ? 0.5 : Math.max(0, Math.min(1, item.data.score)),
+      start: item.data.start,
+    }];
+  });
   return {
-    fillers: parsed.fillers.filter((item) => item.start >= 0 && item.end > item.start && item.end <= duration),
-    highlights: parsed.highlights
-      .filter((item) => item.start >= 0 && item.end > item.start && item.end <= duration)
-      .map((item) => ({ ...item, score: item.score ?? 0.5 })),
+    fillers,
+    highlights,
   };
+}
+
+export function resilientContentAnalysis(content: string, input: AnalysisInput) {
+  const fallback = localContentAnalysis(input);
+  try {
+    const remote = parseAnalysisResult(content, input.duration);
+    return {
+      fillers: remote.fillers.length > 0 ? remote.fillers : fallback.fillers,
+      highlights: remote.highlights.length > 0 ? remote.highlights : fallback.highlights,
+    };
+  } catch {
+    return fallback;
+  }
 }
 
 function analysisPrompt(input: AnalysisInput) {
@@ -158,7 +190,7 @@ class OpenAICompatibleContentAnalysisProvider implements ContentAnalysisProvider
     const result = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
     const content = result.choices?.[0]?.message?.content;
     if (!content) throw new Error("Content analysis provider returned an empty result.");
-    return parseAnalysisResult(content, input.duration);
+    return resilientContentAnalysis(content, input);
   }
 }
 
@@ -199,7 +231,7 @@ class FalContentAnalysisProvider implements ContentAnalysisProvider {
       logs: false,
     });
     const output = z.object({ output: z.string().min(1) }).parse(result.data).output;
-    return parseAnalysisResult(output, input.duration);
+    return resilientContentAnalysis(output, input);
   }
 }
 
