@@ -5,9 +5,9 @@ import { queueMessageSchema, type QueueMessage } from "../src/lib/domain/video";
 import type { Database, Json, Tables } from "../src/types/database.generated";
 import { getWorkerConfig } from "./config";
 import { runGenerationPipeline } from "./generation-pipeline";
+import { workerFailureDetails } from "./failures";
 import { workerLogger } from "./logger";
 import { runPipeline, type ProgressReporter } from "./pipeline";
-import { ProcessError } from "./process";
 
 type QueueRow = Database["public"]["Functions"]["dequeue_video_jobs"]["Returns"][number];
 type Job = Tables<"jobs">;
@@ -30,19 +30,6 @@ let stopping = false;
 
 function delay(milliseconds: number) {
   return new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds));
-}
-
-function errorDetails(error: unknown) {
-  if (error instanceof ProcessError) {
-    return {
-      code: "FFMPEG_PROCESS_ERROR",
-      message: `${error.message}: ${error.stderr.slice(-500)}`.slice(0, 1000),
-    };
-  }
-  return {
-    code: "VIDEO_PIPELINE_ERROR",
-    message: (error instanceof Error ? error.message : "Unknown worker error").slice(0, 1000),
-  };
 }
 
 async function archiveMessage(messageId: number) {
@@ -171,15 +158,15 @@ async function markJobComplete(job: Job, result: Json) {
 }
 
 async function markJobFailed(job: Job, target: WorkTarget, attempt: number, error: unknown) {
-  const details = errorDetails(error);
-  const expectedExhausted = attempt >= job.max_attempts;
+  const details = workerFailureDetails(error);
+  const expectedExhausted = details.forceTerminal || attempt >= job.max_attempts;
   const { data, error: jobError } = await supabase.rpc("fail_job_with_credits", {
     p_attempt: attempt,
     p_error_code: details.code,
     p_error_message: details.message,
-    p_force_terminal: false,
+    p_force_terminal: details.forceTerminal,
     p_job_id: job.id,
-    p_stage: expectedExhausted ? "Processing failed" : `Retry scheduled (${attempt}/${job.max_attempts})`,
+    p_stage: details.stage ?? (expectedExhausted ? "Processing failed" : `Retry scheduled (${attempt}/${job.max_attempts})`),
   });
   if (jobError) workerLogger.error({ error: jobError.message, jobId: job.id }, "Unable to persist job failure");
   const exhausted = data && typeof data === "object" && !Array.isArray(data)
@@ -306,7 +293,20 @@ async function processQueueRow(row: QueueRow) {
     }
     const failure = await markJobFailed(job, target, attempt || job.attempt + 1, error);
     log.error({ attempt, err: error, retrying: !failure.exhausted }, failure.details.message);
-    if (failure.exhausted) await archiveMessage(row.msg_id);
+    if (failure.exhausted) {
+      await archiveMessage(row.msg_id);
+    } else {
+      const retryDelaySeconds = Math.min(15 * (2 ** Math.max(0, attempt - 1)), 120);
+      const { data: retryScheduled, error: retryError } = await supabase.rpc("retry_video_job", {
+        message_id: row.msg_id,
+        retry_delay_seconds: retryDelaySeconds,
+      });
+      if (retryError || !retryScheduled) {
+        log.error({ error: retryError?.message, retryDelaySeconds }, "Unable to schedule queue retry");
+      } else {
+        log.info({ retryDelaySeconds }, "Queue retry scheduled");
+      }
+    }
   } finally {
     if (tempDir) {
       await rm(tempDir, { force: true, recursive: true }).catch((error) => {

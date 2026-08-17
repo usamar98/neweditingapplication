@@ -1,7 +1,7 @@
 begin;
 
 create extension if not exists pgtap with schema extensions;
-select plan(39);
+select plan(41);
 
 select ok((select relrowsecurity from pg_class where oid = 'public.profiles'::regclass), 'profiles has RLS');
 select ok((select relrowsecurity from pg_class where oid = 'public.projects'::regclass), 'projects has RLS');
@@ -32,6 +32,8 @@ select ok(not has_table_privilege('authenticated', 'public.request_counters', 'D
 select ok(has_function_privilege('authenticated', 'public.consume_rate_limit(text,integer,integer)', 'EXECUTE'), 'authenticated can call rate limiter');
 select ok(not has_function_privilege('authenticated', 'public.queue_video_job(jsonb)', 'EXECUTE'), 'authenticated cannot submit arbitrary queue messages');
 select ok(has_function_privilege('service_role', 'public.queue_video_job(jsonb)', 'EXECUTE'), 'service role can submit queue messages');
+select ok(not has_function_privilege('authenticated', 'public.retry_video_job(bigint,integer)', 'EXECUTE'), 'authenticated cannot reschedule queue messages');
+select ok(has_function_privilege('service_role', 'public.retry_video_job(bigint,integer)', 'EXECUTE'), 'service role can schedule bounded queue retries');
 select ok(has_table_privilege('authenticated', 'public.generations', 'SELECT'), 'authenticated users can read owned generations');
 select ok(not has_table_privilege('anon', 'public.generations', 'SELECT'), 'anonymous users cannot read generations');
 select ok(not has_table_privilege('authenticated', 'public.generations', 'INSERT'), 'authenticated users cannot forge generation state');

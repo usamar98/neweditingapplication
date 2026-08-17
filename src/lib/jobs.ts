@@ -205,16 +205,29 @@ export async function enqueueProjectJob({
   }
 
   const projectStatus = kind === "analyze" ? "analyzing" : "exporting";
-  await Promise.all([
-    supabase
+  const [{ error: queueReferenceError }, { error: projectStatusError }] = await Promise.all([
+    admin
       .from("jobs")
       .update({ queue_message_id: queueMessageId })
       .eq("id", job.id),
-    supabase
+    admin
       .from("projects")
       .update({ last_error: null, status: projectStatus })
       .eq("id", projectId),
   ]);
+  if (queueReferenceError || projectStatusError) {
+    logger.error(
+      {
+        jobId: job.id,
+        projectId,
+        projectStatusError: projectStatusError?.message,
+        queueMessageId,
+        queueReferenceError: queueReferenceError?.message,
+        requestId,
+      },
+      "Video job queued but its database references were not fully updated",
+    );
+  }
 
   logger.info(
     { jobId: job.id, kind, projectId, queueMessageId, requestId, userId: user.id },

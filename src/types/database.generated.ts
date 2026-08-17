@@ -740,6 +740,10 @@ export type Database = {
         Returns: boolean
       }
       queue_video_job: { Args: { message: Json }; Returns: number }
+      retry_video_job: {
+        Args: { message_id: number; retry_delay_seconds?: number }
+        Returns: boolean
+      }
       reserve_job_credits: {
         Args: {
           p_credits: number

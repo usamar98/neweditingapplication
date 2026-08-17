@@ -282,7 +282,7 @@ export function UploadZone({
           <div className="min-h-64 rounded-2xl border border-border bg-muted/55 p-5 sm:p-6">
             <span className="grid size-11 place-items-center rounded-2xl border border-border bg-card text-primary shadow-sm"><Link2 className="size-5" /></span>
             <h3 className="mt-4 font-medium">Import from a video link</h3>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">Public YouTube, Vimeo, TikTok, Instagram, Facebook, or X videos · up to 60 minutes.</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">Public YouTube, Vimeo, TikTok, Instagram, Facebook, or X videos · up to 60 minutes · subject to source-platform access. Direct upload is the most reliable option.</p>
             <div className="mt-4 grid gap-3">
               <div className="space-y-1.5"><Label htmlFor="clip-link">Video link</Label><Input id="clip-link" type="url" inputMode="url" placeholder="https://youtube.com/watch?v=…" value={linkUrl} onChange={(event) => setLinkUrl(event.target.value)} disabled={importingLink} /></div>
               <div className="space-y-1.5"><Label htmlFor="clip-name">Project name</Label><Input id="clip-name" placeholder="Podcast highlights" maxLength={120} value={linkName} onChange={(event) => setLinkName(event.target.value)} disabled={importingLink} /></div>
