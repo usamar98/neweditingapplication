@@ -70,6 +70,13 @@ const showcaseImages = [
   { src: automotiveCampaign, label: "Automotive campaign", alt: "A black sports car driving along a coastal road at sunset" },
 ] as const;
 
+const aiImageCardVisuals = [
+  { src: brandPortrait, label: "Portrait", alt: "A stylized gold portrait wearing an ornate red and gold jacket" },
+  { src: fashionEditorial, label: "Fashion", alt: "A fashion model in a metallic jacket standing on a neon-lit city street" },
+  { src: fantasyWorld, label: "World", alt: "A cinematic floating city with waterfalls, aircraft, and dramatic clouds" },
+  { src: automotiveCampaign, label: "Campaign", alt: "A black sports car driving along a coastal road at sunset" },
+] as const;
+
 const siteUrl = getSiteUrl().toString();
 const homeJsonLd = {
   "@context": "https://schema.org",
@@ -270,8 +277,24 @@ export default function Home() {
             <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-fuchsia-300/25 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
-                  <Image src={aiImageVisual} alt="A premium smoky-glass perfume bottle in a cinematic product photograph" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/10" />
+                  <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-px bg-white/25">
+                    {aiImageCardVisuals.map((visual) => (
+                      <div key={visual.label} className="relative overflow-hidden bg-muted">
+                        <Image
+                          src={visual.src}
+                          alt={visual.alt}
+                          fill
+                          placeholder="blur"
+                          sizes="(max-width: 767px) 50vw, (max-width: 1023px) 25vw, 17vw"
+                          className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/5" />
+                        <span className="absolute bottom-2 left-2 rounded-full border border-white/15 bg-black/35 px-2 py-1 text-[8px] uppercase tracking-[0.12em] text-white/80 backdrop-blur">
+                          {visual.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div data-feature-copy className="p-6">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-700"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-700/20 bg-fuchsia-500/5 text-fuchsia-700">New</Badge></div>
