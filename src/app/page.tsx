@@ -111,20 +111,21 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd).replace(/</g, "\\u003c") }} />
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[760px]" />
-      <section className="relative mx-auto grid max-w-7xl gap-14 px-5 pb-24 pt-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-32 lg:pt-28">
-        <div className="max-w-3xl">
-          <Badge variant="outline" className="mb-6 border-primary/25 bg-primary/5 px-3 py-1.5 text-primary">
+      <section className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pb-24 pt-20 text-center sm:px-8 sm:pt-24 lg:pb-32 lg:pt-32">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[28rem] w-[min(92vw,64rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/[0.07] blur-3xl" />
+        <div className="relative max-w-5xl">
+          <Badge variant="outline" className="mb-7 border-primary/25 bg-primary/5 px-3 py-1.5 italic text-primary">
             <Sparkles className="mr-1 size-3.5" /> AI Clipper + multi-model creative studio
           </Badge>
-          <h1 className="text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            Clip. Generate.
-            <span className="block text-primary">Launch creative that performs.</span>
+          <h1 className="text-balance text-5xl font-semibold italic leading-[0.96] tracking-[-0.06em] sm:text-7xl lg:text-8xl">
+            Create once.
+            <span className="block text-primary">Captivate everywhere.</span>
           </h1>
-          <p className="mt-7 max-w-2xl text-balance text-lg leading-8 text-muted-foreground sm:text-xl">
-            Find the best moments in long videos, generate premium video and images, and turn product pages into ready-to-run ads.
-            Choose Seedance, LTX, Veo, Kling, Seedream, and more—or let Model Autopilot route the brief.
+          <p className="mx-auto mt-8 max-w-3xl text-balance text-lg italic leading-8 text-muted-foreground sm:text-xl">
+            Clip the moments people remember, turn still images into motion, generate premium video and visuals,
+            and launch ready-to-run ads from one private creative workspace.
           </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
             <Button size="lg" asChild className="h-12 px-6 shadow-xl shadow-primary/10">
               <Link href="/features">
                 Explore all features <ArrowRight className="size-4" />
@@ -134,72 +135,14 @@ export default function Home() {
               <Link href="/generate/video">Explore the studio</Link>
             </Button>
           </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
+          <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs italic text-muted-foreground">
             <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-primary" /> Private by default</span>
             <span className="inline-flex items-center gap-1.5"><Zap className="size-3.5 text-primary" /> Durable processing</span>
             <span className="inline-flex items-center gap-1.5"><Clock3 className="size-3.5 text-primary" /> Live progress</span>
           </div>
-          <div className="mt-6 flex flex-wrap items-center gap-2" aria-label="Available premium AI model families">
-            {['Seedance 2.5', 'LTX 2.3', 'Veo 3.1', 'Kling 3', 'Seedream 5'].map((model) => <Link href="/ai-video-models" key={model} className="rounded-full border border-border bg-card/65 px-3 py-1.5 text-[10px] font-medium text-muted-foreground shadow-sm transition hover:border-primary/25 hover:text-primary">{model}</Link>)}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label="Available premium AI model families">
+            {['Seedance 2.5', 'LTX 2.3', 'Veo 3.1', 'Kling 3', 'Seedream 5'].map((model) => <Link href="/ai-video-models" key={model} className="rounded-full border border-border bg-card/65 px-3 py-1.5 text-[10px] font-medium italic text-muted-foreground shadow-sm transition hover:border-primary/25 hover:text-primary">{model}</Link>)}
           </div>
-        </div>
-
-        <div className="relative mx-auto w-full max-w-xl lg:mx-0">
-          <div className="absolute -inset-8 -z-10 rounded-[3rem] bg-primary/[0.06] blur-3xl" />
-          <Card className="overflow-hidden border-border bg-card/90 shadow-2xl shadow-black/10 backdrop-blur">
-            <div className="flex h-11 items-center gap-2 border-b border-border px-4">
-              <span className="size-2.5 rounded-full bg-red-400/70" />
-              <span className="size-2.5 rounded-full bg-amber-400/70" />
-              <span className="size-2.5 rounded-full bg-emerald-400/70" />
-              <span className="ml-3 text-xs text-muted-foreground">Editing App · creative command center</span>
-            </div>
-            <CardContent className="p-4 sm:p-5">
-              <div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
-                <Image
-                  src={aiClipperVisual}
-                  alt="AI Clipper identifying high-retention moments in a long-form interview"
-                  fill
-                  placeholder="blur"
-                  sizes="(max-width: 1024px) 92vw, 44vw"
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/10" />
-                <div className="absolute inset-0 grid place-items-center">
-                  <span className="grid size-14 place-items-center rounded-full border border-white/10 bg-black/30 backdrop-blur">
-                    <Film className="size-6 text-white/80" />
-                  </span>
-                </div>
-                <div className="absolute inset-x-8 bottom-5 rounded-md bg-black/65 px-3 py-2 text-center text-sm font-semibold shadow-lg">
-                  Turn one recording into a week of content.
-                </div>
-                <div className="absolute left-4 top-4 rounded-lg border border-primary/25 bg-black/60 px-3 py-2 text-[10px] text-primary backdrop-blur">GPT-5 mini Clip Ranker · selected</div>
-              </div>
-              <div className="mt-5 space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium">AI analysis complete</span>
-                  <span className="font-mono text-primary">00:08:42</span>
-                </div>
-                <div className="relative h-16 overflow-hidden rounded-lg border border-border bg-muted/70 px-3 py-2">
-                  <div className="absolute inset-x-3 top-2 flex h-7 gap-1">
-                    {[22, 14, 28, 18, 30, 13, 25, 16, 27, 19, 31, 15, 22, 12, 29, 17].map((height, index) => (
-                      <span key={index} className="mt-auto w-full rounded-full bg-primary/45" style={{ height }} />
-                    ))}
-                  </div>
-                  <div className="absolute inset-x-3 bottom-2 flex gap-1">
-                    <span className="h-2 w-[24%] rounded-full bg-primary" />
-                    <span className="h-2 w-[14%] rounded-full bg-amber-300/80" />
-                    <span className="h-2 w-[31%] rounded-full bg-sky-400/70" />
-                    <span className="h-2 flex-1 rounded-full bg-primary/70" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center text-xs">
-                  <div className="rounded-lg bg-muted/70 p-3"><strong className="block text-base text-foreground">18</strong><span className="text-muted-foreground">Scenes</span></div>
-                  <div className="rounded-lg bg-muted/70 p-3"><strong className="block text-base text-foreground">6</strong><span className="text-muted-foreground">Highlights</span></div>
-                  <div className="rounded-lg bg-muted/70 p-3"><strong className="block text-base text-foreground">32s</strong><span className="text-muted-foreground">Silence</span></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
@@ -302,6 +245,9 @@ export default function Home() {
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
                   <Image src={aiVideoVisual} alt="A cinematic concept car moving through a rain-lit city" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <video aria-label="AI-generated cinematic video example" autoPlay loop muted playsInline preload="metadata" poster={aiVideoVisual.src} className="absolute inset-0 size-full object-cover motion-reduce:hidden">
+                    <source src="/media/previews/ai-video-generator-showcase.mp4" type="video/mp4" />
+                  </video>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/5 to-black/15" />
                   <div className="absolute left-5 top-5 rounded-full border border-sky-300/20 bg-sky-300/10 px-3 py-1.5 text-[10px] text-sky-200">MODEL AUTOPILOT</div>
                   <div className="absolute inset-x-5 bottom-5 grid grid-cols-3 gap-2">
@@ -342,10 +288,19 @@ export default function Home() {
             <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-violet-400/25 hover:shadow-lg">
               <CardContent className="p-0">
                 <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
-                  <Image src={aiImageVisual} alt="A still campaign image prepared for AI motion generation" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
-                  <video aria-hidden="true" autoPlay loop muted playsInline preload="metadata" poster={aiVideoVisual.src} className="absolute inset-0 hidden size-full object-cover opacity-0 transition duration-700 group-hover:opacity-100 md:block motion-reduce:hidden"><source src="/media/previews/ai-video-generator.mp4" type="video/mp4" media="(min-width: 768px) and (prefers-reduced-motion: no-preference)" /></video>
+                  <div className="absolute inset-0 grid grid-cols-2">
+                    <div className="relative overflow-hidden border-r border-white/20">
+                      <Image src={digitalFalcon} alt="A futuristic falcon used as the source frame for AI image-to-video generation" fill placeholder="blur" sizes="(max-width: 1024px) 50vw, 17vw" className="object-cover object-center transition duration-700 group-hover:scale-[1.03]" />
+                    </div>
+                    <div className="relative overflow-hidden bg-black">
+                      <Image src={digitalFalcon} alt="" fill placeholder="blur" sizes="(max-width: 1024px) 50vw, 17vw" className="object-cover object-center" />
+                      <video aria-label="The source falcon animated into an AI-generated video" autoPlay loop muted playsInline preload="metadata" poster={digitalFalcon.src} className="absolute inset-0 size-full object-cover motion-reduce:hidden">
+                        <source src="/media/previews/image-to-video-falcon.mp4" type="video/mp4" />
+                      </video>
+                    </div>
+                  </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/10" />
-                  <div className="absolute inset-x-5 bottom-5 flex items-center justify-between text-[10px] text-white/80"><span className="rounded-full border border-white/15 bg-black/40 px-3 py-1.5 backdrop-blur">START FRAME</span><ArrowRight className="size-4 text-violet-200" /><span className="rounded-full border border-violet-300/25 bg-violet-300/15 px-3 py-1.5 backdrop-blur">DIRECTED MOTION</span></div>
+                  <div className="absolute inset-x-4 bottom-4 grid grid-cols-[1fr_auto_1fr] items-center gap-2 text-[9px] text-white/85 sm:text-[10px]"><span className="rounded-full border border-white/15 bg-black/45 px-2 py-1.5 text-center backdrop-blur">SOURCE IMAGE</span><ArrowRight className="size-4 text-violet-200" /><span className="rounded-full border border-violet-300/25 bg-violet-300/15 px-2 py-1.5 text-center backdrop-blur">AI VIDEO</span></div>
                 </div>
                 <div data-feature-copy className="p-6">
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-violet-500/10 text-violet-700"><ImagePlay className="size-4.5" /></span><Badge variant="outline" className="border-violet-700/20 bg-violet-500/5 text-violet-700">New</Badge></div>
