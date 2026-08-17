@@ -77,6 +77,17 @@ const aiImageCardVisuals = [
   { src: automotiveCampaign, label: "Campaign", alt: "A black sports car driving along a coastal road at sunset" },
 ] as const;
 
+const heroBackgroundImages = [
+  { src: digitalFalcon, className: "hero-media--falcon" },
+  { src: brandPortrait, className: "hero-media--portrait" },
+  { src: creativeWorkspace, className: "hero-media--workspace" },
+  { src: foodCampaign, className: "hero-media--food" },
+  { src: fashionEditorial, className: "hero-media--fashion" },
+  { src: fantasyWorld, className: "hero-media--world" },
+  { src: productPhotography, className: "hero-media--product" },
+  { src: automotiveCampaign, className: "hero-media--automotive" },
+] as const;
+
 const siteUrl = getSiteUrl().toString();
 const homeJsonLd = {
   "@context": "https://schema.org",
@@ -118,9 +129,45 @@ export default function Home() {
     <main className="relative min-h-screen overflow-hidden">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd).replace(/</g, "\\u003c") }} />
       <div className="surface-grid pointer-events-none absolute inset-x-0 top-0 h-[760px]" />
-      <section className="relative mx-auto flex max-w-7xl flex-col items-center px-5 pb-24 pt-20 text-center sm:px-8 sm:pt-24 lg:pb-32 lg:pt-32">
+      <section className="relative mx-auto flex max-w-7xl flex-col items-center overflow-hidden px-5 pb-24 pt-20 text-center sm:px-8 sm:pt-24 lg:pb-32 lg:pt-32">
+        <div className="hero-media-stage" aria-hidden="true">
+          {heroBackgroundImages.map((visual) => (
+            <div key={visual.className} className={cn("hero-media-card hero-media-image", visual.className)}>
+              <Image
+                src={visual.src}
+                alt=""
+                fill
+                placeholder="blur"
+                sizes="(max-width: 639px) 112px, (max-width: 1023px) 152px, 208px"
+                className="object-cover"
+              />
+            </div>
+          ))}
+
+          <div className="hero-media-card hero-media-phone hero-media--video-falcon">
+            <div className="relative size-full overflow-hidden rounded-[inherit]">
+              <Image src={digitalFalcon} alt="" fill placeholder="blur" sizes="(max-width: 639px) 76px, 104px" className="object-cover" />
+              <video autoPlay loop muted playsInline preload="metadata" poster={digitalFalcon.src} className="relative z-[1] size-full object-cover motion-reduce:hidden">
+                <source src="/media/previews/image-to-video-falcon.mp4" type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
+              </video>
+            </div>
+            <span className="hero-media-phone-notch" />
+          </div>
+
+          <div className="hero-media-card hero-media-phone hero-media--video-studio">
+            <div className="relative size-full overflow-hidden rounded-[inherit]">
+              <Image src={aiVideoVisual} alt="" fill placeholder="blur" sizes="(max-width: 639px) 76px, 104px" className="object-cover" />
+              <video autoPlay loop muted playsInline preload="metadata" poster={aiVideoVisual.src} className="relative z-[1] size-full object-cover motion-reduce:hidden">
+                <source src="/media/previews/ai-video-generator-showcase.mp4" type="video/mp4" media="(prefers-reduced-motion: no-preference)" />
+              </video>
+            </div>
+            <span className="hero-media-phone-notch" />
+          </div>
+
+          <div className="hero-media-scrim" />
+        </div>
         <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[28rem] w-[min(92vw,64rem)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/[0.07] blur-3xl" />
-        <div className="relative max-w-5xl">
+        <div className="relative z-10 max-w-5xl">
           <Badge variant="outline" className="mb-7 border-primary/25 bg-primary/5 px-3 py-1.5 italic text-primary">
             <Sparkles className="mr-1 size-3.5" /> AI Clipper + multi-model creative studio
           </Badge>

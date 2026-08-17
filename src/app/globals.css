@@ -118,6 +118,241 @@
   }
 }
 
+.hero-media-stage {
+  --hero-media-peak: 0.52;
+  --hero-media-drift: 0.34;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-media-card {
+  position: absolute;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid oklch(1 0 0 / 32%);
+  background: var(--card);
+  box-shadow: 0 1.25rem 3.5rem oklch(0.19 0.012 72 / 18%);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-duration: 28s;
+  animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+  animation-iteration-count: infinite;
+}
+
+.hero-media-image {
+  width: clamp(7rem, 13vw, 13rem);
+  aspect-ratio: 25 / 16;
+  border-radius: 1rem;
+}
+
+.hero-media-phone {
+  --hero-media-peak: 0.62;
+  width: clamp(4.75rem, 7vw, 6.5rem);
+  aspect-ratio: 9 / 16;
+  padding: 0.25rem;
+  border-radius: 1.65rem;
+  border-color: oklch(0.2 0.012 72 / 42%);
+  background: oklch(0.15 0.012 72);
+  box-shadow: 0 1.4rem 3.8rem oklch(0.19 0.012 72 / 24%);
+}
+
+.hero-media-phone-notch {
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  z-index: 2;
+  width: 42%;
+  height: 0.28rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: oklch(0.08 0.01 72 / 82%);
+}
+
+.hero-media-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: radial-gradient(
+    ellipse at 50% 46%,
+    color-mix(in oklch, var(--background) 99%, transparent) 0%,
+    color-mix(in oklch, var(--background) 96%, transparent) 30%,
+    color-mix(in oklch, var(--background) 76%, transparent) 53%,
+    color-mix(in oklch, var(--background) 18%, transparent) 77%,
+    transparent 94%
+  );
+}
+
+.hero-media--falcon {
+  top: 8%;
+  left: -2%;
+  animation-name: hero-media-from-left;
+  animation-duration: 26s;
+  animation-delay: -2s;
+}
+
+.hero-media--portrait {
+  top: 10%;
+  right: -2%;
+  animation-name: hero-media-from-right;
+  animation-duration: 30s;
+  animation-delay: -7s;
+}
+
+.hero-media--workspace {
+  bottom: 5%;
+  left: 8%;
+  animation-name: hero-media-from-left;
+  animation-duration: 29s;
+  animation-delay: -22s;
+}
+
+.hero-media--food {
+  right: 8%;
+  bottom: 5%;
+  animation-name: hero-media-from-right;
+  animation-duration: 32s;
+  animation-delay: -27s;
+}
+
+.hero-media--fashion {
+  top: 43%;
+  left: -3%;
+  animation-name: hero-media-from-left;
+  animation-duration: 31s;
+  animation-delay: -14s;
+}
+
+.hero-media--world {
+  top: 44%;
+  right: -3%;
+  animation-name: hero-media-from-right;
+  animation-duration: 27s;
+  animation-delay: -19s;
+}
+
+.hero-media--product {
+  top: -4%;
+  left: 29%;
+  animation-name: hero-media-from-top;
+  animation-duration: 28s;
+  animation-delay: -11s;
+}
+
+.hero-media--automotive {
+  right: 28%;
+  bottom: -4%;
+  animation-name: hero-media-from-bottom;
+  animation-duration: 30s;
+  animation-delay: -24s;
+}
+
+.hero-media--video-falcon {
+  top: 7%;
+  left: 17%;
+  animation-name: hero-media-from-left;
+  animation-duration: 24s;
+  animation-delay: -6s;
+}
+
+.hero-media--video-studio {
+  right: 17%;
+  bottom: 7%;
+  animation-name: hero-media-from-right;
+  animation-duration: 26s;
+  animation-delay: -17s;
+}
+
+@keyframes hero-media-from-left {
+  0%, 8% { opacity: 0; transform: translate3d(-145%, 1.5rem, 0) rotate(-9deg) scale(0.74); }
+  18% { opacity: var(--hero-media-peak); transform: translate3d(0, 0, 0) rotate(-2deg) scale(0.96); }
+  48% { opacity: var(--hero-media-drift); transform: translate3d(3.5rem, -1.25rem, 0) rotate(1deg) scale(1); }
+  74% { opacity: var(--hero-media-drift); transform: translate3d(7rem, 0.75rem, 0) rotate(3deg) scale(0.98); }
+  90%, 100% { opacity: 0; transform: translate3d(11rem, -1.25rem, 0) rotate(6deg) scale(0.86); }
+}
+
+@keyframes hero-media-from-right {
+  0%, 8% { opacity: 0; transform: translate3d(145%, -1rem, 0) rotate(9deg) scale(0.74); }
+  18% { opacity: var(--hero-media-peak); transform: translate3d(0, 0, 0) rotate(2deg) scale(0.96); }
+  48% { opacity: var(--hero-media-drift); transform: translate3d(-3.5rem, 1.25rem, 0) rotate(-1deg) scale(1); }
+  74% { opacity: var(--hero-media-drift); transform: translate3d(-7rem, -0.75rem, 0) rotate(-3deg) scale(0.98); }
+  90%, 100% { opacity: 0; transform: translate3d(-11rem, 1.25rem, 0) rotate(-6deg) scale(0.86); }
+}
+
+@keyframes hero-media-from-top {
+  0%, 8% { opacity: 0; transform: translate3d(-1rem, -155%, 0) rotate(-7deg) scale(0.74); }
+  18% { opacity: var(--hero-media-peak); transform: translate3d(0, 0, 0) rotate(-1deg) scale(0.96); }
+  48% { opacity: var(--hero-media-drift); transform: translate3d(2.5rem, 3.5rem, 0) rotate(2deg) scale(1); }
+  74% { opacity: var(--hero-media-drift); transform: translate3d(-1rem, 7rem, 0) rotate(-2deg) scale(0.98); }
+  90%, 100% { opacity: 0; transform: translate3d(2rem, 11rem, 0) rotate(5deg) scale(0.86); }
+}
+
+@keyframes hero-media-from-bottom {
+  0%, 8% { opacity: 0; transform: translate3d(1rem, 155%, 0) rotate(7deg) scale(0.74); }
+  18% { opacity: var(--hero-media-peak); transform: translate3d(0, 0, 0) rotate(1deg) scale(0.96); }
+  48% { opacity: var(--hero-media-drift); transform: translate3d(-2.5rem, -3.5rem, 0) rotate(-2deg) scale(1); }
+  74% { opacity: var(--hero-media-drift); transform: translate3d(1rem, -7rem, 0) rotate(2deg) scale(0.98); }
+  90%, 100% { opacity: 0; transform: translate3d(-2rem, -11rem, 0) rotate(-5deg) scale(0.86); }
+}
+
+@media (max-width: 639px) {
+  .hero-media-stage {
+    --hero-media-peak: 0.38;
+    --hero-media-drift: 0.22;
+  }
+
+  .hero-media-image {
+    width: 7rem;
+    border-radius: 0.75rem;
+  }
+
+  .hero-media-phone {
+    --hero-media-peak: 0.5;
+    width: 4.75rem;
+    border-radius: 1.35rem;
+  }
+
+  .hero-media--workspace,
+  .hero-media--food {
+    bottom: 2%;
+  }
+
+  .hero-media--product {
+    top: 1%;
+    left: 30%;
+  }
+
+  .hero-media--automotive {
+    right: 27%;
+    bottom: 1%;
+  }
+
+  .hero-media--video-falcon {
+    top: 22%;
+    left: 4%;
+  }
+
+  .hero-media--video-studio {
+    right: 4%;
+    bottom: 20%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-media-card {
+    animation: none;
+    opacity: 0.13;
+    transform: none;
+    will-change: auto;
+  }
+
+  .hero-media-phone {
+    opacity: 0.16;
+  }
+}
+
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
     [data-feature-reveal] [data-feature-media] {
