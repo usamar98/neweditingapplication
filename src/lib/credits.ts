@@ -1,9 +1,11 @@
 import "server-only";
 
 import {
+  compatibleImageToVideoEndpoints,
   compatibleVideoEndpoints,
   endpointForAgent,
   endpointForEditorAgent,
+  endpointForImageToVideoAgent,
   endpointForPerformanceCreativeAgent,
   type EditorAgentId,
 } from "@/lib/domain/ai-models";
@@ -17,7 +19,7 @@ import type { Database, Json } from "@/types/database.generated";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { resolveFalModel } from "../../worker/providers/fal/routing";
 
-export const CREDIT_PRICING_VERSION = "2026-08-15";
+export const CREDIT_PRICING_VERSION = "2026-08-17";
 const CREDIT_MARKUP_BASIS_POINTS = 12_500;
 const MICROS_PER_CENT = 10_000;
 
@@ -121,6 +123,21 @@ function videoCostPerSecondMicros(endpoint: string, resolution: string, generate
   return generateAudio ? 450_000 : 300_000;
 }
 
+function imageToVideoCostPerSecondMicros(endpoint: string, resolution: string, generateAudio: boolean) {
+  if (endpoint === "bytedance/seedance-2.0/image-to-video") return resolution === "1080p" ? 682_000 : 303_400;
+  if (endpoint === "fal-ai/veo3.1/image-to-video") {
+    if (resolution === "4k") return generateAudio ? 600_000 : 400_000;
+    return generateAudio ? 400_000 : 200_000;
+  }
+  if (endpoint === "fal-ai/kling-video/v3/pro/image-to-video") return generateAudio ? 168_000 : 112_000;
+  if (endpoint === "fal-ai/ltx-2.3/image-to-video") {
+    if (resolution === "4k") return 320_000;
+    if (resolution === "1440p") return 160_000;
+    return 80_000;
+  }
+  return generateAudio ? 450_000 : 300_000;
+}
+
 function imageQuote(input: Extract<GenerationRequest, { kind: "image" }>) {
   const routing = resolveFalModel({
     capability: "text-to-image",
@@ -150,6 +167,26 @@ function videoQuote(input: Extract<GenerationRequest, { kind: "video" }>) {
     input.generateAudio,
   ) * durationSeconds(input.duration);
   return quote("generate_video", routing.endpointId, routing.endpointId, providerCost, {}, 10);
+}
+
+function imageToVideoQuote(input: Extract<GenerationRequest, { kind: "image_to_video" }>) {
+  const routing = resolveFalModel({
+    capability: "image-to-video",
+    compatibleEndpointIds: compatibleImageToVideoEndpoints(
+      input.duration,
+      input.resolution,
+      input.aspectRatio,
+      Boolean(input.endSourcePath),
+    ),
+    preferredEndpointId: endpointForImageToVideoAgent(input.agentId),
+    profile: input.profile,
+  });
+  const providerCost = imageToVideoCostPerSecondMicros(
+    routing.endpointId,
+    input.resolution,
+    input.generateAudio,
+  ) * durationSeconds(input.duration);
+  return quote("generate_image_to_video", routing.endpointId, routing.endpointId, providerCost, {}, 10);
 }
 
 function backgroundQuote(input: Extract<GenerationRequest, { kind: "background_removal" }>) {
@@ -224,6 +261,7 @@ export function quoteGenerationCredits(
 ): CreditQuote {
   if (input.kind === "image") return imageQuote(input);
   if (input.kind === "video") return videoQuote(input);
+  if (input.kind === "image_to_video") return imageToVideoQuote(input);
   if (input.kind === "background_removal") return backgroundQuote(input);
   return performanceCreativeQuote(input, sourceDurationSeconds);
 }

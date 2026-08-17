@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { usePathname } from "next/navigation";
-import { CircleUserRound, Clapperboard, ImageIcon, LogOut, Megaphone, Plus, Scissors, Sparkles } from "lucide-react";
+import { CircleUserRound, Clapperboard, ImageIcon, ImagePlay, LogOut, Megaphone, Plus, Scissors, Sparkles } from "lucide-react";
 import { signOut } from "@/app/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ function Navigation({ pathname }: { pathname: string }) {
     { href: "/clipper" as const, icon: Sparkles, label: "AI Clipper" },
     { href: "/generate/video" as const, icon: Clapperboard, label: "AI video generator" },
     { href: "/generate/image" as const, icon: ImageIcon, label: "AI image generator" },
+    { href: "/generate/image-to-video" as const, icon: ImagePlay, label: "Image to video" },
     { href: "/creative-studio/image" as const, icon: ImageIcon, label: "AI image ad creator" },
     { href: "/creative-studio/video" as const, icon: Megaphone, label: "AI video ad creator" },
     { href: "/remove-background" as const, icon: Scissors, label: "Background remover" },

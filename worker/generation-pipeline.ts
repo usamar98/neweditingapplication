@@ -12,6 +12,7 @@ import {
   type GenerationJobPayload,
 } from "../src/lib/domain/generation";
 import {
+  compatibleImageToVideoEndpoints,
   compatibleVideoEndpoints,
 } from "../src/lib/domain/ai-models";
 import {
@@ -113,7 +114,7 @@ const videoDeliveryCheckpointSchema = z.object({
   checkpoint: z.object({
     contentType: z.string().optional(),
     createdAt: z.string().datetime(),
-    kind: z.literal("generate_video"),
+    kind: z.enum(["generate_video", "generate_image_to_video"]),
     mediaUrl: z.string().url(),
     modelEndpoint: z.string().min(1),
     provider: z.literal("fal"),
@@ -432,6 +433,65 @@ function videoInput(
   };
 }
 
+function imageToVideoInput(
+  payload: Extract<GenerationJobPayload, { kind: "image_to_video" }>,
+  endpointId: string,
+  endUserId: string,
+  imageUrl: string,
+  endImageUrl?: string,
+) {
+  const prompt = buildGenerationPrompt(payload);
+  const duration = Number.parseInt(payload.duration, 10);
+  if (endpointId === "bytedance/seedance-2.0/image-to-video") {
+    return {
+      aspect_ratio: payload.aspectRatio,
+      duration: String(duration),
+      end_user_id: endUserId,
+      generate_audio: payload.generateAudio,
+      image_url: imageUrl,
+      prompt,
+      resolution: payload.resolution,
+      ...(endImageUrl ? { end_image_url: endImageUrl } : {}),
+      ...(payload.seed === undefined ? {} : { seed: payload.seed }),
+    };
+  }
+  if (endpointId === "fal-ai/kling-video/v3/pro/image-to-video") {
+    return {
+      cfg_scale: 0.5,
+      duration: String(duration),
+      generate_audio: payload.generateAudio,
+      negative_prompt: payload.negativePrompt,
+      prompt,
+      start_image_url: imageUrl,
+      ...(endImageUrl ? { end_image_url: endImageUrl } : {}),
+    };
+  }
+  if (endpointId === "fal-ai/ltx-2.3/image-to-video") {
+    return {
+      aspect_ratio: payload.aspectRatio,
+      duration,
+      fps: 25,
+      generate_audio: payload.generateAudio,
+      image_url: imageUrl,
+      prompt,
+      resolution: payload.resolution === "4k" ? "2160p" : payload.resolution,
+      ...(endImageUrl ? { end_image_url: endImageUrl } : {}),
+    };
+  }
+  return {
+    aspect_ratio: payload.aspectRatio,
+    auto_fix: true,
+    duration: payload.duration,
+    generate_audio: payload.generateAudio,
+    image_url: imageUrl,
+    negative_prompt: payload.negativePrompt,
+    prompt,
+    resolution: payload.resolution,
+    safety_tolerance: "2",
+    ...(payload.seed === undefined ? {} : { seed: payload.seed }),
+  };
+}
+
 function productVideoInput({
   endpointId,
   endUserId,
@@ -670,6 +730,139 @@ async function generateVideo(context: GenerationContext, payload: Extract<Genera
   }));
   await context.report("Video ready", 100);
   return asJson({ bytes: fileStat.size, durationSeconds, objectPath: outputPath, routing });
+}
+
+async function generateImageToVideo(
+  context: GenerationContext,
+  payload: Extract<GenerationJobPayload, { kind: "image_to_video" }>,
+) {
+  const expectedPrefix = `${context.generation.user_id}/image-to-video/`;
+  if (!payload.sourcePath.startsWith(expectedPrefix)
+    || (payload.endSourcePath && !payload.endSourcePath.startsWith(expectedPrefix))) {
+    throw new Error("Image-to-video source frames do not belong to the generation owner.");
+  }
+
+  const selectedRouting = resolveFalModel({
+    capability: "image-to-video",
+    compatibleEndpointIds: compatibleImageToVideoEndpoints(
+      payload.duration,
+      payload.resolution,
+      payload.aspectRatio,
+      Boolean(payload.endSourcePath),
+    ),
+    overrides: context.config.FAL_MODEL_OVERRIDES,
+    preferredEndpointId: payload.billing.primaryEndpoint,
+    profile: payload.profile,
+  });
+  const checkpointResult = videoDeliveryCheckpointSchema.safeParse(context.job.result);
+  const checkpoint = checkpointResult.success
+    && checkpointResult.data.checkpoint.kind === "generate_image_to_video"
+    ? checkpointResult.data.checkpoint
+    : null;
+  const routing = checkpoint
+    ? {
+        ...selectedRouting,
+        endpointId: checkpoint.modelEndpoint,
+        reason: `Resuming the existing ${checkpoint.modelEndpoint} provider result without another paid generation.`,
+      }
+    : selectedRouting;
+  await updateGeneration(context, {
+    model_endpoint: routing.endpointId,
+    routing_profile: routing.profile,
+    routing_reason: routing.reason,
+    status: "processing",
+  });
+  await context.report(`Motion Autopilot selected ${routing.endpointId}`, 14);
+
+  let providerVideo: { contentType?: string; mediaUrl: string };
+  if (checkpoint) {
+    providerVideo = { contentType: checkpoint.contentType, mediaUrl: checkpoint.mediaUrl };
+    await context.report("Resuming secure delivery of the existing animation", 68);
+  } else {
+    const sourcePaths = [payload.sourcePath, payload.endSourcePath].filter(
+      (value): value is string => Boolean(value),
+    );
+    const { data: signedSources, error: signingError } = await context.supabase.storage
+      .from(payload.sourceBucket)
+      .createSignedUrls(sourcePaths, 60 * 60);
+    if (signingError || !signedSources || signedSources.length !== sourcePaths.length
+      || signedSources.some((source) => source.error || !source.signedUrl)) {
+      throw new Error(`Unable to securely open the source frames: ${signingError?.message ?? "unknown error"}`);
+    }
+    const client = createWorkerFalClient(context.config.FAL_KEY);
+    const startImageUrl = signedSources[0].signedUrl as string;
+    const endImageUrl = signedSources[1]?.signedUrl ?? undefined;
+    await context.markProviderBillingStarted();
+    const response = await client.subscribe(routing.endpointId, {
+      input: imageToVideoInput(
+        payload,
+        routing.endpointId,
+        context.generation.user_id,
+        startImageUrl,
+        endImageUrl,
+      ),
+      logs: false,
+    });
+    const result = videoResultSchema.parse(response.data);
+    providerVideo = { contentType: result.video.content_type, mediaUrl: result.video.url };
+    await saveVideoDeliveryCheckpoint(context, {
+      contentType: providerVideo.contentType,
+      createdAt: new Date().toISOString(),
+      kind: "generate_image_to_video",
+      mediaUrl: providerVideo.mediaUrl,
+      modelEndpoint: routing.endpointId,
+      provider: "fal",
+    });
+  }
+
+  const filePath = join(context.tempDir, "image-animation.mp4");
+  await context.report("Securing generated animation", 72);
+  const downloadedMime = await downloadProviderMedia({
+    destination: filePath,
+    maxBytes: 1024 * 1024 * 1024,
+    url: providerVideo.mediaUrl,
+  });
+  const outputMime = providerVideo.contentType?.split(";")[0] ?? downloadedMime ?? "video/mp4";
+  const outputPath = `${context.generation.user_id}/${context.generation.id}/${context.job.id}-${context.job.attempt}.mp4`;
+  await context.report("Uploading private animation master", 84);
+  await uploadLargeObjectResumably({
+    bucket: VIDEO_OUTPUT_BUCKET,
+    config: context.config,
+    contentType: outputMime,
+    filePath,
+    objectPath: outputPath,
+    onProgress(fraction) {
+      void context.report("Uploading private animation master", Math.round(84 + fraction * 12));
+    },
+  });
+  const fileStat = await stat(filePath);
+  const media = await probeMedia(filePath);
+  await updateGeneration(context, {
+    duration_seconds: media.duration,
+    height: media.height,
+    last_error: null,
+    output_bucket: VIDEO_OUTPUT_BUCKET,
+    output_mime: outputMime,
+    output_path: outputPath,
+    seed: payload.seed ?? null,
+    status: "completed",
+    width: media.width,
+  });
+  await recordGenerationUsage(context, "ai_video_generation", media.duration, asJson({
+    bytes: fileStat.size,
+    generateAudio: payload.generateAudio,
+    kind: "image_to_video",
+    motionStrength: payload.motionStrength,
+    routing,
+  }));
+  const sourcePaths = [payload.sourcePath, payload.endSourcePath].filter(
+    (value): value is string => Boolean(value),
+  );
+  const { error: cleanupError } = await context.supabase.storage
+    .from(payload.sourceBucket)
+    .remove(sourcePaths);
+  await context.report(cleanupError ? "Animation ready; source cleanup will be retried later" : "Animation ready", 100);
+  return asJson({ bytes: fileStat.size, durationSeconds: media.duration, objectPath: outputPath, routing });
 }
 
 async function generateStaticPerformanceCreative(
@@ -1168,6 +1361,7 @@ export async function runGenerationPipeline(context: GenerationContext) {
   }
   if (payload.kind === "image") return generateImage(context, payload);
   if (payload.kind === "video") return generateVideo(context, payload);
+  if (payload.kind === "image_to_video") return generateImageToVideo(context, payload);
   if (payload.kind === "background_removal") return removeBackground(context, payload);
   return generatePerformanceCreative(context, payload);
 }

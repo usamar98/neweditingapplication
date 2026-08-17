@@ -1,6 +1,10 @@
 import { z } from "zod";
 import {
   backgroundAgentIdSchema,
+  imageToVideoAgentIdSchema,
+  imageToVideoAgentSupports,
+  imageToVideoAspectRatios,
+  imageToVideoResolutions,
   imageAgentIdSchema,
   performanceCreativeAgentIdSchema,
   videoDurations,
@@ -13,7 +17,7 @@ import {
   videoVisualStyleSchema,
 } from "@/lib/domain/video-styles";
 
-export const generationKinds = ["image", "video", "background_removal", "performance_creative"] as const;
+export const generationKinds = ["image", "video", "image_to_video", "background_removal", "performance_creative"] as const;
 export const generationKindSchema = z.enum(generationKinds);
 export type GenerationKind = z.infer<typeof generationKindSchema>;
 
@@ -55,6 +59,8 @@ export const videoMoods = [
   "documentary",
   "luxury",
 ] as const;
+
+export const imageToVideoMotionStrengths = ["subtle", "balanced", "dynamic"] as const;
 
 export const performanceCreativePlatforms = ["facebook", "instagram", "tiktok", "youtube"] as const;
 export const performanceCreativePlatformSchema = z.enum(performanceCreativePlatforms);
@@ -118,6 +124,51 @@ export const videoGenerationRequestSchema = z
     }
   });
 
+export const imageToVideoGenerationRequestSchema = z
+  .object({
+    ...sharedRequestShape,
+    agentId: imageToVideoAgentIdSchema.default("auto"),
+    aspectRatio: z.enum(imageToVideoAspectRatios).default("auto"),
+    cameraMotion: z.enum(videoCameraMotions).default("auto"),
+    duration: z.enum(videoDurations).default("6s"),
+    endSourceMime: z.enum(["image/jpeg", "image/png", "image/webp"]).optional(),
+    endSourcePath: z.string().trim().min(1).max(1024).optional(),
+    generateAudio: z.boolean().default(true),
+    kind: z.literal("image_to_video"),
+    motionStrength: z.enum(imageToVideoMotionStrengths).default("balanced"),
+    negativePrompt: z.string().trim().max(1500).default("blur, distortion, unstable subjects, duplicated objects, warped anatomy, flicker, low quality"),
+    preserveSubject: z.boolean().default(true),
+    resolution: z.enum(imageToVideoResolutions).default("1080p"),
+    seed: z.number().int().min(0).max(2147483647).optional(),
+    sourceBucket: z.literal("video-assets"),
+    sourceMime: z.enum(["image/jpeg", "image/png", "image/webp"]),
+    sourcePath: z.string().trim().min(1).max(1024),
+    visualStyle: videoVisualStyleSchema.default("cinematic"),
+  })
+  .strict()
+  .superRefine((input, context) => {
+    if (Boolean(input.endSourcePath) !== Boolean(input.endSourceMime)) {
+      context.addIssue({
+        code: "custom",
+        message: "The optional end frame must include both its path and media type.",
+        path: ["endSourcePath"],
+      });
+    }
+    if (input.agentId !== "auto" && !imageToVideoAgentSupports(
+      input.agentId,
+      input.duration,
+      input.resolution,
+      input.aspectRatio,
+      Boolean(input.endSourcePath),
+    )) {
+      context.addIssue({
+        code: "custom",
+        message: "The selected model does not support this duration, resolution, frame, or transition combination.",
+        path: ["agentId"],
+      });
+    }
+  });
+
 export const backgroundRemovalRequestSchema = z
   .object({
     agentId: backgroundAgentIdSchema.default("auto"),
@@ -174,6 +225,7 @@ export const performanceCreativeRequestSchema = z
 export const generationRequestSchema = z.discriminatedUnion("kind", [
   imageGenerationRequestSchema,
   videoGenerationRequestSchema,
+  imageToVideoGenerationRequestSchema,
   backgroundRemovalRequestSchema,
   performanceCreativeRequestSchema,
 ]);
@@ -192,6 +244,7 @@ export type BillingJobMetadata = z.infer<typeof billingJobMetadataSchema>;
 export const generationJobPayloadSchema = z.discriminatedUnion("kind", [
   imageGenerationRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
   videoGenerationRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
+  imageToVideoGenerationRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
   backgroundRemovalRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
   performanceCreativeRequestSchema.extend({ billing: billingJobMetadataSchema, requestId: z.string().uuid() }),
 ]);
@@ -207,6 +260,12 @@ export const generationQueueMessageSchema = z.union([
     generationId: z.string().uuid(),
     jobId: z.string().uuid(),
     kind: z.literal("generate_video"),
+    userId: z.string().uuid(),
+  }).strict(),
+  z.object({
+    generationId: z.string().uuid(),
+    jobId: z.string().uuid(),
+    kind: z.literal("generate_image_to_video"),
     userId: z.string().uuid(),
   }).strict(),
   z.object({
@@ -276,6 +335,30 @@ export function buildGenerationPrompt(input: GenerationRequest) {
     return [input.prompt, imageStyleDirection[input.style], "No watermark, no UI chrome, no accidental text unless explicitly requested."]
       .filter(Boolean)
       .join("\n");
+  }
+
+  if (input.kind === "image_to_video") {
+    const motionDirection = {
+      subtle: "Use restrained, believable movement with minimal deformation and gentle environmental motion.",
+      balanced: "Use purposeful cinematic movement with believable physics and a clear visual progression.",
+      dynamic: "Use energetic subject and environmental movement while keeping the source identity coherent.",
+    }[input.motionStrength];
+    return [
+      input.prompt,
+      cameraDirection[input.cameraMotion],
+      motionDirection,
+      videoVisualStyleById(input.visualStyle).generationDirection,
+      input.preserveSubject
+        ? "Treat the source image as the visual source of truth. Preserve the primary subject's identity, face, product design, colors, proportions, materials, text, and background continuity."
+        : "Use the source image as the opening composition while allowing an intentional visual transformation.",
+      input.endSourcePath
+        ? "Create a coherent transition that lands precisely on the supplied end frame without an abrupt final jump."
+        : "Develop the source frame into one coherent shot with a stable final payoff.",
+      input.generateAudio
+        ? "Create synchronized production-ready ambience, sound effects, music, or dialogue only when supported by the visible scene."
+        : "Do not generate dialogue or soundtrack; focus entirely on visual motion.",
+      "Avoid flicker, duplicated subjects, identity drift, warped geometry, unintended camera cuts, and sudden changes in lighting or art direction.",
+    ].filter(Boolean).join("\n");
   }
 
   return [

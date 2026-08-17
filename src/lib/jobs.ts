@@ -252,7 +252,7 @@ export async function enqueueGenerationJob({
   await consumeRateLimit(
     supabase,
     `generation:${input.kind}`,
-    input.kind === "video" || input.kind === "performance_creative" ? 2 : 8,
+    input.kind === "video" || input.kind === "image_to_video" || input.kind === "performance_creative" ? 2 : 8,
     60,
   );
   const admin = createAdminClient();
@@ -271,6 +271,27 @@ export async function enqueueGenerationJob({
       .list(sourceFolder, { limit: 5, search: sourceName });
     if (sourceError || !sourceName || !sourceFiles?.some((file) => file.name === sourceName)) {
       throw new HttpError(409, "Upload the source image before starting removal.", "SOURCE_NOT_READY");
+    }
+  }
+
+
+  if (effectiveInput.kind === "image_to_video") {
+    const sourcePaths = [effectiveInput.sourcePath, effectiveInput.endSourcePath].filter(
+      (value): value is string => Boolean(value),
+    );
+    for (const sourcePath of sourcePaths) {
+      if (!sourcePath.startsWith(`${user.id}/image-to-video/`)) {
+        throw new HttpError(403, "The source image does not belong to this account.", "SOURCE_FORBIDDEN");
+      }
+      const sourceParts = sourcePath.split("/");
+      const sourceName = sourceParts.pop();
+      const sourceFolder = sourceParts.join("/");
+      const { data: sourceFiles, error: sourceError } = await supabase.storage
+        .from(effectiveInput.sourceBucket)
+        .list(sourceFolder, { limit: 5, search: sourceName });
+      if (sourceError || !sourceName || !sourceFiles?.some((file) => file.name === sourceName)) {
+        throw new HttpError(409, "Upload each source frame before starting animation.", "SOURCE_NOT_READY");
+      }
     }
   }
 
@@ -333,6 +354,8 @@ export async function enqueueGenerationJob({
     ? "generate_image"
     : effectiveInput.kind === "video"
       ? "generate_video"
+      : effectiveInput.kind === "image_to_video"
+        ? "generate_image_to_video"
       : effectiveInput.kind === "background_removal"
         ? "generate_background_removal"
         : "generate_performance_creative";
@@ -348,6 +371,8 @@ export async function enqueueGenerationJob({
       } as unknown as Json,
       stage: effectiveInput.kind === "background_removal"
         ? "Cutout agent is preparing"
+        : effectiveInput.kind === "image_to_video"
+          ? "Motion director is preparing"
         : effectiveInput.kind === "performance_creative"
           ? effectiveInput.outputType === "image"
             ? "AI image ad designer is preparing"

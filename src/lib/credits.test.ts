@@ -66,6 +66,33 @@ describe("credit quotes", () => {
     expect(quote.credits).toBe(150);
   });
 
+  it("reserves model-specific image-to-video credits before provider work", () => {
+    const quote = quoteGenerationCredits({
+      agentId: "ltx-2-3-image",
+      aspectRatio: "16:9",
+      cameraMotion: "orbit",
+      duration: "6s",
+      generateAudio: true,
+      kind: "image_to_video",
+      motionStrength: "balanced",
+      name: "Animated campaign frame",
+      negativePrompt: "flicker, distortion",
+      preserveSubject: true,
+      profile: "quality",
+      prompt: "A smooth orbit reveals the product materials.",
+      resolution: "4k",
+      sourceBucket: "video-assets",
+      sourceMime: "image/png",
+      sourcePath: "a4bd6f8b-2330-4e39-b06a-000000000000/image-to-video/source.png",
+      visualStyle: "commercial",
+    });
+
+    expect(quote.operationKey).toBe("generate_image_to_video");
+    expect(quote.primaryEndpoint).toBe("fal-ai/ltx-2.3/image-to-video");
+    expect(quote.estimatedProviderCostMicros).toBe(1_920_000);
+    expect(quote.credits).toBe(240);
+  });
+
   it("keeps local export compute billable without inventing provider cost", () => {
     const quote = quoteProjectCredits({ durationSeconds: 120, kind: "export" });
 

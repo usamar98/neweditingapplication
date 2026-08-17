@@ -10,6 +10,7 @@ import {
   Download,
   Film,
   ImageIcon,
+  ImagePlay,
   Megaphone,
   Ratio,
   Scissors,
@@ -330,6 +331,26 @@ export default function Home() {
                   <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-fuchsia-500/10 text-fuchsia-700"><ImageIcon className="size-4.5" /></span><Badge variant="outline" className="border-fuchsia-700/20 bg-fuchsia-500/5 text-fuchsia-700">New</Badge></div>
                   <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image generator</h3>
                   <p className="mt-3 text-sm leading-6 text-muted-foreground">Work from a creative brief, not a mystery prompt box. Shape art direction, canvas, seed, and model intent for repeatable campaign-grade visuals.</p>
+                </div>
+              </CardContent>
+            </Card>
+            </Link>
+            </FeatureReveal>
+
+            <FeatureReveal>
+            <Link href="/generate/image-to-video" aria-label="Open AI image to video generator" className="block h-full rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <Card className="group h-full overflow-hidden border-border bg-card/65 transition hover:-translate-y-1 hover:border-violet-400/25 hover:shadow-lg">
+              <CardContent className="p-0">
+                <div data-feature-media className="relative h-52 overflow-hidden border-b border-border bg-muted">
+                  <Image src={aiImageVisual} alt="A still campaign image prepared for AI motion generation" fill placeholder="blur" sizes="(max-width: 1024px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-[1.03]" />
+                  <video aria-hidden="true" autoPlay loop muted playsInline preload="metadata" poster={aiVideoVisual.src} className="absolute inset-0 hidden size-full object-cover opacity-0 transition duration-700 group-hover:opacity-100 md:block motion-reduce:hidden"><source src="/media/previews/ai-video-generator.mp4" type="video/mp4" media="(min-width: 768px) and (prefers-reduced-motion: no-preference)" /></video>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/5 to-black/10" />
+                  <div className="absolute inset-x-5 bottom-5 flex items-center justify-between text-[10px] text-white/80"><span className="rounded-full border border-white/15 bg-black/40 px-3 py-1.5 backdrop-blur">START FRAME</span><ArrowRight className="size-4 text-violet-200" /><span className="rounded-full border border-violet-300/25 bg-violet-300/15 px-3 py-1.5 backdrop-blur">DIRECTED MOTION</span></div>
+                </div>
+                <div data-feature-copy className="p-6">
+                  <div className="mb-5 flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-violet-500/10 text-violet-700"><ImagePlay className="size-4.5" /></span><Badge variant="outline" className="border-violet-700/20 bg-violet-500/5 text-violet-700">New</Badge></div>
+                  <h3 className="text-xl font-semibold tracking-[-0.025em]">AI image to video generator</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">Animate a photo, product, or artwork with identity lock, optional end-frame transitions, camera direction, native audio, and compatible premium models.</p>
                 </div>
               </CardContent>
             </Card>

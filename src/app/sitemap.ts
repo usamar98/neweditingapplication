@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { blogPosts } from "@/lib/blog";
 import { comparisonPages, searchIntentPages } from "@/lib/marketing/seo-pages";
+import { marketingFeatures } from "@/lib/marketing/features";
 import { legalDocuments } from "@/lib/legal";
 import { getSiteUrl } from "@/lib/site";
 
@@ -16,6 +17,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: new URL("/ai-video-models", siteUrl).toString(), lastModified, changeFrequency: "monthly", priority: 0.9 },
     { url: new URL("/blog", siteUrl).toString(), lastModified, changeFrequency: "weekly", priority: 0.85 },
     { url: new URL("/legal", siteUrl).toString(), lastModified, changeFrequency: "monthly", priority: 0.5 },
+    ...marketingFeatures.map((feature) => ({
+      url: new URL(feature.href, siteUrl).toString(),
+      lastModified,
+      changeFrequency: "weekly" as const,
+      priority: feature.slug === "image-to-video-generator" ? 0.92 : 0.88,
+    })),
     ...legalDocuments.map((document) => ({
       url: new URL(`/legal/${document.slug}`, siteUrl).toString(),
       lastModified,

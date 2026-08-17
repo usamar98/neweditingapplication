@@ -4,6 +4,7 @@ import {
   CircleUserRound,
   CreditCard,
   ImageIcon,
+  ImagePlay,
   LogOut,
   Menu,
   Scissors,
@@ -27,6 +28,7 @@ const appLinks = [
   { href: "/clipper" as const, icon: Sparkles, label: "AI Clipper" },
   { href: "/generate/video" as const, icon: Video, label: "AI video" },
   { href: "/generate/image" as const, icon: ImageIcon, label: "AI image" },
+  { href: "/generate/image-to-video" as const, icon: ImagePlay, label: "Image to video" },
   { href: "/remove-background" as const, icon: Scissors, label: "Background remover" },
 ];
 

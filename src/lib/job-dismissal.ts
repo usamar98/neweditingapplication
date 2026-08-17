@@ -1,6 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
+import { generationRequestSchema } from "@/lib/domain/generation";
 import { HttpError } from "@/lib/http";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -39,6 +40,12 @@ export async function dismissGenerationForUser({
   userId: string;
 }) {
   const admin = createAdminClient();
+  const { data: generation } = await admin
+    .from("generations")
+    .select("settings")
+    .eq("id", generationId)
+    .eq("user_id", userId)
+    .maybeSingle();
   const { data, error } = await admin.rpc("dismiss_generation_admin", {
     p_generation_id: generationId,
     p_user_id: userId,
@@ -50,6 +57,21 @@ export async function dismissGenerationForUser({
 
   const result = dismissalResultSchema.parse(data);
   await archiveCancelledQueueMessage(result, requestId);
+  const settings = generationRequestSchema.safeParse(generation?.settings);
+  if (settings.success && settings.data.kind === "image_to_video") {
+    const sourcePaths = [settings.data.sourcePath, settings.data.endSourcePath].filter(
+      (value): value is string => Boolean(value),
+    );
+    const { error: cleanupError } = await admin.storage
+      .from(settings.data.sourceBucket)
+      .remove(sourcePaths);
+    if (cleanupError) {
+      logger.warn(
+        { error: cleanupError.message, generationId, requestId, userId },
+        "Unable to remove dismissed image-to-video source frames",
+      );
+    }
+  }
   return result;
 }
 

@@ -17,6 +17,13 @@ export const videoAgentIds = [
   "kling-3-pro",
   "veo-3-1-fast",
 ] as const;
+export const imageToVideoAgentIds = [
+  "auto",
+  "seedance-2-image",
+  "veo-3-1-image",
+  "kling-3-pro-image",
+  "ltx-2-3-image",
+] as const;
 export const editorAgentIds = [
   "auto",
   "gpt-5-mini-editor",
@@ -40,20 +47,25 @@ export const performanceCreativeAgentIds = [
 
 export const videoDurations = ["4s", "6s", "8s", "10s", "12s", "15s", "16s", "20s", "30s"] as const;
 export const videoResolutions = ["720p", "1080p", "4k"] as const;
+export const imageToVideoResolutions = ["720p", "1080p", "1440p", "4k"] as const;
+export const imageToVideoAspectRatios = ["auto", "16:9", "9:16", "1:1", "4:3", "3:4"] as const;
 
 export const imageAgentIdSchema = z.enum(imageAgentIds);
 export const videoAgentIdSchema = z.enum(videoAgentIds);
+export const imageToVideoAgentIdSchema = z.enum(imageToVideoAgentIds);
 export const editorAgentIdSchema = z.enum(editorAgentIds);
 export const backgroundAgentIdSchema = z.enum(backgroundAgentIds);
 export const performanceCreativeAgentIdSchema = z.enum(performanceCreativeAgentIds);
 
 export type ImageAgentId = z.infer<typeof imageAgentIdSchema>;
 export type VideoAgentId = z.infer<typeof videoAgentIdSchema>;
+export type ImageToVideoAgentId = z.infer<typeof imageToVideoAgentIdSchema>;
 export type EditorAgentId = z.infer<typeof editorAgentIdSchema>;
 export type BackgroundAgentId = z.infer<typeof backgroundAgentIdSchema>;
 export type PerformanceCreativeAgentId = z.infer<typeof performanceCreativeAgentIdSchema>;
 export type VideoDuration = (typeof videoDurations)[number];
 export type VideoResolution = (typeof videoResolutions)[number];
+export type ImageToVideoResolution = (typeof imageToVideoResolutions)[number];
 export type PerformanceCreativeOutputType = "image" | "video";
 export type PerformanceCreativeSourceType = "business_brief" | "long_video" | "product_url";
 
@@ -69,6 +81,12 @@ export type VideoAgent = AiAgent & {
   durations: readonly VideoDuration[];
   resolutions: readonly VideoResolution[];
   supportsAudio: boolean;
+};
+
+export type ImageToVideoAgent = Omit<VideoAgent, "resolutions"> & {
+  aspectRatios: readonly (typeof imageToVideoAspectRatios)[number][];
+  resolutions: readonly ImageToVideoResolution[];
+  supportsEndFrame: boolean;
 };
 
 export const imageAgents: readonly AiAgent[] = [
@@ -114,6 +132,39 @@ export const videoAgents: readonly VideoAgent[] = [
   },
 ];
 
+export const imageToVideoAgents: readonly ImageToVideoAgent[] = [
+  {
+    id: "auto", endpointId: null, label: "Motion Autopilot", tag: "Recommended",
+    description: "Routes each source image to the strongest compatible motion model for the requested format.",
+    aspectRatios: imageToVideoAspectRatios, durations: ["4s", "6s", "8s", "10s", "12s", "15s"], resolutions: imageToVideoResolutions,
+    supportsAudio: true, supportsEndFrame: true,
+  },
+  {
+    id: "seedance-2-image", endpointId: "bytedance/seedance-2.0/image-to-video", label: "Seedance 2.0", tag: "Director control",
+    description: "Strong source fidelity, realistic physics, camera direction, multi-shot motion, and synchronized audio.",
+    aspectRatios: imageToVideoAspectRatios, durations: ["4s", "6s", "8s", "10s", "12s", "15s"],
+    resolutions: ["720p", "1080p"], supportsAudio: true, supportsEndFrame: true,
+  },
+  {
+    id: "veo-3-1-image", endpointId: "fal-ai/veo3.1/image-to-video", label: "Veo 3.1", tag: "Premium realism",
+    description: "High-fidelity cinematic animation, strong image adherence, natural motion, and native synchronized audio.",
+    aspectRatios: ["auto", "16:9", "9:16"], durations: ["4s", "6s", "8s"],
+    resolutions: ["720p", "1080p", "4k"], supportsAudio: true, supportsEndFrame: false,
+  },
+  {
+    id: "kling-3-pro-image", endpointId: "fal-ai/kling-video/v3/pro/image-to-video", label: "Kling 3 Pro", tag: "Subject consistency",
+    description: "Fluid cinematic movement, strong subject consistency, longer shots, and optional native audio.",
+    aspectRatios: ["auto"], durations: ["4s", "6s", "8s", "10s", "12s", "15s"],
+    resolutions: ["1080p"], supportsAudio: true, supportsEndFrame: true,
+  },
+  {
+    id: "ltx-2-3-image", endpointId: "fal-ai/ltx-2.3/image-to-video", label: "LTX 2.3 Pro", tag: "Native 4K",
+    description: "Sharp detail, portrait support, first-to-last-frame transitions, high frame rates, and native audio up to 4K.",
+    aspectRatios: ["auto", "16:9", "9:16"], durations: ["6s", "8s", "10s"],
+    resolutions: ["1080p", "1440p", "4k"], supportsAudio: true, supportsEndFrame: true,
+  },
+];
+
 export const editorAgents: readonly AiAgent[] = [
   { id: "auto", endpointId: null, label: "Clipper Autopilot", tag: "Recommended", description: "Chooses the best available model for moment detection and clip ranking." },
   { id: "gpt-5-mini-editor", endpointId: "openai/gpt-5-mini", label: "GPT-5 mini Clip Ranker", tag: "Deep analysis", description: "Detailed hook, highlight, pacing, and story-structure analysis." },
@@ -146,6 +197,44 @@ export const performanceCreativeAgents: readonly (AiAgent & {
 
 export function videoAgentById(agentId: string) {
   return videoAgents.find((agent) => agent.id === agentId);
+}
+
+export function imageToVideoAgentById(agentId: string) {
+  return imageToVideoAgents.find((agent) => agent.id === agentId);
+}
+
+export function compatibleImageToVideoEndpoints(
+  duration: VideoDuration,
+  resolution: ImageToVideoResolution,
+  aspectRatio: (typeof imageToVideoAspectRatios)[number],
+  hasEndFrame: boolean,
+) {
+  return imageToVideoAgents
+    .filter((agent) => agent.endpointId
+      && agent.durations.includes(duration)
+      && agent.resolutions.includes(resolution)
+      && agent.aspectRatios.includes(aspectRatio)
+      && (!hasEndFrame || agent.supportsEndFrame))
+    .map((agent) => agent.endpointId as string);
+}
+
+export function imageToVideoAgentSupports(
+  agentId: string,
+  duration: VideoDuration,
+  resolution: ImageToVideoResolution,
+  aspectRatio: (typeof imageToVideoAspectRatios)[number],
+  hasEndFrame: boolean,
+) {
+  const agent = imageToVideoAgentById(agentId);
+  return Boolean(agent
+    && agent.durations.includes(duration)
+    && agent.resolutions.includes(resolution)
+    && agent.aspectRatios.includes(aspectRatio)
+    && (!hasEndFrame || agent.supportsEndFrame));
+}
+
+export function endpointForImageToVideoAgent(agentId: string) {
+  return imageToVideoAgentById(agentId)?.endpointId ?? null;
 }
 
 export function compatibleVideoEndpoints(duration: VideoDuration, resolution: VideoResolution) {

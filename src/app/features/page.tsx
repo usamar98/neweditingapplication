@@ -11,12 +11,12 @@ import { getSiteUrl, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "AI Creative Tools for Video, Images & Ads",
-  description: "Explore Editing App's AI Clipper, separate AI video and image generators, image and video ad studio, and precision background remover.",
-  keywords: ["AI creative tools", "AI clipper", "AI video generator", "AI image generator", "AI ad generator", "local business ad generator", "AI background remover"],
+  description: "Explore Editing App's AI Clipper, separate text-to-video, image-to-video, and image generators, image and video ad studios, and precision background remover.",
+  keywords: ["AI creative tools", "AI clipper", "AI video generator", "AI image to video generator", "AI image generator", "AI ad generator", "local business ad generator", "AI background remover"],
   alternates: { canonical: "/features" },
   openGraph: {
     title: "AI Creative Tools for Video, Images & Ads",
-    description: "One private workspace for AI clipping, separate video and image generation, business ads, and background removal.",
+    description: "One private workspace for AI clipping, text-to-video, image-to-video, image generation, business ads, and background removal.",
     type: "website",
     url: "/features",
   },
@@ -72,7 +72,7 @@ export default function FeaturesPage() {
           AI creative tools for every stage from first brief to final export.
         </h1>
         <p className="mx-auto mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">
-          Find the best moments in long videos, generate premium videos and images in separate focused studios, build source-aware ads, and remove backgrounds in one private workspace.
+          Find the best moments in long videos, generate premium text-to-video, image-to-video, and image creative in separate focused studios, build source-aware ads, and remove backgrounds in one private workspace.
         </p>
         <Button size="lg" asChild className="mt-8"><Link href="/clipper">Open AI Clipper <ArrowRight className="size-4" /></Link></Button>
       </section>

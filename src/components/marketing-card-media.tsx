@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 type MarketingMediaSlug =
   | "ai-clipper"
   | "ai-video-generator"
+  | "image-to-video-generator"
   | "ai-image-generator"
   | "ai-image-ad-creator"
   | "ai-video-ad-creator"
@@ -38,6 +39,12 @@ const videoMedia: Partial<Record<MarketingMediaSlug, VideoMedia>> = {
   "ai-video-generator": {
     alt: "A cinematic concept car shot representing premium AI video generation",
     label: "Multi-model video preview",
+    poster: aiVideoVisual,
+    src: "/media/previews/ai-video-generator.mp4",
+  },
+  "image-to-video-generator": {
+    alt: "A still campaign image transforming into a cinematic AI-generated video",
+    label: "Still frame to directed motion",
     poster: aiVideoVisual,
     src: "/media/previews/ai-video-generator.mp4",
   },

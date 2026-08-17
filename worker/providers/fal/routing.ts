@@ -169,6 +169,21 @@ export const falModelCatalog: Record<FalCapability, readonly FalModelCandidate[]
   ],
   "image-to-video": [
     candidate({
+      endpointId: "bytedance/seedance-2.0/image-to-video",
+      scores: { cost: 4, quality: 10, reliability: 8, speed: 5 },
+      summary: "Seedance 2.0 image animation with strong source fidelity, director-level camera control, realistic physics, and native audio.",
+    }),
+    candidate({
+      endpointId: "fal-ai/kling-video/v3/pro/image-to-video",
+      scores: { cost: 7, quality: 10, reliability: 8, speed: 6 },
+      summary: "Kling 3 Pro image animation with fluid motion, strong subject consistency, flexible duration, and native audio.",
+    }),
+    candidate({
+      endpointId: "fal-ai/ltx-2.3/image-to-video",
+      scores: { cost: 8, quality: 9, reliability: 9, speed: 8 },
+      summary: "LTX 2.3 image animation with sharp detail, first-to-last-frame transitions, native audio, and supported 4K output.",
+    }),
+    candidate({
       endpointId: "bytedance/seedance-2.5/image-to-video",
       scores: { cost: 5, quality: 10, reliability: 8, speed: 5 },
       summary: "Latest Seedance product animation with native audio and strong identity consistency.",

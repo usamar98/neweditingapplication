@@ -58,6 +58,34 @@ describe("AI generation domain", () => {
     expect(generationRequestSchema.safeParse({ ...request, resolution: "1080p" }).success).toBe(false);
   });
 
+  it("validates image-to-video model controls and strengthens source fidelity direction", () => {
+    const request = generationRequestSchema.parse({
+      agentId: "ltx-2-3-image",
+      aspectRatio: "9:16",
+      cameraMotion: "dolly-in",
+      duration: "8s",
+      endSourceMime: "image/png",
+      endSourcePath: "a4bd6f8b-2330-4e39-b06a-000000000000/image-to-video/shot-end.png",
+      generateAudio: true,
+      kind: "image_to_video",
+      motionStrength: "balanced",
+      name: "Product reveal",
+      negativePrompt: "flicker, identity drift",
+      preserveSubject: true,
+      profile: "quality",
+      prompt: "The camera moves closer while reflections travel across the bottle.",
+      resolution: "1440p",
+      sourceBucket: "video-assets",
+      sourceMime: "image/png",
+      sourcePath: "a4bd6f8b-2330-4e39-b06a-000000000000/image-to-video/shot-start.png",
+      visualStyle: "commercial",
+    });
+
+    expect(buildGenerationPrompt(request)).toMatch(/visual source of truth/i);
+    expect(buildGenerationPrompt(request)).toMatch(/lands precisely on the supplied end frame/i);
+    expect(generationRequestSchema.safeParse({ ...request, agentId: "veo-3-1-image" }).success).toBe(false);
+  });
+
   it("requires a request ID in durable worker payloads", () => {
     expect(generationJobPayloadSchema.safeParse({
       aspectRatio: "square_hd",

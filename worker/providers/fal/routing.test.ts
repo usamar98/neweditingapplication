@@ -38,6 +38,21 @@ describe("fal model routing", () => {
     }).endpointId).toBe("bytedance/seedance-2.5/text-to-video");
   });
 
+  it("routes image animation only across the compatibility-filtered models", () => {
+    expect(resolveFalModel({
+      capability: "image-to-video",
+      compatibleEndpointIds: ["fal-ai/ltx-2.3/image-to-video", "fal-ai/veo3.1/image-to-video"],
+      profile: "speed",
+    }).endpointId).toBe("fal-ai/ltx-2.3/image-to-video");
+
+    expect(resolveFalModel({
+      capability: "image-to-video",
+      compatibleEndpointIds: ["fal-ai/kling-video/v3/pro/image-to-video"],
+      preferredEndpointId: "fal-ai/kling-video/v3/pro/image-to-video",
+      profile: "quality",
+    })).toMatchObject({ source: "user-selection" });
+  });
+
   it("selects an analysis model when candidates share an endpoint", () => {
     expect(resolveFalModel({
       capability: "content-analysis",

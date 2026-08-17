@@ -773,6 +773,7 @@ export type Database = {
         | "video"
         | "background_removal"
         | "performance_creative"
+        | "image_to_video"
       job_kind:
         | "analyze"
         | "export"
@@ -780,6 +781,7 @@ export type Database = {
         | "generate_video"
         | "generate_background_removal"
         | "generate_performance_creative"
+        | "generate_image_to_video"
       job_status:
         | "queued"
         | "processing"
@@ -927,6 +929,7 @@ export const Constants = {
         "video",
         "background_removal",
         "performance_creative",
+        "image_to_video",
       ],
       job_kind: [
         "analyze",
@@ -935,6 +938,7 @@ export const Constants = {
         "generate_video",
         "generate_background_removal",
         "generate_performance_creative",
+        "generate_image_to_video",
       ],
       job_status: [
         "queued",
