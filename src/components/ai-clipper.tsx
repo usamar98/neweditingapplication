@@ -61,6 +61,38 @@ import type { Tables } from "@/types/database.generated";
 
 type Job = Tables<"jobs">;
 
+const jobStatusFreshness: Record<Job["status"], number> = {
+  cancelled: 3,
+  completed: 3,
+  failed: 3,
+  processing: 2,
+  retrying: 2,
+  queued: 1,
+};
+
+export function reconcileProjectJobs(serverJobs: Job[], clientJobs: Job[]) {
+  const jobsById = new Map<string, Job>();
+
+  for (const job of [...clientJobs, ...serverJobs]) {
+    const current = jobsById.get(job.id);
+    if (!current) {
+      jobsById.set(job.id, job);
+      continue;
+    }
+
+    const currentUpdatedAt = Date.parse(current.updated_at);
+    const nextUpdatedAt = Date.parse(job.updated_at);
+    if (
+      nextUpdatedAt > currentUpdatedAt
+      || (nextUpdatedAt === currentUpdatedAt && jobStatusFreshness[job.status] >= jobStatusFreshness[current.status])
+    ) {
+      jobsById.set(job.id, job);
+    }
+  }
+
+  return [...jobsById.values()].sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at));
+}
+
 const aspectOptions = [
   { label: "Original", value: "original", detail: "Source frame" },
   { label: "TikTok", value: "tiktok", detail: "9:16" },
@@ -228,10 +260,15 @@ export function AIClipper({ project }: { project: ProjectEditorData }) {
   const [error, setError] = useState<string | null>(null);
   const [realtimeState, setRealtimeState] = useState<"connecting" | "live" | "degraded">("connecting");
 
+  const reconciledJobs = useMemo(() => reconcileProjectJobs(project.jobs, jobs), [jobs, project.jobs]);
   const activeJob = useMemo(
-    () => jobs.find((job) => !job.dismissed_at && ["queued", "processing", "retrying"].includes(job.status))
-      ?? jobs.find((job) => !job.dismissed_at && job.status === "failed"),
-    [jobs],
+    () => {
+      const failedJob = reconciledJobs.find((job) => !job.dismissed_at && job.status === "failed");
+      if (project.status === "failed") return failedJob;
+      return reconciledJobs.find((job) => !job.dismissed_at && ["queued", "processing", "retrying"].includes(job.status))
+        ?? failedJob;
+    },
+    [project.status, reconciledJobs],
   );
   const projectDuration = normalizeMediaDuration(project.duration);
   const mediaDuration = detectedMedia?.projectId === project.id && detectedMedia.url === project.previewUrl
@@ -246,7 +283,9 @@ export function AIClipper({ project }: { project: ProjectEditorData }) {
   const endTime = clipRange.end;
   const previewStatus = previewLoad?.url === project.previewUrl ? previewLoad.status : "loading";
   const jobIsRunning = Boolean(activeJob && ["queued", "processing", "retrying"].includes(activeJob.status));
-  const sourceIsProcessing = !project.sourceReady && (jobIsRunning || project.status === "analyzing");
+  const sourceIsProcessing = !project.sourceReady
+    && project.status !== "failed"
+    && (jobIsRunning || project.status === "analyzing");
   const activeVisualStyle = videoVisualStyleById(settings.visualStyle);
   const activeCaption = useMemo(
     () => project.transcript.segments.find((segment) => currentTime >= segment.start && currentTime <= segment.end),
