@@ -5,6 +5,7 @@ import {
   VIDEO_OUTPUT_BUCKET,
   VIDEO_SOURCE_BUCKET,
 } from "@/lib/domain/video";
+import { clipRangeValidationError } from "@/lib/domain/clip-range";
 import { errorResponse, getRequestId, HttpError } from "@/lib/http";
 import { createClient } from "@/lib/supabase/server";
 
@@ -31,12 +32,13 @@ export async function PATCH(request: Request, context: ProjectRouteContext) {
     if (!project) {
       throw new HttpError(404, "Project not found.", "PROJECT_NOT_FOUND");
     }
-    if (
-      settings.trimEnd !== null &&
-      project.duration_seconds !== null &&
-      settings.trimEnd > Number(project.duration_seconds) + 0.05
-    ) {
-      throw new HttpError(400, "Trim end exceeds the video duration.", "INVALID_TRIM_RANGE");
+    const rangeError = clipRangeValidationError({
+      duration: project.duration_seconds === null ? null : Number(project.duration_seconds),
+      end: settings.trimEnd,
+      start: settings.trimStart,
+    });
+    if (rangeError) {
+      throw new HttpError(400, rangeError, "INVALID_TRIM_RANGE");
     }
 
     const { error } = await supabase

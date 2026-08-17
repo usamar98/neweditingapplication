@@ -10,5 +10,5 @@ export default async function ProjectPage(props: { params: Promise<{ id: string 
   const { id } = await props.params;
   z.string().uuid().parse(id);
   const project = await getProjectEditorData(id);
-  return <AIClipper project={project} />;
+  return <AIClipper key={project.id} project={project} />;
 }

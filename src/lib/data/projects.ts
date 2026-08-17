@@ -38,9 +38,11 @@ export type ProjectEditorData = {
   exportUrl: string | null;
   id: string;
   jobs: Tables<"jobs">[];
+  lastError: string | null;
   name: string;
   previewUrl: string;
   sourceFilename: string;
+  sourceReady: boolean;
   status: Tables<"projects">["status"];
   thumbnailUrl: string | null;
   transcript: Transcript;
@@ -98,9 +100,12 @@ export const getProjectEditorData = cache(
       notFound();
     }
 
+    const sourceReady = Number(project.source_size_bytes) > 1 || Number(project.duration_seconds ?? 0) > 0;
     const ttl = getSignedUrlTtl();
     const signedRequests = [
-      supabase.storage.from(VIDEO_SOURCE_BUCKET).createSignedUrl(project.source_path, ttl),
+      sourceReady
+        ? supabase.storage.from(VIDEO_SOURCE_BUCKET).createSignedUrl(project.source_path, ttl)
+        : Promise.resolve({ data: null, error: null }),
       project.export_path
         ? supabase.storage.from(VIDEO_OUTPUT_BUCKET).createSignedUrl(project.export_path, ttl)
         : Promise.resolve({ data: null, error: null }),
@@ -118,9 +123,11 @@ export const getProjectEditorData = cache(
       exportUrl: exportSigned.data?.signedUrl ?? null,
       id: project.id,
       jobs: jobs ?? [],
+      lastError: project.last_error,
       name: project.name,
       previewUrl: sourceSigned.data?.signedUrl ?? "",
       sourceFilename: project.source_filename,
+      sourceReady,
       status: project.status,
       thumbnailUrl: thumbnailSigned.data?.signedUrl ?? null,
       transcript: asTranscript(project.transcript),
