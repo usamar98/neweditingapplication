@@ -12,6 +12,7 @@ import {
   ImageIcon,
   ImagePlay,
   Megaphone,
+  Plus,
   Ratio,
   Scissors,
   ShieldCheck,
@@ -444,6 +445,20 @@ export default function Home() {
               </CardContent>
             </Card>
             </Link>
+            </FeatureReveal>
+
+            <FeatureReveal>
+              <Card className="flex h-full min-h-[22rem] items-center justify-center border-dashed border-primary/25 bg-primary/[0.025] shadow-none">
+                <CardContent data-feature-copy className="flex max-w-xs flex-col items-center px-8 py-12 text-center">
+                  <span className="grid size-16 place-items-center rounded-full border border-dashed border-primary/35 bg-primary/5 text-primary">
+                    <Plus className="size-7" strokeWidth={1.6} />
+                  </span>
+                  <h3 className="mt-6 text-xl font-semibold tracking-[-0.025em]">More tools coming</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                    New creative workflows will appear here.
+                  </p>
+                </CardContent>
+              </Card>
             </FeatureReveal>
           </div>
         </div>
