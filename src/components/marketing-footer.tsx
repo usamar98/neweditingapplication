@@ -15,11 +15,6 @@ const featureLabels: Record<(typeof marketingFeatures)[number]["slug"], string> 
   "background-remover": "AI background remover",
 };
 
-const toolLabels: Record<(typeof searchIntentPages)[number]["slug"], string> = {
-  "product-url-to-video": "Product URL to video",
-  "long-video-to-shorts": "Long video to shorts",
-};
-
 export function MarketingFooter() {
   return (
     <footer className="mx-auto max-w-7xl px-5 pb-10 pt-6 sm:px-8">
@@ -54,7 +49,7 @@ export function MarketingFooter() {
               {searchIntentPages.map((page) => (
                 <li key={page.slug}>
                   <Link href={`/tools/${page.slug}` as Route} className="hover:text-foreground">
-                    {toolLabels[page.slug]}
+                    {page.eyebrow}
                   </Link>
                 </li>
               ))}

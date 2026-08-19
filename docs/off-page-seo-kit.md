@@ -1,6 +1,6 @@
 # Editing App off-page SEO kit
 
-Last reviewed: 2026-08-09
+Last reviewed: 2026-08-19
 
 Off-page SEO requires business-owned accounts and human review. Use this kit to earn relevant mentions and links; do not use bulk link networks, automated comment spam, paid link packages, or fake review profiles.
 
@@ -9,11 +9,15 @@ Off-page SEO requires business-owned accounts and human review. Use this kit to 
 - Homepage: `https://www.editingapp.live/`
 - Product URL to video: `https://www.editingapp.live/tools/product-url-to-video`
 - Long video to shorts: `https://www.editingapp.live/tools/long-video-to-shorts`
+- AI video generator: `https://www.editingapp.live/tools/ai-video-generator`
+- Image to video AI: `https://www.editingapp.live/tools/image-to-video-ai`
+- AI image generator: `https://www.editingapp.live/tools/ai-image-generator`
+- Product photo background remover: `https://www.editingapp.live/tools/product-photo-background-remover`
 - AI video model guide: `https://www.editingapp.live/ai-video-models`
-- AI video editor: `https://www.editingapp.live/features/ai-video-editor`
-- AI video generator: `https://www.editingapp.live/features/ai-video-generator`
 
 Link to the page that best answers the referring page's audience. Do not force every mention to the homepage.
+
+The referring website must use a crawlable HTML link such as `<a href="https://www.editingapp.live/tools/ai-video-generator">AI video generator</a>`. Editing App can provide correct canonical and preview metadata, but it cannot force Google to crawl or credit a link on another website.
 
 ## Ready-to-use product descriptions
 

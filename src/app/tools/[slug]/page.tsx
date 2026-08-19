@@ -46,7 +46,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
         name: page.title,
         description: page.description,
         url: pageUrl,
-        dateModified: "2026-08-10",
+        dateModified: "2026-08-19",
         inLanguage: "en",
         keywords: page.keywords.join(", "),
         about: page.answer.summary,

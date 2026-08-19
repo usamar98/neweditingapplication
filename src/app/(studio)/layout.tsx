@@ -1,7 +1,16 @@
+import type { Metadata } from "next";
 import { AppShell } from "@/components/app-shell";
 import { getCurrentAccount } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
+};
 
 export default async function PublicStudioLayout({ children }: { children: React.ReactNode }) {
   const account = await getCurrentAccount();

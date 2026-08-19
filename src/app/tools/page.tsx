@@ -10,12 +10,12 @@ import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { getSiteUrl, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "AI Video Tools for Ads & Short Clips",
-  description: "Use focused AI workflows to turn a product URL into a video ad or repurpose long footage into editable clips for Reels, TikTok, Shorts, and Facebook.",
-  keywords: ["AI video tools", "product URL to video", "URL to video ad", "long video to shorts", "AI clip maker", "ecommerce video ads"],
+  title: "AI Video, Image, Clipping & Ad Tools",
+  description: "Use focused AI workflows for video generation, image-to-video, image generation, product ads, long-video clipping, and product photo background removal.",
+  keywords: ["AI creative tools", "AI video generator", "image to video AI", "AI image generator", "product URL to video", "long video to shorts", "product background remover"],
   alternates: { canonical: "/tools" },
-  openGraph: { title: "AI Video Tools for Ads & Short Clips", description: "Outcome-based AI video workflows for ecommerce ads and long-video repurposing.", type: "website", url: "/tools" },
-  twitter: { card: "summary_large_image", title: "AI Video Tools for Ads & Short Clips", description: "Turn product pages and long footage into channel-ready creative." },
+  openGraph: { title: "AI Video, Image, Clipping & Ad Tools", description: "Outcome-based AI workflows for video, images, ads, clipping, and product cutouts.", type: "website", url: "/tools" },
+  twitter: { card: "summary_large_image", title: "AI Video, Image, Clipping & Ad Tools", description: "Choose an outcome-based AI creative workflow, then the compatible model." },
 };
 
 export default function ToolsPage() {
@@ -35,8 +35,8 @@ export default function ToolsPage() {
       <section className="relative mx-auto max-w-6xl px-5 pb-16 pt-16 sm:px-8 lg:pb-24 lg:pt-24">
         <nav aria-label="Breadcrumb" className="mb-8 text-xs text-muted-foreground"><Link href="/" className="hover:text-foreground">Home</Link><span className="mx-2">/</span><span>Tools</span></nav>
         <Badge variant="outline" className="border-primary/25 bg-primary/5 text-primary"><WandSparkles className="size-3.5" /> Outcome-based workflows</Badge>
-        <h1 className="mt-6 max-w-5xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">AI video tools built around the result you need.</h1>
-        <p className="mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">Start with a real product page or owned long-form video. Editing App keeps the source, model choice, edits, and private delivery connected.</p>
+        <h1 className="mt-6 max-w-5xl text-balance text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">AI video, image, clipping, and ad tools built around the result you need.</h1>
+        <p className="mt-6 max-w-3xl text-balance text-lg leading-8 text-muted-foreground">Generate video or images, animate a photo, turn long footage into short clips, build a product ad from a real page, or remove a product background—without losing model choice or private delivery.</p>
       </section>
       <section className="mx-auto max-w-6xl px-5 pb-24 sm:px-8">
         <div className="grid gap-5 lg:grid-cols-2">

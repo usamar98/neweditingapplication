@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MarketingFooter } from "@/components/marketing-footer";
 import { blogPosts, formatBlogDate, getBlogPost } from "@/lib/blog";
-import { getSiteUrl, siteName } from "@/lib/site";
+import { brandLogoPath, getSiteUrl, siteName } from "@/lib/site";
 
 type BlogPostPageProps = { params: Promise<{ slug: string }> };
 
@@ -74,7 +74,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         dateModified: post.modifiedAt,
         mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
         author: { "@type": "Organization", name: "Editing App Editorial Team", url: new URL("/blog", siteUrl).toString() },
-        publisher: { "@type": "Organization", name: siteName, url: siteUrl.toString(), logo: { "@type": "ImageObject", url: new URL("/icon.svg", siteUrl).toString() } },
+        publisher: { "@type": "Organization", name: siteName, url: siteUrl.toString(), logo: { "@type": "ImageObject", url: new URL(brandLogoPath, siteUrl).toString(), width: 512, height: 512 } },
         articleSection: post.category,
         keywords: post.keywords.join(", "),
         inLanguage: "en",

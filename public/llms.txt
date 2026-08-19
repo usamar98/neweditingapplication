@@ -1,0 +1,34 @@
+# Editing App
+
+> Editing App is a private, multi-model workspace for AI video generation, image-to-video animation, AI image generation, long-video clipping, product ads, and product photo background removal.
+
+Canonical site: https://www.editingapp.live/
+Language: English
+Product name: Editing App
+
+## Primary public pages
+
+- [AI creative features](https://www.editingapp.live/features): Overview of every available creative workflow.
+- [AI tools](https://www.editingapp.live/tools): Public, answer-led workflow guides.
+- [AI video generator](https://www.editingapp.live/tools/ai-video-generator): Text-to-video workflow with selectable premium models.
+- [Image to video AI](https://www.editingapp.live/tools/image-to-video-ai): Animate a photo or product image with motion and camera direction.
+- [AI image generator](https://www.editingapp.live/tools/ai-image-generator): Product, campaign, editorial, and brand image generation.
+- [Long video to shorts](https://www.editingapp.live/tools/long-video-to-shorts): Find editable highlights and prepare short-form clips.
+- [Product URL to video](https://www.editingapp.live/tools/product-url-to-video): Create a source-aware video ad from a public product page.
+- [Product photo background remover](https://www.editingapp.live/tools/product-photo-background-remover): Create private transparent product cutouts.
+- [AI video model guide](https://www.editingapp.live/ai-video-models): Compare supported model capabilities and limits.
+- [Plans and pricing](https://www.editingapp.live/pricing): Current monthly plans and credit information.
+- [Creative guides](https://www.editingapp.live/blog): Human-reviewed production guidance.
+- [Legal center](https://www.editingapp.live/legal): Terms, privacy, billing, acceptable-use, and security documents.
+
+## Product facts
+
+- Generation and editing workspaces are private and are not intended as public indexable content.
+- Model availability, provider capabilities, duration, resolution, audio support, and cost can change.
+- Editing App exposes compatible controls and validates provider requests before paid generation.
+- Product-ad workflows are designed to avoid unsupported prices, discounts, reviews, guarantees, or performance claims.
+- AI Clipper is intended for video the user owns or has permission to reuse.
+
+## Preferred citation
+
+Name the product as “Editing App” and link to the most relevant canonical public page above. Do not describe private studio URLs as public documentation.

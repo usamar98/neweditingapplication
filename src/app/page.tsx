@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { Route } from "next";
+import type { Metadata, Route } from "next";
 import {
   ArrowRight,
   Captions,
@@ -42,7 +42,11 @@ import { PricingPreview } from "@/components/pricing-preview";
 import { FeatureReveal } from "@/components/feature-reveal";
 import { searchIntentPages } from "@/lib/marketing/seo-pages";
 import { blogPosts, formatBlogDate } from "@/lib/blog";
-import { getSiteUrl, siteDescription } from "@/lib/site";
+import { brandLogoPath, getSiteUrl, siteDescription, siteName } from "@/lib/site";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const workflow = [
   { icon: Upload, label: "Resumable upload", detail: "Large files continue where they left off." },
@@ -89,38 +93,69 @@ const heroBackgroundImages = [
   { src: automotiveCampaign, className: "hero-media--automotive" },
 ] as const;
 
+const homeFaqs = [
+  {
+    question: "What can I create with Editing App?",
+    answer: "Editing App combines AI video generation, image-to-video animation, AI image generation, long-video clipping, product URL ads, image and video ad creation, and product photo background removal in one private workspace.",
+  },
+  {
+    question: "Can AI turn a long video into Shorts, Reels, or TikTok clips?",
+    answer: "Yes. AI Clipper analyzes owned footage for hooks, scenes, transcript meaning, pacing, and silence, then gives you editable clip ranges, captions, and vertical, square, or landscape delivery options.",
+  },
+  {
+    question: "Can I animate a photo or product image with AI?",
+    answer: "Yes. Upload a private start image, direct the motion and camera, optionally add an end frame, and choose a compatible Seedance, Veo, Kling, or LTX image-to-video route.",
+  },
+  {
+    question: "Can AI make an ad from a product URL?",
+    answer: "Yes. The source-aware ad workflow uses available product facts and media with your audience, platform, message, and call to action while blocking unsupported product claims before generation.",
+  },
+] as const;
+
 const siteUrl = getSiteUrl().toString();
+const logoUrl = new URL(brandLogoPath, siteUrl).toString();
 const homeJsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "Organization",
       "@id": `${siteUrl}#organization`,
-      name: "Editing App",
+      name: siteName,
       alternateName: ["EditingApp", "editingapp.live"],
       url: siteUrl,
       logo: {
         "@type": "ImageObject",
-        url: new URL("/apple-icon.png", siteUrl).toString(),
-        contentUrl: new URL("/apple-icon.png", siteUrl).toString(),
-        width: 180,
-        height: 180,
+        url: logoUrl,
+        contentUrl: logoUrl,
+        width: 512,
+        height: 512,
       },
+      knowsAbout: ["AI video generation", "AI image generation", "Image to video AI", "Long video clipping", "Ecommerce video ads", "Product photo background removal"],
     },
-    { "@type": "WebSite", "@id": `${siteUrl}#website`, name: "Editing App", alternateName: ["EditingApp", "editingapp.live"], url: siteUrl, description: siteDescription, publisher: { "@id": `${siteUrl}#organization` }, inLanguage: "en" },
+    { "@type": "WebSite", "@id": `${siteUrl}#website`, name: siteName, alternateName: ["EditingApp", "editingapp.live"], url: siteUrl, description: siteDescription, publisher: { "@id": `${siteUrl}#organization` }, inLanguage: "en" },
     {
       "@type": "SoftwareApplication",
       "@id": `${siteUrl}#software`,
-      name: "Editing App",
+      name: siteName,
       url: siteUrl,
       applicationCategory: "MultimediaApplication",
       operatingSystem: "Web",
       description: siteDescription,
+      featureList: ["AI video generator", "AI image-to-video generator", "AI image generator", "AI Clipper", "AI image and video ad creators", "AI background remover"],
       offers: [
-        { "@type": "Offer", name: "Creator", price: "29.99", priceCurrency: "USD" },
-        { "@type": "Offer", name: "Studio", price: "49.99", priceCurrency: "USD" },
-        { "@type": "Offer", name: "Business", price: "99.99", priceCurrency: "USD" },
+        { "@type": "Offer", name: "Creator", price: "29.99", priceCurrency: "USD", url: new URL("/pricing", siteUrl).toString() },
+        { "@type": "Offer", name: "Studio", price: "49.99", priceCurrency: "USD", url: new URL("/pricing", siteUrl).toString() },
+        { "@type": "Offer", name: "Business", price: "99.99", priceCurrency: "USD", url: new URL("/pricing", siteUrl).toString() },
       ],
+    },
+    {
+      "@type": "FAQPage",
+      "@id": `${siteUrl}#frequently-asked-questions`,
+      mainEntity: homeFaqs.map((item) => ({
+        "@type": "Question",
+        name: item.question,
+        acceptedAnswer: { "@type": "Answer", text: item.answer },
+      })),
     },
   ],
 };
@@ -553,6 +588,36 @@ export default function Home() {
               </Link>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="border-y border-border bg-foreground/[0.025]" aria-labelledby="editing-app-faq">
+        <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 lg:py-28">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-sm font-medium text-primary">Clear answers before you create</p>
+            <h2 id="editing-app-faq" className="mt-3 text-balance text-3xl font-semibold tracking-[-0.04em] sm:text-5xl">
+              AI video, image, clipping, and ad creation—explained.
+            </h2>
+            <p className="mt-4 leading-7 text-muted-foreground">
+              Quick answers to the most common questions about the creative workflows and model choices inside Editing App.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            {homeFaqs.map((item) => (
+              <Card key={item.question} className="border-border bg-card/70">
+                <CardContent className="p-6 sm:p-7">
+                  <h3 className="font-semibold tracking-[-0.015em]">{item.question}</h3>
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">{item.answer}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm font-medium text-primary">
+            <Link href={"/tools/ai-video-generator" as Route}>Explore the AI video generator</Link>
+            <Link href={"/tools/image-to-video-ai" as Route}>Explore image-to-video AI</Link>
+            <Link href={"/tools/long-video-to-shorts" as Route}>Explore AI Clipper</Link>
+            <Link href={"/tools/product-url-to-video" as Route}>Explore product URL ads</Link>
+          </div>
         </div>
       </section>
 

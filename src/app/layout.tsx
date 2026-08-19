@@ -18,13 +18,14 @@ const googleSiteVerification = process.env.GOOGLE_SITE_VERIFICATION?.trim();
 export const metadata: Metadata = {
   applicationName: siteName,
   title: {
-    default: "AI Clipper, Video & Image Generator | Editing App",
+    default: "AI Video Generator, AI Clipper & Image Tools | Editing App",
     template: "%s | Editing App",
   },
   description: siteDescription,
   keywords: [
     "AI clipper",
     "AI video generator",
+    "image to video AI",
     "AI image generator",
     "AI image ad creator",
     "AI video ad creator",
@@ -33,12 +34,12 @@ export const metadata: Metadata = {
     "AI background remover",
   ],
   metadataBase: getSiteUrl(),
-  alternates: { canonical: "/" },
   creator: siteName,
   publisher: siteName,
   category: "technology",
   icons: {
     icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
       { url: "/favicon.svg", sizes: "any", type: "image/svg+xml" },
     ],
@@ -50,13 +51,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName,
-    title: "AI Clipper, Video & Image Generator | Editing App",
+    title: "AI Video Generator, AI Clipper & Image Tools | Editing App",
     description: siteDescription,
     url: "/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Clipper, Video & Image Generator | Editing App",
+    title: "AI Video Generator, AI Clipper & Image Tools | Editing App",
     description: siteDescription,
   },
   robots: {
@@ -85,49 +86,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         username: current.profile?.username ?? `creator_${current.user.id.slice(0, 6)}`,
       }
     : null;
-  const siteUrl = getSiteUrl();
-  const logoUrl = new URL("/apple-icon.png", siteUrl).toString();
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": new URL("/#organization", siteUrl).toString(),
-        name: siteName,
-        alternateName: ["EditingApp", "editingapp.live"],
-        url: siteUrl.toString(),
-        logo: {
-          "@type": "ImageObject",
-          url: logoUrl,
-          contentUrl: logoUrl,
-          width: 180,
-          height: 180,
-        },
-        knowsAbout: [
-          "AI video clipping",
-          "AI video generation",
-          "AI image generation",
-          "Ecommerce video ads",
-          "Long video repurposing",
-          "Image background removal",
-        ],
-      },
-      {
-        "@type": "WebSite",
-        "@id": new URL("/#website", siteUrl).toString(),
-        name: siteName,
-        alternateName: ["EditingApp", "editingapp.live"],
-        url: siteUrl.toString(),
-        description: siteDescription,
-        publisher: { "@id": new URL("/#organization", siteUrl).toString() },
-        inLanguage: "en",
-      },
-    ],
-  };
   return (
     <html lang="en" className={geistSans.variable} suppressHydrationWarning>
       <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
         <SiteHeader account={account} />
         {account ? <AuthActivityTracker /> : null}
         {children}

@@ -14,7 +14,9 @@ type MarketingMediaSlug =
   | "ai-video-ad-creator"
   | "background-remover"
   | "product-url-to-video"
-  | "long-video-to-shorts";
+  | "long-video-to-shorts"
+  | "image-to-video-ai"
+  | "product-photo-background-remover";
 
 type VideoMedia = {
   alt: string;
@@ -45,6 +47,12 @@ const videoMedia: Partial<Record<MarketingMediaSlug, VideoMedia>> = {
   "image-to-video-generator": {
     alt: "A still campaign image transforming into a cinematic AI-generated video",
     label: "Still frame to directed motion",
+    poster: aiVideoVisual,
+    src: "/media/previews/ai-video-generator.mp4",
+  },
+  "image-to-video-ai": {
+    alt: "A still campaign image transforming into a cinematic AI-generated video",
+    label: "Photo to directed AI motion",
     poster: aiVideoVisual,
     src: "/media/previews/ai-video-generator.mp4",
   },
@@ -131,7 +139,7 @@ export function MarketingCardMedia({
     );
   }
 
-  if (slug === "background-remover") {
+  if (slug === "background-remover" || slug === "product-photo-background-remover") {
     return (
       <div className={cn("relative aspect-video overflow-hidden border-b border-border bg-[linear-gradient(45deg,#ece9df_25%,transparent_25%),linear-gradient(-45deg,#ece9df_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#ece9df_75%),linear-gradient(-45deg,transparent_75%,#ece9df_75%)] bg-[length:22px_22px]", className)}>
         <Image

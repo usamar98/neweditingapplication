@@ -1,6 +1,7 @@
 export const siteName = "Editing App";
-export const siteDescription = "AI Clipper and multi-model creative studio for short-form clips, premium AI video, AI images, product ads, and private background removal.";
+export const siteDescription = "Create AI videos and images, animate photos, turn long videos into shorts, build product ads from URLs, and remove backgrounds in one private workspace.";
 export const productionSiteUrl = "https://www.editingapp.live";
+export const brandLogoPath = "/logo-512.png";
 
 export function getSiteUrl() {
   const raw = process.env.NEXT_PUBLIC_APP_URL?.trim() || "http://localhost:3000";
